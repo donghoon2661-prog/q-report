@@ -145,6 +145,86 @@ button{font:inherit;color:inherit;cursor:pointer}
 .f span.na{color:#4E6B7D;font-weight:400}
 .note{margin-top:14px;font-size:12.5px;color:var(--fog);line-height:1.6}
 
+
+#menu[hidden]{display:none!important}
+
+/* ---------- 모바일 ---------- */
+@media(max-width:760px){
+  #ship{padding:16px 12px 70px}
+  .topbar{gap:10px}
+  .topbar h1{font-size:20px;width:100%;order:3}
+  .stamp{font-size:10px;width:100%;order:4;line-height:1.5}
+  .lane{gap:14px}
+  .lane b{font-size:18px}
+  .lane div{font-size:11px}
+  #map{height:340px}
+  #mapwrap{gap:12px}
+  #side{padding:14px}
+  .addbar input{width:100%}
+  .tab{padding:9px 14px;font-size:13px}
+  /* 표는 가로 스크롤 대신 2열로 접기 */
+  #vtable thead,#otable thead{display:none}
+  #vtable tr,#otable tr{display:block;border-bottom:1px solid var(--line)}
+  #vtable td,#otable td{display:flex;justify-content:space-between;gap:12px;
+    padding:8px 12px;border:0;font-size:12.5px}
+  #vtable td:first-child,#otable td:first-child{display:block;padding-top:12px}
+  #vtable td:not(:first-child)::before,#otable td:not(:first-child)::before{
+    content:attr(data-l);font-family:'IBM Plex Mono';font-size:9.5px;
+    letter-spacing:.1em;color:var(--fog);flex:0 0 auto}
+  .orail{height:200px;margin:0 4px}
+  .ov .lb{font-size:11px}
+  .card-bd{padding:16px 14px}
+  .rail{margin:6px 2px 26px}
+  .node-lb{font-size:8px}
+  #overview{padding:16px 14px 14px}
+  #overview h2{font-size:16px}
+  footer{padding:0 12px 30px}
+}
+/* 품질 대시보드 모바일: 가로 넘침·차트 깨짐 방지 */
+#qview{max-width:100%;overflow-x:hidden}
+#qview canvas{max-width:100%!important;height:auto!important}
+#qview table{display:block;overflow-x:auto;-webkit-overflow-scrolling:touch}
+@media(max-width:760px){
+  #qview{font-size:13px}
+  #qview .wrap,#qview .container,#qview main,#qview section{padding-left:10px;padding-right:10px}
+}
+
+/* ---------- PO 팝업 ---------- */
+#vtable{margin-top:0}
+.tablerow{grid-column:1/-1;display:grid;grid-template-columns:1fr;gap:12px;align-items:start}
+.tablerow.open{grid-template-columns:1fr}
+.tablerow.open #vtable{display:none}
+#popanel{cursor:pointer}
+#popanel .pogrid,#popanel .close{cursor:default}
+#popanel .close{cursor:pointer}
+#popanel{border:1px solid var(--sail);background:var(--hull);padding:16px}
+#popanel[hidden]{display:none}
+#popanel .close{float:right;background:none;border:1px solid var(--line);color:var(--fog);
+  font-family:'IBM Plex Mono';font-size:13px;line-height:1;padding:5px 10px;cursor:pointer}
+#popanel .close:hover{color:var(--paper);border-color:var(--fog)}
+#popanel .hintclose{margin:12px 0 0;font-family:'IBM Plex Mono';font-size:9.5px;
+  color:#3E586A;letter-spacing:.08em}
+#popanel h3{font-family:'Barlow Condensed';font-size:19px;margin:0 0 2px}
+#popanel .sb{font-family:'IBM Plex Mono';font-size:11px;color:var(--fog);margin-bottom:14px}
+.pogrid{display:grid;grid-template-columns:repeat(5,1fr);gap:5px}
+@media(max-width:760px){.pogrid{grid-template-columns:repeat(3,1fr)}}
+.pocell{border:1px solid var(--line-soft);padding:7px 5px;text-align:center;
+  font-family:'IBM Plex Mono';font-size:10.5px;line-height:1.45}
+.pocell .po{color:#7FD8FF;display:block;font-weight:600;letter-spacing:.02em}
+.pocell .cn{color:var(--dock);display:block;font-size:9.5px}
+.pocell.empty{border-style:dashed;color:#3E586A}
+.poeta{font-family:'IBM Plex Mono';font-size:10.5px;color:var(--fog);margin:-8px 0 12px;
+  display:flex;flex-direction:column;gap:3px}
+.poeta s{opacity:.6}
+.poeta b{font-weight:600}
+.poeta b.cur{color:var(--paper)}
+.poeta b.late{color:var(--buoy)}
+.poeta b.early{color:var(--sail)}
+.poeta b.ontime{color:var(--fog)}
+.ponote{margin:12px 0 0;font-size:11px;line-height:1.6;color:var(--dock)}
+.polegend{display:flex;gap:14px;margin-top:12px;font-family:'IBM Plex Mono';font-size:10px;color:var(--fog)}
+.polegend i{display:inline-block;width:8px;height:8px;margin-right:5px;vertical-align:middle}
+
 footer{max-width:1180px;margin:0 auto;padding:0 22px 40px;color:#4E6B7D;font-size:11.5px;line-height:1.7;display:none}
 </style>
 
@@ -232,9 +312,12 @@ footer{max-width:1180px;margin:0 auto;padding:0 22px 40px;color:#4E6B7D;font-siz
         <span><i style="background:#8AA4B5"></i>Port call</span>
       </div>
     </aside>
-    <table id="vtable"><thead><tr>
-      <th>VESSEL</th><th>ETD · PORT KLANG</th><th>ETD · SINGAPORE</th><th>ETA · LOS ANGELES</th>
-    </tr></thead><tbody id="vtbody"></tbody></table>
+    <div class="tablerow">
+      <table id="vtable"><thead><tr>
+        <th>VESSEL</th><th>ETD · PORT KLANG</th><th>ETD · SINGAPORE</th><th>ETA · LOS ANGELES</th>
+      </tr></thead><tbody id="vtbody"></tbody></table>
+      <aside id="popanel" hidden></aside>
+    </div>
   </div>
 
   <div id="cards">
@@ -277,6 +360,7 @@ const FALLBACK = {
       route:[[2.9372384,101.3007552],[1.2511247,103.7272898],[10.5372748,107.0315867],
              [22.5703753,114.2596394],[33.76478926,-118.2680205]],
       idx:3, ratio:0.6826,
+      pos:["FNG031006 (Container 2 of 18)","FNG031006 (Container 3 of 18)","FNG031006 (Container 4 of 18)","FNG031006 (Container 5 of 18)","FNG031006 (Container 6 of 18)","FNG031006 (Container 7 of 18)","FNG031006 (Container 8 of 18)","FNG031006 (Container 9 of 18)","FNG031006 (Container 10 of 18)","FNG031006 (Container 11 of 18)","FNG031006 (Container 12 of 18)","FNG031006 (Container 13 of 18)","FNG031006 (Container 14 of 18)","FNG031006 (Container 15 of 18)"], poEta:"2026-08-09",
       last:"Jul 14 departed Singapore · Jul 22 departed Yantian" },
 
     { booking:"KULM75953600", vessel:"HYUNDAI PLUTO", voyage:"0047E", svc:"PS3",
@@ -286,6 +370,7 @@ const FALLBACK = {
       route:[[2.9372384,101.3007552],[1.2511247,103.7272898],[10.5372748,107.0315867],
              [22.5703753,114.2596394],[33.76478926,-118.2680205]],
       idx:2, ratio:0.2374,
+      pos:["FNG031006 (Container 16 of 18)","FNG031006 (Container 17 of 18)","FNG031006 (Container 18 of 18)","FNG031007 (Container 1 of 18)","FNG031007 (Container 2 of 18)","FNG031007 (Container 3 of 18)","FNG031007 (Container 4 of 18)","FNG031007 (Container 5 of 18)","FNG031007 (Container 6 of 18)","FNG031007 (Container 7 of 18)","FNG031007 (Container 8 of 18)","FNG031007 (Container 9 of 18)","FNG031007 (Container 10 of 18)","FNG031007 (Container 11 of 18)"], poEta:"2026-08-16",
       last:"Jul 29 departed Singapore · Cai Mep → Yantian leg" },
 
     { booking:"KULM40326600", vessel:"HANS SCHULTE", voyage:"0001E", svc:"PS5",
@@ -295,6 +380,8 @@ const FALLBACK = {
       route:[[2.9372384,101.3007552],[1.2511247,103.7272898],[10.5372748,107.0315867],
              [33.76478926,-118.2680205]],
       idx:1, ratio:0,
+      pos:["FNG031007 (Container 12 of 18)","FNG031007 (Container 13 of 18)","FNG031007 (Container 14 of 18)","FNG031007 (Container 15 of 18)","FNG031007 (Container 16 of 18)","FNG031007 (Container 17 of 18)","FNG031007 (Container 18 of 18)","FNG031008 (Container 1 of 15)","FNG031008 (Container 2 of 15)","FNG031008 (Container 3 of 15)","FNG031008 (Container 4 of 15)","FNG031008 (Container 5 of 15)","FNG031008 (Container 6 of 15)","FNG031008 (Container 7 of 15)"], poEta:"2026-08-23",
+      poNote:"Source lists two ETAs for this lot (23-Aug and 27-Aug). The earlier date is shown.",
       last:"Jul 31 feeder discharged at Singapore · awaiting mother vessel" },
 
     { booking:"KULM85176300", vessel:"HMM JAKARTA", voyage:"0145E", svc:"PS5",
@@ -304,6 +391,7 @@ const FALLBACK = {
       route:[[2.9372384,101.3007552],[1.2511247,103.7272898],[10.5372748,107.0315867],
              [20.796246,106.9065732],[33.76478926,-118.2680205]],
       idx:1, ratio:0,
+      pos:["FNG031008 (Container 8 of 15)","FNG031008 (Container 9 of 15)","FNG031008 (Container 10 of 15)","FNG031008 (Container 11 of 15)","FNG031008 (Container 12 of 15)","FNG031008 (Container 13 of 15)","FNG031008 (Container 14 of 15)","FNG031008 (Container 15 of 15)","FNG031009 (Container 1 of 15)","FNG031009 (Container 2 of 15)","FNG031009 (Container 3 of 15)","FNG031009 (Container 4 of 15)","FNG031009 (Container 5 of 15)","FNG031009 (Container 6 of 15)"], poEta:"2026-09-03",
       last:"Jul 31 feeder discharged at Singapore · awaiting mother vessel" },
 
     { booking:"KULM72444200", vessel:"YM MODERATION", voyage:"0084E", svc:"PS5",
@@ -313,6 +401,8 @@ const FALLBACK = {
       route:[[2.9372384,101.3007552],[1.2511247,103.7272898],[10.5372748,107.0315867],
              [20.796246,106.9065732],[33.76478926,-118.2680205]],
       idx:0, ratio:0,
+      pos:["FNG031009 (Container 7 of 15)","FNG031009 (Container 8 of 15)","FNG031009 (Container 9 of 15)","FNG031009 (Container 10 of 15)","FNG031009 (Container 11 of 15)","FNG031009 (Container 12 of 15)","FNG031009 (Container 13 of 15)","FNG031009 (Container 14 of 15)","FNG031009 (Container 15 of 15)","FNG031010 (Container 1 of 15)","FNG031010 (Container 2 of 15)","FNG031010 (Container 3 of 15)","FNG031010 (Container 4 of 15)","FNG031010 (Container 5 of 15)"], poEta:"2026-09-06",
+      poNote:"These 14 containers are split across 3 feeder/mother combinations (ONE PREMIUM 0093E \u00d72, YM MODERATION 0084E). The per-container split is not specified in the source.",
       last:"Aug 2 feeder loaded at Port Klang · Singapore ETA Aug 4" },
 
     { booking:"KULM92606700", vessel:"HYUNDAI TOKYO", voyage:"0164E", svc:"PS5",
@@ -322,6 +412,7 @@ const FALLBACK = {
       route:[[2.9372384,101.3007552],[1.2511247,103.7272898],[1.3115724,103.7188794],
              [10.5372748,107.0315867],[20.796246,106.9065732],[33.76478926,-118.2680205]],
       idx:4, ratio:0.4205,
+      pos:["FNG031005 (Container 6 of 18)","FNG031005 (Container 7 of 18)","FNG031005 (Container 8 of 18)","FNG031005 (Container 9 of 18)","FNG031005 (Container 10 of 18)","FNG031005 (Container 11 of 18)","FNG031005 (Container 12 of 18)","FNG031005 (Container 13 of 18)","FNG031005 (Container 14 of 18)","FNG031005 (Container 15 of 18)","FNG031005 (Container 16 of 18)","FNG031005 (Container 17 of 18)","FNG031005 (Container 18 of 18)","FNG031006 (Container 1 of 18)"], poEta:"2026-08-02",
       last:"Jul 18 departed Singapore · Hai Phong → LA leg" }
   ]
 };
@@ -394,7 +485,7 @@ function initMap(data){
     const m = L.circleMarker([lat,lng],{radius:8,color:'#FF6B35',weight:2,
       fillColor:'#FF6B35',fillOpacity:L2.atPort?1:0.45}).addTo(map);
     m.bindTooltip(`${s.vessel} ${s.voyage}`,{className:'vsl-tip',direction:'top',offset:[0,-6]});
-    m.on('click',()=>select(s,idx,false));
+    m.on('click',()=>{ closePO(); select(s,idx,false); });
     markers.push(m);
   });
   map.fitBounds(L.featureGroup(markers).getBounds().pad(0.35));
@@ -428,10 +519,16 @@ function select(s,i,pan){
 function buildTable(data){
   document.getElementById('vtbody').innerHTML = rowsHTML(data.shipments);
   document.getElementById('otbody').innerHTML = rowsHTML(data.shipments);
-  document.querySelectorAll('#vtbody tr').forEach(tr=>
-    tr.addEventListener('click',()=>select(data.shipments[tr.dataset.i], +tr.dataset.i, true)));
-  document.querySelectorAll('#otbody tr').forEach(tr=>
-    tr.addEventListener('click',()=>{ setView('map'); select(data.shipments[tr.dataset.i], +tr.dataset.i, true); }));
+  const hook = (sel, jump) => document.querySelectorAll(sel).forEach(tr=>
+    tr.addEventListener('click',()=>{
+      const i=+tr.dataset.i, s=data.shipments[i];
+      if(jump) setView('map');
+      document.querySelectorAll('#vtbody tr,#otbody tr').forEach(t=>t.classList.toggle('on',+t.dataset.i===i));
+      select(s,i,true);
+      showPO(s,i);
+    }));
+  hook('#vtbody tr', false);
+  hook('#otbody tr', true);
 }
 
 /* ---------- LIST 카드 ---------- */
@@ -536,9 +633,9 @@ function rowsHTML(list){
     <tr data-i="${i}">
       <td><span class="nm">${s.vessel}</span><span class="vy">${s.voyage}</span>
           <span class="bk">${s.booking} · IMO ${s.imo||"—"}</span></td>
-      <td><span class="dt">${fmtDT(s.polDep)}</span><span class="est">${TS(s.polDep)<=now?"actual":"scheduled"}</span></td>
-      <td><span class="dt">${fmtDT(s.tsDep)}</span><span class="est">${TS(s.tsDep)<=now?"actual":"scheduled"}</span></td>
-      <td><span class="dt">${fmtDT(s.eta)}</span><span class="est">ETB</span></td>
+      <td data-l="PKG ETD"><span class="dt">${fmtDT(s.polDep)}</span><span class="est">${TS(s.polDep)<=now?"actual":"scheduled"}</span></td>
+      <td data-l="SIN ETD"><span class="dt">${fmtDT(s.tsDep)}</span><span class="est">${TS(s.tsDep)<=now?"actual":"scheduled"}</span></td>
+      <td data-l="LA ETB"><span class="dt">${fmtDT(s.eta)}</span><span class="est">ETB</span></td>
     </tr>`).join("");
 }
 
@@ -577,6 +674,70 @@ function addBooking(){
     .finally(()=>{ inp.disabled=false; document.getElementById("addbtn").disabled=false; });
 }
 
+/* ---------- PO 팝업 ---------- */
+let poSelected = null;
+function paintMarkers(){
+  markers.forEach((m,k)=>{
+    const on = (k===poSelected);
+    m.setStyle({color: on?'#3FD0A6':'#FF6B35', fillColor: on?'#3FD0A6':'#FF6B35'});
+    if(on) m.bringToFront();
+  });
+}
+function showPO(s,i){
+  poSelected = i; paintMarkers();
+  const list = s.pos || [];
+  let cells;
+  if(!list.length){
+    cells = `<p class="hint" style="margin:0">No PO data loaded for this vessel yet.</p>`;
+  }else{
+    const CELLS = 15;
+    let out = "";
+    for(let k=0;k<CELLS;k++){
+      const v = list[k];
+      if(!v){ out += `<div class="pocell empty">—</div>`; continue; }
+      const m = v.match(/^(\S+)\s*\(Container\s*(\d+)\s*of\s*(\d+)\)/i);
+      out += m
+        ? `<div class="pocell"><span class="po">${m[1]}</span><span class="cn">${m[2]} / ${m[3]}</span></div>`
+        : `<div class="pocell"><span class="po">${v}</span></div>`;
+    }
+    cells = `<div class="pogrid">${out}</div>
+      <div class="polegend">
+        <span><i style="background:#7FD8FF"></i>PO No.</span>
+        <span><i style="background:#F2C14E"></i>Container</span>
+      </div>`;
+  }
+  const p=document.getElementById('popanel');
+  let eta="";
+  if(s.poEta){
+    const gap=Math.round((new Date(s.eta.slice(0,10))-new Date(s.poEta))/86400000);
+    const tag = gap>0 ? `<b class="late">${gap}d BEHIND original plan</b>`
+              : gap<0 ? `<b class="early">${-gap}d ahead of original plan</b>`
+                      : `<b class="ontime">On original plan</b>`;
+    eta=`<div class="poeta">
+      <span>Original ETA <s>${s.poEta}</s></span>
+      <span>Current ETB <b class="cur">${s.eta.slice(0,10)}</b></span>
+      ${tag}</div>`;
+  }
+  const note = s.poNote? `<p class="ponote">${s.poNote}</p>`:"";
+  p.innerHTML = `<button class="close" id="poclose" title="Close">✕</button>
+     <h3>${s.vessel} ${s.voyage}</h3>
+     <div class="sb">${s.booking} · ${list.length} container(s)</div>
+     ${eta}${cells}${note}<p class="hintclose">TAP ANYWHERE TO CLOSE · ESC</p>`;
+  p.hidden=false;
+  document.querySelector('.tablerow').classList.add('open');
+  document.getElementById('poclose').addEventListener('click',e=>{e.stopPropagation();closePO();});
+  p.onclick = e => { if(!e.target.closest('.pocell')) closePO(); };
+}
+document.addEventListener('keydown',e=>{ if(e.key==="Escape") closePO(); });
+function closePO(){
+  const pp=document.getElementById('popanel'); if(!pp||pp.hidden) return;
+  poSelected=null; paintMarkers();
+  const p=document.getElementById('popanel');
+  p.hidden=true; p.innerHTML="";
+  document.querySelector('.tablerow').classList.remove('open');
+  document.querySelectorAll('#vtbody tr,#otbody tr').forEach(t=>t.classList.remove('on'));
+}
+
 /* ---------- 라우팅 ---------- */
 function render(data){
   const before = data.shipments.length;
@@ -608,8 +769,8 @@ function show(v){
   window.scrollTo(0,0);
 }
 document.querySelectorAll(".tile").forEach(t=>t.addEventListener("click",()=>{
-  if(t.dataset.go==="quality"){show("quality");return;}
-  show("ship"); setTimeout(()=>map&&map.invalidateSize(),60);
+  if(t.dataset.go==="quality"){show("quality");setTimeout(()=>document.getElementById("qbar").scrollIntoView({block:"start"}),60);return;}
+  show("ship"); setTimeout(()=>{ map&&map.invalidateSize(); document.getElementById('ship').scrollIntoView({block:'start'}); },80);
 }));
 document.getElementById("back").addEventListener("click",()=>show("menu"));
 document.addEventListener("DOMContentLoaded",()=>{
