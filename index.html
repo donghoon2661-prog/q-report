@@ -189,19 +189,19 @@ footer{max-width:1180px;margin:0 auto;padding:0 22px 40px;color:#4E6B7D;font-siz
     <div class="bar"></div><div class="idx">01 / LOGISTICS</div>
     <h2>SHIPMENT<br>STATUS</h2>
     <p>Vessel positions, port calls and shipment schedule, tracked by Booking No.</p>
-    <div class="go">열기 →</div>
+    <div class="go">OPEN →</div>
   </button>
   <button class="tile" data-go="quality">
     <div class="bar"></div><div class="idx">02 / OQC</div>
     <h2>QUALITY<br>ANALYSIS</h2>
-    <p>COA 기반 출하검사 대시보드. 워크시트 단위 측정값과 추세.</p>
-    <div class="go">열기 →</div>
+    <p>COA-based outgoing quality dashboard. Measurements and trends by worksheet.</p>
+    <div class="go">OPEN →</div>
   </button>
 </main>
 
 <section id="ship">
   <div class="topbar">
-    <button class="btn" id="back">← 메뉴</button>
+    <button class="btn" id="back">← MENU</button>
     <h1>SHIPMENT STATUS</h1>
     <div class="stamp" id="stamp"></div>
   </div>
@@ -212,43 +212,43 @@ footer{max-width:1180px;margin:0 auto;padding:0 22px 40px;color:#4E6B7D;font-siz
   </div>
   <div id="rstatus"></div>
   <div class="tabs">
-    <button class="tab on" data-view="map">지도</button>
-    <button class="tab" data-view="list">목록</button>
+    <button class="tab on" data-view="map">MAP</button>
+    <button class="tab" data-view="list">LIST</button>
   </div>
   <div class="lane">
     <div>CARRIER<b>HMM</b></div>
     <div>POL<b>PORT KLANG</b></div>
     <div>POD<b>LOS ANGELES</b></div>
     <div>BOOKINGS<b id="n-bkg">—</b></div>
-    <div>가장 이른 도착<b id="n-eta">—</b></div>
+    <div>EARLIEST ARRIVAL<b id="n-eta">—</b></div>
   </div>
 
   <div id="mapwrap">
     <div id="map"></div>
     <aside id="side">
-      <p class="hint">주황색 표시가 각 부킹의 현재 위치입니다. HMM Track &amp; Trace가 제공하는 좌표를 그대로 사용합니다. 위에 마우스를 올리면 본선명이 뜨고, 누르면 상세가 여기에 나옵니다.</p>
+      <p class="hint">Orange markers show each booking’s current position, using the coordinates provided by HMM Track &amp; Trace. Hover for the vessel name, click for details.</p>
       <div class="legend">
-        <span><i style="background:#FF6B35"></i>현재 위치</span>
-        <span><i style="background:#8AA4B5"></i>기항지</span>
+        <span><i style="background:#FF6B35"></i>Current position</span>
+        <span><i style="background:#8AA4B5"></i>Port call</span>
       </div>
     </aside>
     <table id="vtable"><thead><tr>
-      <th>본선</th><th>ETD · 포트클랑</th><th>ETD · 싱가포르</th><th>ETA · 로스앤젤레스</th>
+      <th>VESSEL</th><th>ETD · PORT KLANG</th><th>ETD · SINGAPORE</th><th>ETA · LOS ANGELES</th>
     </tr></thead><tbody id="vtbody"></tbody></table>
   </div>
 
   <div id="cards">
     <section id="overview"></section>
     <table id="otable"><thead><tr>
-      <th>본선</th><th>ETD · 포트클랑</th><th>ETD · 싱가포르</th><th>ETA · 로스앤젤레스</th>
+      <th>VESSEL</th><th>ETD · PORT KLANG</th><th>ETD · SINGAPORE</th><th>ETA · LOS ANGELES</th>
     </tr></thead><tbody id="otbody"></tbody></table>
     <div id="cardlist"></div>
   </div>
 </section>
 
 <footer id="ftr">
-  위치·항로·기항지는 HMM Track &amp; Trace의 화물추적 지도(trackMap)가 제공하는 좌표와 진행 비율을 그대로 사용합니다.
-  HMM은 해당 지도의 화물 위치가 참고용이며 완전히 정확하지 않을 수 있다고 안내하고 있습니다.
+  Positions, routes and port calls come directly from the coordinates and progress ratios provided by the HMM Track &amp; Trace cargo map (trackMap).
+  HMM states that the cargo location shown on that map is for reference only and may not be fully accurate.
 </footer>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -257,14 +257,14 @@ footer{max-width:1180px;margin:0 auto;padding:0 22px 40px;color:#4E6B7D;font-siz
    상대경로라 저장소 이름이 바뀌어도 깨지지 않습니다. */
 const QUALITY_URL = "quality.html";
 
-/* Worker 배포 후 주소를 채우면 [갱신하기]가 실시간 수집분을 읽습니다. */
+/* Worker 배포  주소를 채우면 [갱신하기]가 실h 수집분을 읽습니다. */
 const API = "https://kossan-oqc.dhoqc.workers.dev/data";
 const source = () => API || "shipments.json";
 
 /* ============ HMM trackMap 실측 데이터 (조회 2026-08-03 10:12) ============
-   route  : HMM이 준 기항지 좌표 [lat, lng]
-   names  : 기항지명
-   idx    : 현재 위치한 구간 번호 (route[idx] → route[idx+1])
+   route  : HMM이 준 Port call 좌표 [lat, lng]
+   names  : Port call명
+   idx    : Current position한 구간 번호 (route[idx] → route[idx+1])
    ratio  : 그 구간 내 진행 비율
    ======================================================================== */
 const FALLBACK = {
@@ -277,7 +277,7 @@ const FALLBACK = {
       route:[[2.9372384,101.3007552],[1.2511247,103.7272898],[10.5372748,107.0315867],
              [22.5703753,114.2596394],[33.76478926,-118.2680205]],
       idx:3, ratio:0.6826,
-      last:"7/14 싱가포르 본선 출항 · 7/22 옌톈 출항" },
+      last:"Jul 14 departed Singapore · Jul 22 departed Yantian" },
 
     { booking:"KULM75953600", vessel:"HYUNDAI PLUTO", voyage:"0047E", svc:"PS3",
       feeder:"HR RHEA 0110N", imo:9725160,
@@ -286,7 +286,7 @@ const FALLBACK = {
       route:[[2.9372384,101.3007552],[1.2511247,103.7272898],[10.5372748,107.0315867],
              [22.5703753,114.2596394],[33.76478926,-118.2680205]],
       idx:2, ratio:0.2374,
-      last:"7/29 싱가포르 본선 출항 · 까이멥 → 옌톈 구간" },
+      last:"Jul 29 departed Singapore · Cai Mep → Yantian leg" },
 
     { booking:"KULM40326600", vessel:"HANS SCHULTE", voyage:"0001E", svc:"PS5",
       feeder:"HR HERA 0110N", imo:9531909,
@@ -295,7 +295,7 @@ const FALLBACK = {
       route:[[2.9372384,101.3007552],[1.2511247,103.7272898],[10.5372748,107.0315867],
              [33.76478926,-118.2680205]],
       idx:1, ratio:0,
-      last:"7/31 싱가포르 피더 양하 · 본선 적재 대기" },
+      last:"Jul 31 feeder discharged at Singapore · awaiting mother vessel" },
 
     { booking:"KULM85176300", vessel:"HMM JAKARTA", voyage:"0145E", svc:"PS5",
       feeder:"HR HERA 0110N", imo:9323522,
@@ -304,7 +304,7 @@ const FALLBACK = {
       route:[[2.9372384,101.3007552],[1.2511247,103.7272898],[10.5372748,107.0315867],
              [20.796246,106.9065732],[33.76478926,-118.2680205]],
       idx:1, ratio:0,
-      last:"7/31 싱가포르 피더 양하 · 본선 적재 대기" },
+      last:"Jul 31 feeder discharged at Singapore · awaiting mother vessel" },
 
     { booking:"KULM72444200", vessel:"YM MODERATION", voyage:"0084E", svc:"PS5",
       feeder:"NZ SUZHOU 0015N", imo:9664897,
@@ -313,7 +313,7 @@ const FALLBACK = {
       route:[[2.9372384,101.3007552],[1.2511247,103.7272898],[10.5372748,107.0315867],
              [20.796246,106.9065732],[33.76478926,-118.2680205]],
       idx:0, ratio:0,
-      last:"8/2 포트클랑 피더 적재 · 싱가포르 8/4 도착 예정" },
+      last:"Aug 2 feeder loaded at Port Klang · Singapore ETA Aug 4" },
 
     { booking:"KULM92606700", vessel:"HYUNDAI TOKYO", voyage:"0164E", svc:"PS5",
       feeder:"HR RHEA 0109N", imo:null,
@@ -322,7 +322,7 @@ const FALLBACK = {
       route:[[2.9372384,101.3007552],[1.2511247,103.7272898],[1.3115724,103.7188794],
              [10.5372748,107.0315867],[20.796246,106.9065732],[33.76478926,-118.2680205]],
       idx:4, ratio:0.4205,
-      last:"7/18 싱가포르 본선 출항 · 하이퐁 → LA 구간" }
+      last:"Jul 18 departed Singapore · Hai Phong → LA leg" }
   ]
 };
 
@@ -342,7 +342,7 @@ function locate(s){
   return {
     pos, i, f,
     from: s.names[i], to: s.names[i+1],
-    phase: atPort ? `${s.names[i]} 정박` : `${s.names[i]} → ${s.names[i+1]}`,
+    phase: atPort ? `${s.names[i]} — berthed` : `${s.names[i]} → ${s.names[i+1]}`,
     atPort,
     pct: done / total
   };
@@ -352,7 +352,7 @@ function locate(s){
 const TS = s => new Date(s+"Z").getTime();
 const DAY = 86400000;
 
-/* ETA 확정 후 7일이 지난 건은 목록에서 제외 */
+/* ETA 확정  7일이 지난 은 LIST에서 제외 */
 function prune(list){
   const now=Date.now();
   return list.filter(s=>now < TS(s.eta) + 7*DAY);
@@ -365,7 +365,7 @@ function sortByETD(list){
 const fmtDT = s => s.slice(5,10).replace("-","/")+" "+s.slice(11,16);
 const fmtD  = s => s.slice(5,10).replace("-","/");
 
-/* ---------- 지도 ---------- */
+/* ---------- MAP ---------- */
 let map, markers=[];
 function initMap(data){
   map = L.map('map',{worldCopyJump:false,minZoom:2}).setView([25,175],3);
@@ -405,16 +405,16 @@ function showSide(s,L2){
     <h3>${s.vessel} ${s.voyage}</h3>
     <div class="sb">${s.booking} · ${s.svc} · IMO ${s.imo||"—"}</div>
     <dl>
-      <dt>상태</dt><dd>${L2.phase}</dd>
-      <dt>구간</dt><dd>${L2.i+1} / ${s.route.length-1} · ${(L2.f*100).toFixed(1)}%</dd>
-      <dt>좌표</dt><dd>${L2.pos[0].toFixed(3)}° , ${unwrap(L2.pos[1]).toFixed(3)}°</dd>
-      <dt>전체 항로</dt><dd>${s.names.join(" → ")}</dd>
-      <dt>PKG 출항</dt><dd>${fmtDT(s.polDep)}</dd>
-      <dt>SIN 입항</dt><dd>${fmtDT(s.tsArr)}</dd>
-      <dt>SIN 출항</dt><dd>${fmtDT(s.tsDep)}</dd>
+      <dt>STATUS</dt><dd>${L2.phase}</dd>
+      <dt>SEGMENT</dt><dd>${L2.i+1} / ${s.route.length-1} · ${(L2.f*100).toFixed(1)}%</dd>
+      <dt>POSITION</dt><dd>${L2.pos[0].toFixed(3)}° , ${unwrap(L2.pos[1]).toFixed(3)}°</dd>
+      <dt>ROUTE</dt><dd>${s.names.join(" → ")}</dd>
+      <dt>PKG ETD</dt><dd>${fmtDT(s.polDep)}</dd>
+      <dt>SIN ETA</dt><dd>${fmtDT(s.tsArr)}</dd>
+      <dt>SIN ETD</dt><dd>${fmtDT(s.tsDep)}</dd>
       <dt>LA ETB</dt><dd>${fmtDT(s.eta)}</dd>
-      <dt>피더</dt><dd>${s.feeder}</dd>
-      <dt>최근</dt><dd>${s.last}</dd>
+      <dt>FEEDER</dt><dd>${s.feeder}</dd>
+      <dt>LATEST</dt><dd>${s.last}</dd>
     </dl>`;
 }
 function select(s,i,pan){
@@ -434,7 +434,7 @@ function buildTable(data){
     tr.addEventListener('click',()=>{ setView('map'); select(data.shipments[tr.dataset.i], +tr.dataset.i, true); }));
 }
 
-/* ---------- 목록 카드 ---------- */
+/* ---------- LIST 카드 ---------- */
 function cardHTML(s){
   const L2 = locate(s);
   const cls = L2.atPort ? "t-dock" : (L2.i === s.route.length-2 ? "t-sail" : "t-sail");
@@ -455,14 +455,14 @@ function cardHTML(s){
         ${nodes}<div class="ship-icon" style="left:${pos}%">▮</div>
         <div class="pct">${Math.round(L2.pct*100)}%</div></div>
       <div class="grid">
-        <div class="f"><label>PKG 출항</label><span>${fmtDT(s.polDep)}</span></div>
-        <div class="f"><label>SIN 입항</label><span>${fmtDT(s.tsArr)}</span></div>
-        <div class="f"><label>SIN 출항</label><span>${fmtDT(s.tsDep)}</span></div>
+        <div class="f"><label>PKG ETD</label><span>${fmtDT(s.polDep)}</span></div>
+        <div class="f"><label>SIN ETA</label><span>${fmtDT(s.tsArr)}</span></div>
+        <div class="f"><label>SIN ETD</label><span>${fmtDT(s.tsDep)}</span></div>
         <div class="f"><label>LA ETB</label><span>${fmtDT(s.eta)}</span></div>
         <div class="f"><label>SERVICE</label><span>${s.svc}</span></div>
         <div class="f"><label>FEEDER</label><span>${s.feeder}</span></div>
       </div>
-      <p class="note">최근 이벤트 — ${s.last}</p>
+      <p class="note">Latest event — ${s.last}</p>
     </div></article>`;
 }
 
@@ -470,7 +470,7 @@ function cardHTML(s){
 let CUR=null;
 function ago(ts){
   const m=Math.round((Date.now()-new Date(ts.replace(" ","T")+"+09:00").getTime())/60000);
-  return m<60 ? m+"분 전" : m<1440 ? Math.round(m/60)+"시간 전" : Math.round(m/1440)+"일 전";
+  return m<60 ? m+"m ago" : m<1440 ? Math.round(m/60)+"h ago" : Math.round(m/1440)+"d ago";
 }
 /* 자동 수집 시각 (한국시간) — Worker의 Cron과 일치시켜야 합니다 */
 const CRON_KST = [8.1667, 14.1667, 20.1667];   // 08:10 / 14:10 / 20:10
@@ -483,12 +483,12 @@ function nextRun(){
   for(const c of CRON_KST){ if(c>h){ wait=(c-h)*3600000; break; } }
   if(wait===null) wait=(24-h+CRON_KST[0])*3600000;
   const m=Math.round(wait/60000);
-  return m<60 ? m+"분 후" : Math.floor(m/60)+"시간 "+(m%60?m%60+"분 ":"")+"후";
+  return m<60 ? m+"m" : Math.floor(m/60)+"h "+(m%60?m%60+"m ":"")+"";
 }
 function stampText(d){
   document.getElementById("stamp").innerHTML =
-    `HMM 조회 ${d.updated} · ${ago(d.updated)}` +
-    `<span style="color:#3E586A"> · 다음 갱신 ${nextRun()}</span>`;
+    `HMM retrieved ${d.updated} · ${ago(d.updated)}` +
+    `<span style="color:#3E586A"> · next update in ${nextRun()}</span>`;
 }
 
 /* ---------- 종합 도표 (전 선적 한 화면) ---------- */
@@ -513,7 +513,7 @@ function buildOverview(list){
 
   document.getElementById("overview").innerHTML=`
     <h2>ALL SHIPMENTS · PORT KLANG → LOS ANGELES</h2>
-    <div class="sub">진행 중 ${active.length}건 / 전체 ${list.length}건 · 기항지 구간 기준</div>
+    <div class="sub">In transit ${active.length} of ${list.length} · by port-call segment</div>
     <div class="orail">
       <div class="base"></div>
       <div class="cap" style="left:0"></div><div class="cap-lb" style="left:0">PORT KLANG</div>
@@ -529,15 +529,15 @@ function buildOverview(list){
   });
 }
 
-/* 표 HTML (지도 아래 / 목록 상단 공용) */
+/* 표 HTML (MAP 아래 / LIST 상단 공용) */
 function rowsHTML(list){
   const now=Date.now();
   return list.map((s,i)=>`
     <tr data-i="${i}">
       <td><span class="nm">${s.vessel}</span><span class="vy">${s.voyage}</span>
           <span class="bk">${s.booking} · IMO ${s.imo||"—"}</span></td>
-      <td><span class="dt">${fmtDT(s.polDep)}</span><span class="est">${TS(s.polDep)<=now?"실적":"예정"}</span></td>
-      <td><span class="dt">${fmtDT(s.tsDep)}</span><span class="est">${TS(s.tsDep)<=now?"실적":"예정"}</span></td>
+      <td><span class="dt">${fmtDT(s.polDep)}</span><span class="est">${TS(s.polDep)<=now?"actual":"scheduled"}</span></td>
+      <td><span class="dt">${fmtDT(s.tsDep)}</span><span class="est">${TS(s.tsDep)<=now?"actual":"scheduled"}</span></td>
       <td><span class="dt">${fmtDT(s.eta)}</span><span class="est">ETB</span></td>
     </tr>`).join("");
 }
@@ -549,31 +549,31 @@ function addBooking(){
   const bkg=inp.value.trim().toUpperCase();
 
   if(!/^[A-Z]{4}\d{8}$/.test(bkg)){
-    el.innerHTML="부킹번호 형식이 올바르지 않습니다. 영문 4자 + 숫자 8자입니다.";
+    el.innerHTML="Invalid booking number format. Expected 4 letters + 8 digits.";
     return;
   }
   if(CUR.shipments.some(s=>s.booking===bkg)){
-    el.innerHTML=`<b>${bkg}</b> 는 이미 목록에 있습니다.`;
+    el.innerHTML=`<b>${bkg}</b> is already in the list.`;
     return;
   }
   if(!API){
-    el.innerHTML=`브라우저에서 HMM을 직접 호출할 수 없어(CORS·세션·CSRF 필요) `+
-      `Worker를 거쳐야 합니다. 스크립트 상단 <b>API</b> 값을 채우면 이 버튼이 동작합니다.`;
+    el.innerHTML=`The browser cannot call HMM directly (CORS / session / CSRF), so `+
+      `Workerthe request goes through the Worker. Set <b>API</b> at the top of the script to enable this button.`;
     return;
   }
 
   inp.disabled=true; document.getElementById("addbtn").disabled=true;
-  el.textContent=`${bkg} 조회 중… (HMM 응답까지 5~10초)`;
+  el.textContent=`${bkg} Retrieving… (HMM responds in 5–10s)`;
 
   fetch(API.replace(/\/data$/,"")+"/lookup?bkg="+encodeURIComponent(bkg),{cache:"no-store"})
     .then(r=>r.json())
     .then(res=>{
       if(res.error) throw new Error(res.error);
       CUR.shipments.push(res);
-      el.innerHTML=`<b>${bkg}</b> 추가됨 — ${res.vessel} ${res.voyage}. 화면을 다시 그립니다.`;
+      el.innerHTML=`<b>${bkg}</b> added — ${res.vessel} ${res.voyage}. Reloading view.`;
       setTimeout(()=>location.reload(),900);
     })
-    .catch(e=>{ el.innerHTML=`${bkg} 조회 실패 — ${e.message||"응답 없음"}`; })
+    .catch(e=>{ el.innerHTML=`${bkg} lookup failed — ${e.message||"no response"}`; })
     .finally(()=>{ inp.disabled=false; document.getElementById("addbtn").disabled=false; });
 }
 
@@ -588,7 +588,7 @@ function render(data){
   document.getElementById("n-eta").textContent=fmtD(data.shipments.map(s=>s.eta).sort()[0]);
   document.getElementById("cardlist").innerHTML=data.shipments.map(cardHTML).join("");
   if(dropped) document.getElementById("rstatus").innerHTML=
-    `도착 후 7일이 지난 <b>${dropped}건</b>을 목록에서 정리했습니다.`;
+    `Removed <b>${dropped}</b> shipment(s) that arrived over 7 days ago.`;
   initMap(data); buildTable(data); buildOverview(data.shipments);
 }
 function setView(v){
@@ -622,7 +622,7 @@ document.querySelectorAll(".tab").forEach(t=>t.addEventListener("click",()=>setV
 
 function unlock(){
   if(document.getElementById("pw").value.trim()!=="kossan"){
-    document.getElementById("gate-err").textContent="비밀번호가 맞지 않습니다."; return;
+    document.getElementById("gate-err").textContent="Incorrect password."; return;
   }
   document.getElementById("gate").remove();
   show("menu"); setView('map');
@@ -637,7 +637,7 @@ document.getElementById("pw").focus();
 <div id="qbar" style="display:none;position:sticky;top:0;z-index:9999;align-items:center;gap:12px;
  padding:9px 16px;background:#07141C;border-bottom:1px solid #1E3A4C;
  font-family:'Barlow Condensed',system-ui,sans-serif;letter-spacing:.14em;font-size:13px">
- <button id="qback" style="background:none;color:#8AA4B5;border:1px solid #1E3A4C;padding:5px 12px;cursor:pointer;font:inherit">← 메뉴</button>
+ <button id="qback" style="background:none;color:#8AA4B5;border:1px solid #1E3A4C;padding:5px 12px;cursor:pointer;font:inherit">← MENU</button>
  <span style="color:#DCE8EF">QUALITY ANALYSIS</span>
  <span style="margin-left:auto;color:#3FD0A6;font-family:'IBM Plex Mono',monospace;font-size:11px">KOSSAN OQC</span>
 </div>
