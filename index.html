@@ -111,6 +111,13 @@ html[data-theme="light"] .tile:hover{background:#F0F5F8;border-color:#0F2430}
 #otable .vy{font-family:'IBM Plex Mono';font-size:11px;color:var(--fog);margin-left:7px}
 #otable .bk{display:block;font-family:'IBM Plex Mono';font-size:11px;color:var(--fog);margin-top:3px}
 #otable .dt{font-family:'IBM Plex Mono';font-size:12.5px}
+.gapbox{display:inline-block;min-width:34px;padding:2px 5px;margin-left:6px;
+  font-family:'IBM Plex Mono',monospace;font-size:10.5px;line-height:1.3;text-align:center;
+  border:1px solid currentColor;border-radius:3px;background:transparent;vertical-align:middle}
+.gapbox.g-early{color:var(--sail)}
+.gapbox.g-ok{color:var(--paper)}
+.gapbox.g-warn{color:var(--dock)}
+.gapbox.g-bad{color:var(--buoy)}
 #otable .est{color:var(--fog);font-size:10px;font-family:'IBM Plex Mono';margin-left:6px}
 .addbar{display:flex;align-items:center;gap:10px;margin-top:14px;flex-wrap:wrap}
 .addbar label{font-family:'IBM Plex Mono';font-size:10px;letter-spacing:.14em;color:var(--fog)}
@@ -1262,6 +1269,17 @@ function buildOverview(list){
   });
 }
 
+/* 원 스케줄 대비 편차를 작은 사각 배지로. 색 구간은 요청 기준:
+   빠름(음수) 초록 / 1~3일 흰색 / 4~6일 노랑 / 7일 이상 빨강 */
+function gapBox(s){
+  const d = poDelay(s);
+  if(!d) return "";
+  const g = d.gap;
+  const cls = g < 0 ? "g-early" : g <= 3 ? "g-ok" : g <= 6 ? "g-warn" : "g-bad";
+  const txt = g > 0 ? "+" + g : String(g);
+  return `<span class="gapbox ${cls}" title="Original plan ${d.orig} · ${g>0?g+"일 지연":g<0?(-g)+"일 빠름":"계획대로"}">${txt}</span>`;
+}
+
 /* 표 HTML (MAP 아래 / LIST 상단 공용) */
 function rowsHTML(list){
   const now=Date.now();
@@ -1271,7 +1289,7 @@ function rowsHTML(list){
           <span class="bk">${s.booking} · ${s.cntrQty||"—"} CNTR${s.staleItem?" · STALE":""}</span></td>
       <td data-l="PKG ETD"><span class="dt">${fmtDT(s.polDep)}</span><span class="est">${TS(s.polDep)!==null && TS(s.polDep)<=now?"actual":"scheduled"}</span></td>
       <td data-l="SIN ETD"><span class="dt">${fmtDT(s.tsDep)}</span><span class="est">${TS(s.tsDep)!==null && TS(s.tsDep)<=now?"actual":"scheduled"}</span></td>
-      <td data-l="LA ETB"><span class="dt">${fmtDT(s.eta)}</span><span class="est">ETB</span></td>
+      <td data-l="LA ETB"><span class="dt">${fmtDT(s.eta)}</span>${gapBox(s)}<span class="est">ETB</span></td>
     </tr>`).join("");
 }
 
