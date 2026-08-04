@@ -144,6 +144,21 @@ html[data-theme="light"] .tile:hover{background:#F0F5F8;border-color:#0F2430}
 .warn{color:var(--warn)}
 .note.dim{opacity:.6;font-size:11px}
 .card.is-stale{opacity:.78}
+#alertbar{margin-top:12px;border:1px solid var(--buoy);background:var(--hull);padding:11px 14px;
+  display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;font-size:12px}
+#alertbar b{font-family:'Barlow Condensed',sans-serif;letter-spacing:.12em;color:var(--buoy);
+  font-size:13px;margin-right:6px}
+#alertbar .ai{font-family:'IBM Plex Mono';font-size:11.5px;color:var(--paper);cursor:pointer;
+  border-bottom:1px dotted var(--line)}
+#alertbar .ai:hover{color:var(--buoy)}
+.dtag.watch{color:var(--dock);border-color:var(--dock)}
+.dtag.roll{color:var(--paper);background:var(--buoy);border-color:var(--buoy);font-weight:600}
+.dtag{font-family:'IBM Plex Mono';font-size:10.5px;padding:3px 8px;border:1px solid var(--line);
+  border-radius:3px;margin-left:6px}
+.dtag.late{color:var(--buoy);border-color:var(--buoy)}
+.dtag.early{color:var(--sail);border-color:var(--sail)}
+.dtag.ontime{color:var(--fog)}
+dd .dim{opacity:.65}
 .tag.t-stale{background:var(--warn-bg);color:var(--warn);border-color:var(--warn-line)}
 #rstatus{margin-top:12px;font-size:12.5px;line-height:1.7;color:var(--fog)}
 #rstatus b{color:var(--buoy);font-family:'IBM Plex Mono';font-size:12px}
@@ -264,17 +279,22 @@ html[data-theme="light"] .tile:hover{background:#F0F5F8;border-color:#0F2430}
 const PO_KEY  = "oqc_po_map_v1";     // 서버 응답 캐시 (오프라인 대비)
 const KEY_KEY = "oqc_refresh_key";   // 저장용 키를 이 브라우저에 기억
 const PO_URL  = API.replace(/\/data$/,"") + "/po";
-let PO = {};
+let PO = {}, POETA = {};
 
 /* 서버(Worker KV)에서 읽는다. 실패하면 마지막 캐시를 쓴다. */
 async function loadPO(){
   try{
     const r = await fetch(PO_URL, {cache:"no-store"});
     if(!r.ok) throw new Error(r.status);
-    PO = await r.json() || {};
-    try{ localStorage.setItem(PO_KEY, JSON.stringify(PO)); }catch(_){}
+    const j = await r.json() || {};
+    PO    = j.po  || j;          // 구버전 응답(부킹 키가 최상위)도 수용
+    POETA = j.eta || {};
+    try{ localStorage.setItem(PO_KEY, JSON.stringify({po:PO,eta:POETA})); }catch(_){}
   }catch(_){
-    try{ PO = JSON.parse(localStorage.getItem(PO_KEY) || "{}") || {}; }catch(__){ PO = {}; }
+    try{
+      const c = JSON.parse(localStorage.getItem(PO_KEY) || "{}") || {};
+      PO = c.po || c; POETA = c.eta || {};
+    }catch(__){ PO = {}; POETA = {}; }
   }
   return PO;
 }
@@ -291,47 +311,99 @@ function getKey(){
 function forgetKey(){ try{ localStorage.removeItem(KEY_KEY); }catch(_){} }
 
 /* 서버에 저장. mode:"replace"면 전체 교체 */
-async function savePO(patch, mode){
+async function savePO(patch, mode, etaPatch){
   const key = getKey();
   if(!key) return {ok:false, msg:"No key entered — nothing was saved."};
   const r = await fetch(PO_URL, {
     method:"POST",
     headers:{"Content-Type":"application/json","X-Refresh-Key":key},
-    body: JSON.stringify({po:patch, mode:mode||"merge"})
+    body: JSON.stringify({po:patch, eta:etaPatch||{}, mode:mode||"merge"})
   });
   const res = await r.json().catch(()=>({}));
   if(!r.ok){
     if(r.status===401) forgetKey();
     return {ok:false, msg: res.error || ("Save failed ("+r.status+")")};
   }
-  PO = res.po || {};
-  try{ localStorage.setItem(PO_KEY, JSON.stringify(PO)); }catch(_){}
+  PO = res.po || {}; POETA = res.eta || {};
+  try{ localStorage.setItem(PO_KEY, JSON.stringify({po:PO,eta:POETA})); }catch(_){}
   return {ok:true, res};
 }
 
 /* 붙여넣은 텍스트 → { 부킹번호: [PO 문자열, ...] } */
 function parsePO(text){
-  const map = {}, bad = [];
+  const map = {}, eta = {}, bad = [];
   let cur = null, n = 0;
+  /* 날짜 정규화: 2026-08-02 / 2026/8/2 / 2026.08.02 → 2026-08-02 */
+  const normDate = v => {
+    const d = String(v||"").trim().replace(/[./]/g,"-");
+    if(!/^\d{4}-\d{1,2}-\d{1,2}$/.test(d)) return null;
+    const [y,m,dd] = d.split("-");
+    return `${y}-${String(m).padStart(2,"0")}-${String(dd).padStart(2,"0")}`;
+  };
+
   text.split(/\r?\n/).forEach((line,ln)=>{
     if(!line.trim()) return;
+
+    /* 부킹번호로 시작하는 줄은 "부킹 + 원 스케줄"만 등록한다 (PO 항목 없이도 가능).
+       예: KULM92606700 2026-08-02 */
+    const solo = line.trim().match(/^([A-Z]{4}\d{8})[\s,\t]+(\S+)?\s*$/i);
+    if(solo){
+      cur = solo[1].toUpperCase();
+      const d = normDate(solo[2]);
+      if(d) eta[cur] = d;
+      if(!map[cur]) map[cur] = [];      // 목록에 등록만 하고 PO는 비워둔다
+      return;
+    }
     /* 탭 우선, 없으면 2칸 이상 공백으로 분리 */
     const parts = line.includes("\t") ? line.split("\t") : line.split(/\s{2,}/);
     const left  = (parts[0]||"").trim();
     const right = (parts[1]||"").trim().toUpperCase();
+    const third = (parts[2]||"").trim();
     if(right){
       if(!/^[A-Z]{4}\d{8}$/.test(right)){ bad.push(ln+1); return; }
       cur = right;
+      /* 3열이 있으면 그 부킹의 원 스케줄 도착일로 쓴다 (YYYY-MM-DD) */
+      const d = normDate(third);
+      if(d) eta[cur] = d;
     }
     if(!left) return;
     if(!cur){ bad.push(ln+1); return; }   // 첫 행에 부킹번호가 없으면 귀속 불가
     (map[cur] = map[cur] || []).push(left);
     n++;
   });
-  return { map, bad, n };
+  return { map, eta, bad, n };
 }
 
 /* 카드/사이드바에 넣을 한 줄 요약 — "FNG031002 ×8, FNG031003 ×6 (14)" */
+/* 원 스케줄 대비 지연일 — 없으면 null */
+const DELAY_SAFE_D = 3;   /* 원 스케줄 대비 3일까지는 안전 (Worker와 동일 기준) */
+function poDelay(s){
+  const orig = s.planEta || POETA[s.booking] || s.poEta;
+  if(!orig || !s.eta) return null;
+  const gap = (typeof s.delayDays === "number")
+    ? s.delayDays
+    : Math.round((new Date(s.eta.slice(0,10)) - new Date(orig))/86400000);
+  const level = s.alert || (gap<=0 ? "ok" : gap<=DELAY_SAFE_D ? "watch" : "alert");
+  return {gap, orig, level};
+}
+function delayHTML(s){
+  const d = poDelay(s);
+  if(!d) return "";
+  const cls = d.level==="alert" ? "late" : d.level==="watch" ? "watch" : "early";
+  const txt = d.gap>0 ? `${d.gap}d behind` : d.gap<0 ? `${-d.gap}d ahead` : "on plan";
+  return `<span class="dtag ${cls}" title="Original plan ${d.orig} · ${d.level.toUpperCase()}">${txt}</span>`;
+}
+/* 롤오버: 본선 예정 출항이 지났는데 선적 이벤트가 없는 상태 */
+function rolloverHTML(s){
+  if(!s.rollover) return "";
+  return `<span class="dtag roll" title="${s.rolloverNote||""}">ROLLOVER ${s.rolloverDays||0}d</span>`;
+}
+/* 최근 스케줄 변경 (이번 수집에서 바뀐 항목) */
+function changeHTML(s){
+  if(!Array.isArray(s.justChanged) || !s.justChanged.length) return "";
+  const t = s.justChanged.map(c=>`${c.label} ${c.from} → ${c.to}`).join(" / ");
+  return `<p class="note warn">Schedule changed — ${t}</p>`;
+}
 function poSummary(booking){
   const list = PO[booking];
   if(!list || !list.length) return "";
@@ -360,14 +432,14 @@ async function applyPO(){
   const btn = document.getElementById("posave");
   const txt = document.getElementById("poin").value;
   if(!txt.trim()){ st.textContent="Nothing to apply."; return; }
-  const { map, bad, n } = parsePO(txt);
+  const { map, eta, bad, n } = parsePO(txt);
   const keys = Object.keys(map);
   if(!keys.length){
     st.innerHTML = `No rows parsed. The first line must carry a booking number.`;
     return;
   }
   btn.disabled = true; st.textContent = "Saving to server…";
-  const out = await savePO(map, "merge");
+  const out = await savePO(map, "merge", eta);
   btn.disabled = false;
   renderPOTable();
   if(CUR) render(CUR);
@@ -381,7 +453,7 @@ async function clearPO(){
   if(!confirm("Remove ALL PO / container mappings from the server? This affects every device.")) return;
   const st = document.getElementById("postatus");
   st.textContent = "Clearing…";
-  const out = await savePO({}, "replace");
+  const out = await savePO({}, "replace", {});
   renderPOTable();
   if(CUR) render(CUR);
   st.textContent = out.ok ? "Cleared on server." : ("Not cleared — " + out.msg);
@@ -507,12 +579,16 @@ html[data-theme="light"] #qview td.near{background:rgba(154,107,18,.08)}
     <input id="newbkg" type="text" placeholder="KULM00000000" autocomplete="off" spellcheck="false">
     <button class="btn" id="addbtn">Add</button>
   </div>
+  <div id="alertbar" hidden></div>
   <div id="rstatus"></div>
 
   <details id="pobox">
     <summary>PO / CONTAINER MAPPING — paste from spreadsheet</summary>
     <p class="pohelp">Paste two columns: PO/container on the left, booking number on the right.
        Leave the booking cell blank to reuse the one above (fill-down), exactly as it appears in your sheet.
+       Optional third column on the first row of each booking = original planned arrival (YYYY-MM-DD),
+       used to show days behind/ahead of plan. You can also paste booking + date only, one per line
+       (e.g. <code>KULM92606700 2026-08-02</code>), without any PO rows.
        Saved on the server, so it shows up on every device. The first save asks for the refresh key.</p>
     <textarea id="poin" spellcheck="false" placeholder="FNG031002 (Container 15 of 22)&#9;KULM63616300&#10;FNG031002 (Container 16 of 22)&#10;FNG031002 (Container 17 of 22)&#10;..."></textarea>
     <div class="porow">
@@ -822,6 +898,10 @@ function showSide(s,L2){
   /* PO 매핑은 붙여넣기로 등록된 로컬 데이터 */
   const po = poSummary(s.booking);
   const poRow = po ? `<dt>PO / LOT</dt><dd>${po}</dd>` : "";
+  const d = poDelay(s);
+  const dRow = d ? `<dt>VS PLAN</dt><dd>${delayHTML(s)} <span class="dim">(original ${d.orig})</span></dd>` : "";
+  const rRow = s.rollover
+    ? `<dt>ROLLOVER</dt><dd class="warn">Not loaded on ${s.vessel} ${s.voyage} — ${s.rolloverDays||0}d past ETD</dd>` : "";
 
   /* 최근 이벤트 타임라인 */
   const ev = Array.isArray(s.events) && s.events.length
@@ -845,7 +925,7 @@ function showSide(s,L2){
       <dt>LA ETB</dt><dd>${fmtDT(s.eta)}</dd>
       <dt>DEST ETA</dt><dd>${fmtDT(s.destEta)}</dd>
       <dt>FEEDER</dt><dd>${s.feeder||"— (direct)"}</dd>
-      ${poRow}${chk}
+      ${poRow}${dRow}${rRow}${chk}
       <dt>LATEST</dt><dd>${s.last||"—"}</dd>
     </dl>${ev}`;
 }
@@ -901,7 +981,7 @@ function cardHTML(s){
   return `<article class="card${s.staleItem?" is-stale":""}">
     <div class="card-hd"><span class="bkg">${s.booking}</span>
       <span class="vsl">${s.vessel} ${s.voyage}</span>
-      <span class="tag ${cls}">${phase}</span>${stale}</div>
+      <span class="tag ${cls}">${phase}</span>${stale}${rolloverHTML(s)}${delayHTML(s)}</div>
     <div class="card-bd">
       ${railHTML}
       <div class="grid">
@@ -914,6 +994,7 @@ function cardHTML(s){
         <div class="f"><label>CNTR</label><span>${s.cntrQty||"—"}</span></div>
         <div class="f"><label>PO / LOT</label><span>${po||"—"}</span></div>
       </div>
+      ${changeHTML(s)}
       <p class="note">Latest event — ${s.last||"—"}</p>
       ${s.checkedAt?`<p class="note dim">Checked ${toKST(s.checkedAt)} · ${ago(s.checkedAt)}</p>`:""}
     </div></article>`;
@@ -953,6 +1034,25 @@ function toKST(ts){
   const k = new Date(d.getTime() + 9*3600000);
   const p = n => String(n).padStart(2,"0");
   return `${p(k.getUTCMonth()+1)}-${p(k.getUTCDate())} ${p(k.getUTCHours())}:${p(k.getUTCMinutes())} KST`;
+}
+
+function alertBanner(d){
+  const el = document.getElementById("alertbar");
+  if(!el) return;
+  const list = (d.shipments||[]).filter(s=>s.rollover || s.alert==="alert");
+  if(!list.length){ el.hidden = true; el.innerHTML=""; return; }
+  el.hidden = false;
+  el.innerHTML = `<b>${list.length} shipment(s) need action</b>` +
+    list.map(s=>{
+      const why = s.rollover
+        ? `not loaded on ${s.vessel} ${s.voyage} (${s.rolloverDays||0}d past ETD)`
+        : `${s.delayDays}d behind original plan${s.planEta?` (${s.planEta})`:""}`;
+      return `<span class="ai" data-b="${s.booking}">${s.booking} · ${why}</span>`;
+    }).join("");
+  el.querySelectorAll(".ai").forEach(x=>x.addEventListener("click",()=>{
+    const i=(CUR.shipments||[]).findIndex(v=>v.booking===x.dataset.b);
+    if(i>=0){ setView('map'); select(CUR.shipments[i],i,true); showPO(CUR.shipments[i],i); }
+  }));
 }
 
 function stampText(d){
@@ -1059,17 +1159,22 @@ function addBooking(){
 const PO_KEY  = "oqc_po_map_v1";     // 서버 응답 캐시 (오프라인 대비)
 const KEY_KEY = "oqc_refresh_key";   // 저장용 키를 이 브라우저에 기억
 const PO_URL  = API.replace(/\/data$/,"") + "/po";
-let PO = {};
+let PO = {}, POETA = {};
 
 /* 서버(Worker KV)에서 읽는다. 실패하면 마지막 캐시를 쓴다. */
 async function loadPO(){
   try{
     const r = await fetch(PO_URL, {cache:"no-store"});
     if(!r.ok) throw new Error(r.status);
-    PO = await r.json() || {};
-    try{ localStorage.setItem(PO_KEY, JSON.stringify(PO)); }catch(_){}
+    const j = await r.json() || {};
+    PO    = j.po  || j;          // 구버전 응답(부킹 키가 최상위)도 수용
+    POETA = j.eta || {};
+    try{ localStorage.setItem(PO_KEY, JSON.stringify({po:PO,eta:POETA})); }catch(_){}
   }catch(_){
-    try{ PO = JSON.parse(localStorage.getItem(PO_KEY) || "{}") || {}; }catch(__){ PO = {}; }
+    try{
+      const c = JSON.parse(localStorage.getItem(PO_KEY) || "{}") || {};
+      PO = c.po || c; POETA = c.eta || {};
+    }catch(__){ PO = {}; POETA = {}; }
   }
   return PO;
 }
@@ -1086,47 +1191,99 @@ function getKey(){
 function forgetKey(){ try{ localStorage.removeItem(KEY_KEY); }catch(_){} }
 
 /* 서버에 저장. mode:"replace"면 전체 교체 */
-async function savePO(patch, mode){
+async function savePO(patch, mode, etaPatch){
   const key = getKey();
   if(!key) return {ok:false, msg:"No key entered — nothing was saved."};
   const r = await fetch(PO_URL, {
     method:"POST",
     headers:{"Content-Type":"application/json","X-Refresh-Key":key},
-    body: JSON.stringify({po:patch, mode:mode||"merge"})
+    body: JSON.stringify({po:patch, eta:etaPatch||{}, mode:mode||"merge"})
   });
   const res = await r.json().catch(()=>({}));
   if(!r.ok){
     if(r.status===401) forgetKey();
     return {ok:false, msg: res.error || ("Save failed ("+r.status+")")};
   }
-  PO = res.po || {};
-  try{ localStorage.setItem(PO_KEY, JSON.stringify(PO)); }catch(_){}
+  PO = res.po || {}; POETA = res.eta || {};
+  try{ localStorage.setItem(PO_KEY, JSON.stringify({po:PO,eta:POETA})); }catch(_){}
   return {ok:true, res};
 }
 
 /* 붙여넣은 텍스트 → { 부킹번호: [PO 문자열, ...] } */
 function parsePO(text){
-  const map = {}, bad = [];
+  const map = {}, eta = {}, bad = [];
   let cur = null, n = 0;
+  /* 날짜 정규화: 2026-08-02 / 2026/8/2 / 2026.08.02 → 2026-08-02 */
+  const normDate = v => {
+    const d = String(v||"").trim().replace(/[./]/g,"-");
+    if(!/^\d{4}-\d{1,2}-\d{1,2}$/.test(d)) return null;
+    const [y,m,dd] = d.split("-");
+    return `${y}-${String(m).padStart(2,"0")}-${String(dd).padStart(2,"0")}`;
+  };
+
   text.split(/\r?\n/).forEach((line,ln)=>{
     if(!line.trim()) return;
+
+    /* 부킹번호로 시작하는 줄은 "부킹 + 원 스케줄"만 등록한다 (PO 항목 없이도 가능).
+       예: KULM92606700 2026-08-02 */
+    const solo = line.trim().match(/^([A-Z]{4}\d{8})[\s,\t]+(\S+)?\s*$/i);
+    if(solo){
+      cur = solo[1].toUpperCase();
+      const d = normDate(solo[2]);
+      if(d) eta[cur] = d;
+      if(!map[cur]) map[cur] = [];      // 목록에 등록만 하고 PO는 비워둔다
+      return;
+    }
     /* 탭 우선, 없으면 2칸 이상 공백으로 분리 */
     const parts = line.includes("\t") ? line.split("\t") : line.split(/\s{2,}/);
     const left  = (parts[0]||"").trim();
     const right = (parts[1]||"").trim().toUpperCase();
+    const third = (parts[2]||"").trim();
     if(right){
       if(!/^[A-Z]{4}\d{8}$/.test(right)){ bad.push(ln+1); return; }
       cur = right;
+      /* 3열이 있으면 그 부킹의 원 스케줄 도착일로 쓴다 (YYYY-MM-DD) */
+      const d = normDate(third);
+      if(d) eta[cur] = d;
     }
     if(!left) return;
     if(!cur){ bad.push(ln+1); return; }   // 첫 행에 부킹번호가 없으면 귀속 불가
     (map[cur] = map[cur] || []).push(left);
     n++;
   });
-  return { map, bad, n };
+  return { map, eta, bad, n };
 }
 
 /* 카드/사이드바에 넣을 한 줄 요약 — "FNG031002 ×8, FNG031003 ×6 (14)" */
+/* 원 스케줄 대비 지연일 — 없으면 null */
+const DELAY_SAFE_D = 3;   /* 원 스케줄 대비 3일까지는 안전 (Worker와 동일 기준) */
+function poDelay(s){
+  const orig = s.planEta || POETA[s.booking] || s.poEta;
+  if(!orig || !s.eta) return null;
+  const gap = (typeof s.delayDays === "number")
+    ? s.delayDays
+    : Math.round((new Date(s.eta.slice(0,10)) - new Date(orig))/86400000);
+  const level = s.alert || (gap<=0 ? "ok" : gap<=DELAY_SAFE_D ? "watch" : "alert");
+  return {gap, orig, level};
+}
+function delayHTML(s){
+  const d = poDelay(s);
+  if(!d) return "";
+  const cls = d.level==="alert" ? "late" : d.level==="watch" ? "watch" : "early";
+  const txt = d.gap>0 ? `${d.gap}d behind` : d.gap<0 ? `${-d.gap}d ahead` : "on plan";
+  return `<span class="dtag ${cls}" title="Original plan ${d.orig} · ${d.level.toUpperCase()}">${txt}</span>`;
+}
+/* 롤오버: 본선 예정 출항이 지났는데 선적 이벤트가 없는 상태 */
+function rolloverHTML(s){
+  if(!s.rollover) return "";
+  return `<span class="dtag roll" title="${s.rolloverNote||""}">ROLLOVER ${s.rolloverDays||0}d</span>`;
+}
+/* 최근 스케줄 변경 (이번 수집에서 바뀐 항목) */
+function changeHTML(s){
+  if(!Array.isArray(s.justChanged) || !s.justChanged.length) return "";
+  const t = s.justChanged.map(c=>`${c.label} ${c.from} → ${c.to}`).join(" / ");
+  return `<p class="note warn">Schedule changed — ${t}</p>`;
+}
 function poSummary(booking){
   const list = PO[booking];
   if(!list || !list.length) return "";
@@ -1155,14 +1312,14 @@ async function applyPO(){
   const btn = document.getElementById("posave");
   const txt = document.getElementById("poin").value;
   if(!txt.trim()){ st.textContent="Nothing to apply."; return; }
-  const { map, bad, n } = parsePO(txt);
+  const { map, eta, bad, n } = parsePO(txt);
   const keys = Object.keys(map);
   if(!keys.length){
     st.innerHTML = `No rows parsed. The first line must carry a booking number.`;
     return;
   }
   btn.disabled = true; st.textContent = "Saving to server…";
-  const out = await savePO(map, "merge");
+  const out = await savePO(map, "merge", eta);
   btn.disabled = false;
   renderPOTable();
   if(CUR) render(CUR);
@@ -1176,7 +1333,7 @@ async function clearPO(){
   if(!confirm("Remove ALL PO / container mappings from the server? This affects every device.")) return;
   const st = document.getElementById("postatus");
   st.textContent = "Clearing…";
-  const out = await savePO({}, "replace");
+  const out = await savePO({}, "replace", {});
   renderPOTable();
   if(CUR) render(CUR);
   st.textContent = out.ok ? "Cleared on server." : ("Not cleared — " + out.msg);
@@ -1223,13 +1380,14 @@ function showPO(s,i){
   }
   const p=document.getElementById('popanel');
   let eta="";
-  if(s.poEta){
-    const gap=Math.round((new Date(s.eta.slice(0,10))-new Date(s.poEta))/86400000);
+  const orig = POETA[s.booking] || s.poEta;
+  if(orig && s.eta){
+    const gap=Math.round((new Date(s.eta.slice(0,10))-new Date(orig))/86400000);
     const tag = gap>0 ? `<b class="late">${gap}d BEHIND original plan</b>`
               : gap<0 ? `<b class="early">${-gap}d ahead of original plan</b>`
                       : `<b class="ontime">On original plan</b>`;
     eta=`<div class="poeta">
-      <span>Original ETA <s>${s.poEta}</s></span>
+      <span>Original ETA <s>${orig}</s></span>
       <span>Current ETB <b class="cur">${s.eta.slice(0,10)}</b></span>
       ${tag}</div>`;
   }
@@ -1265,6 +1423,7 @@ function render(data){
   document.getElementById("cardlist").innerHTML=data.shipments.map(cardHTML).join("");
   if(dropped) document.getElementById("rstatus").innerHTML=
     `Removed <b>${dropped}</b> shipment(s) that arrived over 7 days ago.`;
+  alertBanner(data);
   initMap(data); buildTable(data); buildOverview(data.shipments);
   renderPOTable();
 }
