@@ -955,17 +955,24 @@ function locate(s){
 }
 
 /* ---------- 정렬 · 만료 ---------- */
-const TS = s => new Date(s+"Z").getTime();
+/* 값이 없거나 형식이 어긋나면 NaN이 되어 정렬이 무너지므로 null로 정규화한다 */
+const TS = s => { const t = s ? new Date(String(s).replace(" ","T")+"Z").getTime() : NaN;
+                  return Number.isFinite(t) ? t : null; };
 const DAY = 86400000;
 
 /* ETA 확정  7일이 지난 은 LIST에서 제외 */
 function prune(list){
   const now=Date.now();
-  return list.filter(s=>now < TS(s.eta) + 7*DAY);
+  return list.filter(s=>{ const t=TS(s.eta); return t===null ? true : now < t + 7*DAY; });
 }
 /* 포트클랑 ETD 빠른 순 */
+/* 포트클랑 ETD 빠른 순. ETD가 없으면 ETB로, 그것도 없으면 맨 뒤로 보낸다. */
 function sortByETD(list){
-  return [...list].sort((a,b)=>TS(a.polDep)-TS(b.polDep));
+  const key = s => TS(s.polDep) ?? TS(s.eta) ?? Infinity;
+  return [...list].sort((a,b)=>{
+    const d = key(a) - key(b);
+    return d || String(a.booking).localeCompare(String(b.booking));
+  });
 }
 
 /* 직항(피더 없음) 화물은 tsArr/tsDep가 null이므로 방어한다 */
@@ -1259,8 +1266,8 @@ function rowsHTML(list){
     <tr data-i="${i}">
       <td><span class="nm">${s.vessel}</span><span class="vy">${s.voyage}</span>
           <span class="bk">${s.booking} · ${s.cntrQty||"—"} CNTR${s.staleItem?" · STALE":""}</span></td>
-      <td data-l="PKG ETD"><span class="dt">${fmtDT(s.polDep)}</span><span class="est">${TS(s.polDep)<=now?"actual":"scheduled"}</span></td>
-      <td data-l="SIN ETD"><span class="dt">${fmtDT(s.tsDep)}</span><span class="est">${TS(s.tsDep)<=now?"actual":"scheduled"}</span></td>
+      <td data-l="PKG ETD"><span class="dt">${fmtDT(s.polDep)}</span><span class="est">${TS(s.polDep)!==null && TS(s.polDep)<=now?"actual":"scheduled"}</span></td>
+      <td data-l="SIN ETD"><span class="dt">${fmtDT(s.tsDep)}</span><span class="est">${TS(s.tsDep)!==null && TS(s.tsDep)<=now?"actual":"scheduled"}</span></td>
       <td data-l="LA ETB"><span class="dt">${fmtDT(s.eta)}</span><span class="est">ETB</span></td>
     </tr>`).join("");
 }
