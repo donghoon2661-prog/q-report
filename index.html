@@ -656,24 +656,79 @@ const FALLBACK = {
 const shortPort = n => !n ? "" : String(n).split(",")[0].replace(/\s+/g," ").trim().toUpperCase();
 
 function portNames(s){
-  const raw = Array.isArray(s.names) ? s.names : [];
-  const isPlaceholder = !raw.length || raw.every(n=>/^P\d+$/.test(n));
-  let list;
-  if(!isPlaceholder){
-    list = raw.map(shortPort);
-  }else if(Array.isArray(s.legs) && s.legs.length){
-    list = [shortPort(s.legs[0].pol), ...s.legs.map(l=>shortPort(l.pod))];
-  }else{
-    list = raw.map((n,i)=>shortPort(n)||("P"+(i+1)));
+  const raw  = Array.isArray(s.names) ? s.names : [];
+  const need = Array.isArray(s.route) ? s.route.length : raw.length;
+  const real = raw.filter(n=>n && !/^P\d+$/.test(n));
+
+  /* 지도에서 실제 항구명을 받은 경우 — 기항지를 그대로 쓴다 */
+  if(real.length === need) return raw.map(shortPort);
+
+  /* 지도 좌표만 승계되어 이름이 P1..Pn으로 폴백된 경우.
+     legs로 알 수 있는 건 출발지와 최종 양하항뿐이므로 그 둘만 채우고,
+     중간 기항지는 개수를 유지한 채 순번으로 남긴다 (임의로 합치거나 늘리지 않는다). */
+  const legs = Array.isArray(s.legs) ? s.legs : [];
+  const first = legs.length ? shortPort(legs[0].pol) : (raw[0] ? shortPort(raw[0]) : "");
+  const lastN = legs.length ? shortPort(legs[legs.length-1].pod) : (raw[need-1] ? shortPort(raw[need-1]) : "");
+  const out = [];
+  for(let i=0;i<need;i++){
+    if(i===0 && first) out.push(first);
+    else if(i===need-1 && lastN) out.push(lastN);
+    else out.push(raw[i] ? shortPort(raw[i]) : ("P"+(i+1)));
   }
-  /* 좌표 개수에 맞춰 길이를 보정 (부족하면 마지막 항구를 반복) */
-  const need = Array.isArray(s.route) ? s.route.length : list.length;
-  while(list.length < need) list.push(list[list.length-1]||"—");
-  return list.slice(0, need);
+  return out;
 }
 
 /* 연속 중복 항구(같은 항 내 선석 이동 등)는 라벨을 비워 겹침을 막는다 */
 const dedupeLabels = names => names.map((n,i)=> i>0 && n===names[i-1] ? "" : n);
+
+
+/* ---------- 진행바(rail) ----------
+   지도 좌표(route)는 베트남/중국 경유까지 포함한 기항지라 실제 기항 항구 수와 다르다.
+   진행바는 legs(선적항 → T/S → 양하항)로만 그리고, 위치는 일정 시각으로 보간한다. */
+function railInfo(s){
+  const legs = Array.isArray(s.legs) ? s.legs : [];
+  if(!legs.length) return null;
+
+  /* 노드: [선적항, (T/S…), 양하항] — 각 노드에 도착/출발 시각을 붙인다 */
+  const nodes = [{ name: shortPort(legs[0].pol), arr: null, dep: legs[0].etd }];
+  legs.forEach((l,i)=>{
+    nodes.push({ name: shortPort(l.pod), arr: l.eta, dep: legs[i+1] ? legs[i+1].etd : null });
+  });
+
+  /* 같은 항구가 연달아 나오면(같은 항 내 선석 이동 등) 하나로 합친다 */
+  const merged = [];
+  nodes.forEach(n=>{
+    const prev = merged[merged.length-1];
+    if(prev && prev.name === n.name){ prev.dep = n.dep || prev.dep; prev.arr = prev.arr || n.arr; }
+    else merged.push({...n});
+  });
+  if(merged.length < 2) return null;
+
+  const now = Date.now();
+  const T = v => v ? new Date(v+"Z").getTime() : null;
+  const last = merged.length-1;
+
+  let i = 0, f = 0, atPort = true;
+  for(let k=0;k<merged.length;k++){
+    const dep = T(merged[k].dep), nextArr = T(merged[k+1] && merged[k+1].arr);
+    const arr = T(merged[k].arr);
+    if(arr && now < arr){ i = Math.max(0,k-1); f = 1; atPort = true; break; }   // 아직 도착 전
+    if(dep && now < dep){ i = k; f = 0; atPort = true; break; }                  // 정박 중
+    if(dep && nextArr && now >= dep && now < nextArr){                           // 항해 중
+      i = k; f = Math.min(1,(now-dep)/(nextArr-dep)); atPort = false; break;
+    }
+    i = k; f = 0; atPort = true;
+  }
+  if(i >= last){ i = last-1; f = 1; atPort = true; }
+
+  const names = merged.map(n=>n.name);
+  return {
+    nodes: merged, names, i, f, atPort,
+    pct: (i + f) / last,
+    phase: atPort ? `${names[Math.min(i + (f>=1?1:0), last)]} — berthed`
+                  : `${names[i]} → ${names[i+1]}`
+  };
+}
 
 /* ---------- 좌표 유틸 ---------- */
 const wrap = p => [p[0], p[1] < -30 ? p[1] + 360 : p[1]];   // 태평양 연속 표시
@@ -826,12 +881,12 @@ function cardHTML(s){
   if(!L2){
     railHTML = `<p class="note warn">Position unavailable — HMM map lookup failed. Schedule below is current.</p>`;
   }else{
-    const nm = dedupeLabels(L2.names);
+    const nm = dedupeLabels(L2.names);      // 연속 중복 항구만 라벨 생략
     const n = L2.names.length-1;
     let nodes="";
     nm.forEach((label,k)=>{
       const x = k/n*100;
-      const c = k===nm.length-1 ? "node end" : (k <= L2.i ? "node on" : "node");
+      const c = k===n ? "node end" : (k <= L2.i ? "node on" : "node");
       nodes += `<div class="${c}" style="left:${x}%"></div>`
              + (label?`<div class="node-lb" style="left:${x}%">${label}</div>`:"");
     });
