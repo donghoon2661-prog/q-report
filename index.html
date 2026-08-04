@@ -143,6 +143,8 @@ ol.pohelp b{color:var(--paper);font-weight:600}
 #poin:focus{outline:none;border-color:var(--buoy)}
 .porow{display:flex;align-items:center;gap:10px;margin:10px 0 14px;flex-wrap:wrap}
 .btn.ghost{background:none}
+.btn.danger{color:var(--buoy);border-color:var(--buoy)}
+.btn.danger:hover{background:var(--buoy);color:var(--ink);border-color:var(--buoy)}
 #postatus{font-size:12px;color:var(--fog)}
 #potable{margin-bottom:14px}
 #potable table{width:100%;border-collapse:collapse;font-size:11.5px}
@@ -151,6 +153,8 @@ ol.pohelp b{color:var(--paper);font-weight:600}
 #potable td{padding:6px 8px;border-bottom:1px solid var(--hair);font-family:'IBM Plex Mono',monospace}
 #potable td.b{color:var(--buoy)}
 #potable td.l{color:var(--fog)}
+#potable td.yes{color:var(--sail);font-weight:600;text-align:center}
+#potable td.no{color:var(--fog);opacity:.7;text-align:center}
 .schist{margin-top:14px;border-top:1px solid var(--line);padding-top:10px}
 .sh-h{font-family:'Barlow Condensed',sans-serif;letter-spacing:.14em;font-size:11px;
   color:var(--fog);margin-bottom:8px}
@@ -472,7 +476,7 @@ html[data-theme="light"] #qview td.near{background:rgba(154,107,18,.08)}
     <textarea id="poin" spellcheck="false" placeholder="FNG031007 (Container 12 of 18)&#9;KULM40326600&#10;FNG031007 (Container 13 of 18)&#10;KULM40326600 2026-08-23&#10;KULM40326600 https://u.pcloud.link/publink/show?code=..."></textarea>
     <div class="porow">
       <button class="btn" id="posave">Apply</button>
-      <button class="btn ghost" id="poclear">Clear all</button>
+      <button class="btn ghost danger" id="poclear" title="Deletes all mapping data on the server">Clear all</button>
       <span id="postatus"></span>
     </div>
     <div id="potable"></div>
@@ -1337,15 +1341,29 @@ function poSummary(booking){
 }
 
 function renderPOTable(){
-  const keys = Object.keys(PO).sort();
   const el = document.getElementById("potable");
   if(!el) return;
+  /* PO·원 스케줄·사진 중 하나라도 등록된 부킹을 모두 보여준다 */
+  const keys = [...new Set([].concat(
+    Object.keys(PO||{}), Object.keys(POETA||{}), Object.keys(PHOTOS||{})
+  ))].sort();
   if(!keys.length){ el.innerHTML=""; return; }
-  el.innerHTML = `<table><thead><tr><th>BOOKING</th><th>LOTS</th><th>CONTAINERS</th></tr></thead><tbody>`
+
+  el.innerHTML = `<table><thead><tr>
+      <th>BOOKING</th><th>LOTS</th><th>CNTR</th><th>PHOTOS</th><th>ORIGINAL ETA</th>
+    </tr></thead><tbody>`
     + keys.map(k=>{
-        const known = CUR && CUR.shipments.some(s=>s.booking===k);
-        return `<tr><td class="b">${k}${known?"":' <span class="l">(not tracked)</span>'}</td>`
-             + `<td class="l">${poSummary(k)}</td><td>${PO[k].length}</td></tr>`;
+        const known  = CUR && CUR.shipments.some(s=>s.booking===k);
+        const nCntr  = (PO[k]||[]).length;
+        const hasPic = !!PHOTOS[k];
+        const eta    = POETA[k] || null;
+        return `<tr>
+          <td class="b">${k}${known?"":' <span class="l">(not tracked)</span>'}</td>
+          <td class="l">${poSummary(k) || "—"}</td>
+          <td>${nCntr || "—"}</td>
+          <td class="${hasPic?"yes":"no"}">${hasPic?"O":"X"}</td>
+          <td class="${eta?"":"no"}">${eta || "N/A"}</td>
+        </tr>`;
       }).join("")
     + `</tbody></table>`;
 }
@@ -1379,8 +1397,17 @@ async function applyPO(){
 }
 
 async function clearPO(){
-  if(!confirm("Remove ALL PO / container mappings from the server? This affects every device.")) return;
   const st = document.getElementById("postatus");
+  /* 서버의 PO·원 스케줄·사진 링크를 모두 지운다. 모든 기기·모든 사용자에게 영향이 있으므로
+     확인 문구를 직접 입력하게 한다. (비밀번호를 코드에 넣으면 공개 저장소에 노출된다) */
+  const typed = prompt(
+    "This deletes ALL mapping data on the server — PO/containers, original schedules and photo links.\n" +
+    "It affects every device and cannot be undone.\n\n" +
+    "Type  DELETE ALL  to continue:");
+  if((typed||"").trim().toUpperCase() !== "DELETE ALL"){
+    st.textContent = "Cancelled — nothing was deleted.";
+    return;
+  }
   st.textContent = "Clearing…";
   const out = await savePO({}, "replace", {}, {});
   renderPOTable();
@@ -1436,10 +1463,11 @@ const PC_API  = "https://api.pcloud.com";
 const PC_PROXY = API.replace(/\/data$/,"") + "/pcloud";
 const pcCache = {};
 /* 브라우저에서 api.pcloud.com 을 직접 부르면 CORS로 막히므로 워커를 경유한다 */
-async function pcList(code, folderid){
-  const key = code + "|" + (folderid||"");
+async function pcList(code, folderName){
+  const key = code + "|" + (folderName||"");
   if(pcCache[key]) return pcCache[key];
-  const u = `${PC_PROXY}?code=${encodeURIComponent(code)}` + (folderid?`&folderid=${folderid}`:"");
+  const u = `${PC_PROXY}?code=${encodeURIComponent(code)}`
+          + (folderName?`&folder=${encodeURIComponent(folderName)}`:"");
   const r = await fetch(u,{cache:"no-store"});
   const j = await r.json();
   if(j.error) throw new Error(j.error);
@@ -1460,23 +1488,12 @@ function poFolderName(poText){
 }
 
 const PAGE_N = 5;
-/* 상위 폴더 목록에서 이름으로 하위 folderid를 찾는다 */
-async function pcFolderId(code, folderName){
-  const top = await pcList(code);
-  const hit = (top.folders||[]).find(f =>
-    String(f.name).trim().toUpperCase() === folderName.toUpperCase());
-  return hit ? hit.folderid : null;
-}
-
 function renderGallery(el, label, code, folderName){
   const head = txt => `<div class="gal-h"><b>${label}</b> ${txt}</div>`;
   if(!code){ el.innerHTML = head(`<span class="dim">no photo link for this booking</span>`); return; }
   el.innerHTML = head(`<span class="dim">loading…</span>`);
 
-  pcFolderId(code, folderName).then(fid=>{
-    if(!fid) throw new Error(`folder "${folderName}" not found`);
-    return pcList(code, fid);
-  }).then(data=>{
+  pcList(code, folderName).then(data=>{
     const files = data.files||[];
     if(!files.length){ el.innerHTML = head(`<span class="dim">no images</span>`); return; }
     let page = 0;
