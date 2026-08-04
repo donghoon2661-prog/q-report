@@ -172,7 +172,11 @@ html[data-theme="light"] .tile:hover{background:#F0F5F8;border-color:#0F2430}
   border-bottom:1px dotted var(--line)}
 #alertbar .ai:hover{color:var(--buoy)}
 .dtag.watch{color:var(--dock);border-color:var(--dock)}
-.galbox{margin-top:14px;border-top:1px solid var(--line);padding-top:10px;cursor:default}
+.gal-title{margin-top:16px;font-family:'Barlow Condensed',sans-serif;letter-spacing:.14em;
+  font-size:11px;color:var(--fog);border-top:1px solid var(--line);padding-top:12px}
+.galbox.nolink{opacity:.55}
+.gal-h b{color:var(--paper)}
+.galbox{margin-top:12px;border-left:2px solid var(--line);padding:2px 0 2px 10px;cursor:default}
 .gal-h{font-family:'IBM Plex Mono';font-size:11px;color:var(--paper);margin-bottom:8px;
   display:flex;align-items:center;gap:8px}
 .gal-h .dim{color:var(--fog);font-size:10.5px}
@@ -509,8 +513,14 @@ async function applyPO(){
   btn.disabled = false;
   renderPOTable();
   if(CUR) render(CUR);
+  const ph = Object.keys(photos);
+  const parts = [];
+  if(n) parts.push(`${n} PO row(s) → ${keys.length} booking(s)`);
+  if(Object.keys(eta).length) parts.push(`${Object.keys(eta).length} original schedule date(s)`);
+  if(ph.length) parts.push(`${ph.length} photo folder(s): ${ph.join(", ")}`);
   st.innerHTML = out.ok
-    ? `${n} row(s) mapped to ${keys.length} booking(s) — saved to server, visible on any device.`
+    ? (parts.length ? parts.join(" · ") : "Nothing recognised")
+      + ` — saved to server, visible on any device.`
       + (bad.length? ` Skipped line(s): ${bad.slice(0,8).join(", ")}${bad.length>8?"…":""}.` : "")
     : `Not saved — ${out.msg}`;
 }
@@ -585,29 +595,37 @@ async function pcList(code){
 }
 const pcThumb = (code,id,size) => `${PC_API}/getpubthumb?code=${encodeURIComponent(code)}&fileid=${id}&size=${size||"320x240"}&crop=1&type=jpg`;
 
-/* 부킹에 걸린 로트들 중 사진이 등록된 것 */
-function lotsWithPhotos(booking){
+/* 부킹에 걸린 로트 전체 — 사진 링크 유무와 컨테이너 수를 함께 준다 */
+function bookingLots(booking){
   const list = PO[booking]||[];
-  const lots = [...new Set(list.map(v=>{const m=String(v).match(/^(\S+)/);return m?m[1].toUpperCase():"";}))];
-  return lots.filter(l=>PHOTOS[l]);
+  const cnt = {};
+  list.forEach(v=>{
+    const m = String(v).match(/^(\S+)/);
+    if(!m) return;
+    const k = m[1].toUpperCase();
+    cnt[k] = (cnt[k]||0) + 1;
+  });
+  return Object.keys(cnt).sort().map(lot=>({ lot, n: cnt[lot], code: PHOTOS[lot] || null }));
 }
 
 const PAGE_N = 5;
-function renderGallery(el, lot, code){
-  el.innerHTML = `<div class="gal-h">${lot} <span class="dim">loading photos…</span></div>`;
+function renderGallery(el, lot, code, nCntr){
+  const head = txt => `<div class="gal-h"><b>${lot}</b> <span class="dim">${nCntr} cntr</span> ${txt}</div>`;
+  if(!code){ el.innerHTML = head(`<span class="dim">no photo link registered</span>`); return; }
+  el.innerHTML = head(`<span class="dim">loading photos…</span>`);
   pcList(code).then(files=>{
-    if(!files.length){ el.innerHTML = `<div class="gal-h">${lot} <span class="dim">no images</span></div>`; return; }
+    if(!files.length){ el.innerHTML = head(`<span class="dim">no images in folder</span>`); return; }
     let page = 0;
     const pages = Math.ceil(files.length/PAGE_N);
     const draw = () => {
       const slice = files.slice(page*PAGE_N,(page+1)*PAGE_N);
-      el.innerHTML = `
-        <div class="gal-h">${lot} <span class="dim">${files.length} photos · ${page+1}/${pages}</span>
-          <span class="gal-nav">
-            <button class="gnav" data-d="-1" ${page===0?"disabled":""}>‹</button>
-            <button class="gnav" data-d="1" ${page>=pages-1?"disabled":""}>›</button>
-          </span></div>
-        <div class="gal">${slice.map(f=>`
+      el.innerHTML = head(
+          `<span class="dim">${files.length} photos · ${page+1}/${pages}</span>
+           <span class="gal-nav">
+             <button class="gnav" data-d="-1" ${page===0?"disabled":""}>‹</button>
+             <button class="gnav" data-d="1" ${page>=pages-1?"disabled":""}>›</button>
+           </span>`)
+        + `<div class="gal">${slice.map(f=>`
           <a class="gcell" href="${pcThumb(code,f.fileid,"1600x1200")}" target="_blank" rel="noopener"
              title="${(f.name||"").replace(/"/g,"")}">
             <img loading="lazy" src="${pcThumb(code,f.fileid,"320x240")}" alt="${(f.name||"").replace(/"/g,"")}">
@@ -618,7 +636,7 @@ function renderGallery(el, lot, code){
     };
     draw();
   }).catch(e=>{
-    el.innerHTML = `<div class="gal-h">${lot} <span class="warn">photos unavailable — ${e.message||e}</span></div>`;
+    el.innerHTML = head(`<span class="warn">photos unavailable — ${e.message||e}</span>`);
   });
 }
 
@@ -1650,8 +1668,14 @@ async function applyPO(){
   btn.disabled = false;
   renderPOTable();
   if(CUR) render(CUR);
+  const ph = Object.keys(photos);
+  const parts = [];
+  if(n) parts.push(`${n} PO row(s) → ${keys.length} booking(s)`);
+  if(Object.keys(eta).length) parts.push(`${Object.keys(eta).length} original schedule date(s)`);
+  if(ph.length) parts.push(`${ph.length} photo folder(s): ${ph.join(", ")}`);
   st.innerHTML = out.ok
-    ? `${n} row(s) mapped to ${keys.length} booking(s) — saved to server, visible on any device.`
+    ? (parts.length ? parts.join(" · ") : "Nothing recognised")
+      + ` — saved to server, visible on any device.`
       + (bad.length? ` Skipped line(s): ${bad.slice(0,8).join(", ")}${bad.length>8?"…":""}.` : "")
     : `Not saved — ${out.msg}`;
 }
@@ -1726,29 +1750,37 @@ async function pcList(code){
 }
 const pcThumb = (code,id,size) => `${PC_API}/getpubthumb?code=${encodeURIComponent(code)}&fileid=${id}&size=${size||"320x240"}&crop=1&type=jpg`;
 
-/* 부킹에 걸린 로트들 중 사진이 등록된 것 */
-function lotsWithPhotos(booking){
+/* 부킹에 걸린 로트 전체 — 사진 링크 유무와 컨테이너 수를 함께 준다 */
+function bookingLots(booking){
   const list = PO[booking]||[];
-  const lots = [...new Set(list.map(v=>{const m=String(v).match(/^(\S+)/);return m?m[1].toUpperCase():"";}))];
-  return lots.filter(l=>PHOTOS[l]);
+  const cnt = {};
+  list.forEach(v=>{
+    const m = String(v).match(/^(\S+)/);
+    if(!m) return;
+    const k = m[1].toUpperCase();
+    cnt[k] = (cnt[k]||0) + 1;
+  });
+  return Object.keys(cnt).sort().map(lot=>({ lot, n: cnt[lot], code: PHOTOS[lot] || null }));
 }
 
 const PAGE_N = 5;
-function renderGallery(el, lot, code){
-  el.innerHTML = `<div class="gal-h">${lot} <span class="dim">loading photos…</span></div>`;
+function renderGallery(el, lot, code, nCntr){
+  const head = txt => `<div class="gal-h"><b>${lot}</b> <span class="dim">${nCntr} cntr</span> ${txt}</div>`;
+  if(!code){ el.innerHTML = head(`<span class="dim">no photo link registered</span>`); return; }
+  el.innerHTML = head(`<span class="dim">loading photos…</span>`);
   pcList(code).then(files=>{
-    if(!files.length){ el.innerHTML = `<div class="gal-h">${lot} <span class="dim">no images</span></div>`; return; }
+    if(!files.length){ el.innerHTML = head(`<span class="dim">no images in folder</span>`); return; }
     let page = 0;
     const pages = Math.ceil(files.length/PAGE_N);
     const draw = () => {
       const slice = files.slice(page*PAGE_N,(page+1)*PAGE_N);
-      el.innerHTML = `
-        <div class="gal-h">${lot} <span class="dim">${files.length} photos · ${page+1}/${pages}</span>
-          <span class="gal-nav">
-            <button class="gnav" data-d="-1" ${page===0?"disabled":""}>‹</button>
-            <button class="gnav" data-d="1" ${page>=pages-1?"disabled":""}>›</button>
-          </span></div>
-        <div class="gal">${slice.map(f=>`
+      el.innerHTML = head(
+          `<span class="dim">${files.length} photos · ${page+1}/${pages}</span>
+           <span class="gal-nav">
+             <button class="gnav" data-d="-1" ${page===0?"disabled":""}>‹</button>
+             <button class="gnav" data-d="1" ${page>=pages-1?"disabled":""}>›</button>
+           </span>`)
+        + `<div class="gal">${slice.map(f=>`
           <a class="gcell" href="${pcThumb(code,f.fileid,"1600x1200")}" target="_blank" rel="noopener"
              title="${(f.name||"").replace(/"/g,"")}">
             <img loading="lazy" src="${pcThumb(code,f.fileid,"320x240")}" alt="${(f.name||"").replace(/"/g,"")}">
@@ -1759,7 +1791,7 @@ function renderGallery(el, lot, code){
     };
     draw();
   }).catch(e=>{
-    el.innerHTML = `<div class="gal-h">${lot} <span class="warn">photos unavailable — ${e.message||e}</span></div>`;
+    el.innerHTML = head(`<span class="warn">photos unavailable — ${e.message||e}</span>`);
   });
 }
 
@@ -1826,13 +1858,14 @@ function showPO(s,i){
   /* 로트별 사진 */
   const gw = document.getElementById("galwrap");
   if(gw){
-    const lots = lotsWithPhotos(s.booking);
-    gw.innerHTML = "";
-    lots.forEach(lot=>{
+    const lots = bookingLots(s.booking);
+    gw.innerHTML = lots.length
+      ? `<div class="gal-title">PHOTOS BY PO / LOT — ${lots.length} lot(s) in this booking</div>` : "";
+    lots.forEach(({lot,n,code})=>{
       const box = document.createElement("div");
-      box.className = "galbox";
+      box.className = "galbox" + (code ? "" : " nolink");
       gw.appendChild(box);
-      renderGallery(box, lot, PHOTOS[lot]);
+      renderGallery(box, lot, code, n);
     });
   }
   p.onclick = e => {
