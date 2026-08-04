@@ -162,6 +162,12 @@ html[data-theme="light"] .tile:hover{background:#F0F5F8;border-color:#0F2430}
   border-bottom:1px dotted var(--line)}
 #alertbar .ai:hover{color:var(--buoy)}
 .dtag.watch{color:var(--dock);border-color:var(--dock)}
+.tsdwell{font-family:'IBM Plex Mono';font-size:11.5px;color:var(--fog);
+  border:1px solid var(--line);padding:9px 12px;margin:0 0 14px;line-height:1.8}
+.tsdwell b{color:var(--paper);font-size:13px}
+.tsdwell i{font-style:normal;opacity:.7}
+.tsdwell .dim{display:block;opacity:.6;font-size:10.5px;margin-top:2px}
+.dtag.pre{color:var(--fog);border-style:dashed}
 .dtag.roll{color:var(--paper);background:var(--buoy);border-color:var(--buoy);font-weight:600}
 .dtag{font-family:'IBM Plex Mono';font-size:10.5px;padding:3px 8px;border:1px solid var(--line);
   border-radius:3px;margin-left:6px}
@@ -478,6 +484,47 @@ async function clearPO(){
   renderPOTable();
   if(CUR) render(CUR);
   st.textContent = out.ok ? "Cleared on server." : ("Not cleared — " + out.msg);
+}
+
+
+/* ---------- T/S 체류일 ----------
+   계획: 처음 관측했을 때의 T/S 도착→출항 (이력 first 기록)
+   실제/현재: 지금 스케줄 기준. 본선 출항 이벤트가 있으면 실적으로 확정된 값이다. */
+function tsDwell(s){
+  if(!s.tsArr || !s.tsDep) return null;
+  const D = (a,b)=> (new Date(b+"Z") - new Date(a+"Z"))/86400000;
+  const cur = D(s.tsArr, s.tsDep);
+  if(!isFinite(cur)) return null;
+
+  const first = (HIST[s.booking]||[]).find(e=>e.first);
+  const plan = (first && first.tsArr && first.tsDep) ? D(first.tsArr, first.tsDep) : null;
+
+  /* 본선이 이미 T/S를 떠났으면 실적, 아니면 예정 */
+  const departed = (s.events||[]).some(e=>{
+    const m=(e.mode||"").toUpperCase(), st=(e.status||"").toUpperCase();
+    return s.vessel && m.includes(s.vessel.toUpperCase()) && st.includes("DEPARTURE");
+  });
+  return {
+    cur: Math.round(cur*10)/10,
+    plan: plan===null ? null : Math.round(plan*10)/10,
+    diff: plan===null ? null : Math.round((cur-plan)*10)/10,
+    actual: departed
+  };
+}
+function tsDwellHTML(s){
+  const t = tsDwell(s);
+  if(!t) return "";
+  const lbl = t.actual ? "actual" : "scheduled";
+  let extra = "";
+  if(t.plan!==null && t.diff!==0){
+    const cls = t.diff>0 ? "late" : "early";
+    extra = ` <span class="dtag ${cls}">${t.diff>0?"+":""}${t.diff}d vs plan</span>`;
+  }else if(t.plan!==null){
+    extra = ` <span class="dtag early">on plan</span>`;
+  }
+  const planTxt = t.plan!==null ? `plan ${t.plan}d → ` : "";
+  return `<div class="tsdwell">T/S DWELL <b>${planTxt}${t.cur}d</b> <i>(${lbl})</i>${extra}
+    <span class="dim">${fmtDT(s.tsArr)} → ${fmtDT(s.tsDep)}</span></div>`;
 }
 
 /* ---------- PO 팝업 ---------- */
@@ -951,13 +998,14 @@ function showSide(s,L2){
 
   document.getElementById('side').innerHTML=`
     <h3>${s.vessel} ${s.voyage}</h3>
-    <div class="sb">${s.booking} · ${s.svc} · ${s.cntrQty||s.containers&&s.containers.length||"—"} CNTR</div>
+    <div class="sb">${s.booking} · ${s.svc} · ${s.cntrQty||(s.containers&&s.containers.length)||"—"} CNTR${s.cntrType?" "+s.cntrType:""}</div>
     <dl>
       ${geo}
       <dt>ROUTE</dt><dd>${dedupeLabels(nm).filter(Boolean).join(" → ")}</dd>
       <dt>PKG ETD</dt><dd>${fmtDT(s.polDep)}</dd>
       <dt>SIN ETA</dt><dd>${fmtDT(s.tsArr)}</dd>
       <dt>SIN ETD</dt><dd>${fmtDT(s.tsDep)}</dd>
+      ${(()=>{const t=tsDwell(s);return t?`<dt>T/S DWELL</dt><dd>${t.plan!==null?`plan ${t.plan}d → `:""}<b>${t.cur}d</b> <span class="dim">(${t.actual?"actual":"scheduled"})</span>${t.diff!==null&&t.diff!==0?` <span class="${t.diff>0?"warn":""}">${t.diff>0?"+":""}${t.diff}d</span>`:""}</dd>`:"";})()}
       <dt>LA ETB</dt><dd>${fmtDT(s.eta)}</dd>
       <dt>DEST ETA</dt><dd>${fmtDT(s.destEta)}</dd>
       <dt>FEEDER</dt><dd>${s.feeder||"— (direct)"}</dd>
@@ -991,6 +1039,7 @@ function buildTable(data){
 /* ---------- LIST 카드 ---------- */
 function cardHTML(s){
   const L2 = locate(s);
+  const pre = s.preShipment ? `<span class="dtag pre">NOT SHIPPED</span>` : "";
   const stale = s.staleItem ? `<span class="tag t-stale" title="이 건은 최근 조회에 실패해 이전 값이 표시됩니다">STALE</span>` : "";
 
   let railHTML;
@@ -1017,7 +1066,7 @@ function cardHTML(s){
   return `<article class="card${s.staleItem?" is-stale":""}">
     <div class="card-hd"><span class="bkg">${s.booking}</span>
       <span class="vsl">${s.vessel} ${s.voyage}</span>
-      <span class="tag ${cls}">${phase}</span>${stale}${rolloverHTML(s)}${delayHTML(s)}</div>
+      <span class="tag ${cls}">${phase}</span>${stale}${pre}${rolloverHTML(s)}${delayHTML(s)}</div>
     <div class="card-bd">
       ${railHTML}
       <div class="grid">
@@ -1386,6 +1435,47 @@ async function clearPO(){
   st.textContent = out.ok ? "Cleared on server." : ("Not cleared — " + out.msg);
 }
 
+
+/* ---------- T/S 체류일 ----------
+   계획: 처음 관측했을 때의 T/S 도착→출항 (이력 first 기록)
+   실제/현재: 지금 스케줄 기준. 본선 출항 이벤트가 있으면 실적으로 확정된 값이다. */
+function tsDwell(s){
+  if(!s.tsArr || !s.tsDep) return null;
+  const D = (a,b)=> (new Date(b+"Z") - new Date(a+"Z"))/86400000;
+  const cur = D(s.tsArr, s.tsDep);
+  if(!isFinite(cur)) return null;
+
+  const first = (HIST[s.booking]||[]).find(e=>e.first);
+  const plan = (first && first.tsArr && first.tsDep) ? D(first.tsArr, first.tsDep) : null;
+
+  /* 본선이 이미 T/S를 떠났으면 실적, 아니면 예정 */
+  const departed = (s.events||[]).some(e=>{
+    const m=(e.mode||"").toUpperCase(), st=(e.status||"").toUpperCase();
+    return s.vessel && m.includes(s.vessel.toUpperCase()) && st.includes("DEPARTURE");
+  });
+  return {
+    cur: Math.round(cur*10)/10,
+    plan: plan===null ? null : Math.round(plan*10)/10,
+    diff: plan===null ? null : Math.round((cur-plan)*10)/10,
+    actual: departed
+  };
+}
+function tsDwellHTML(s){
+  const t = tsDwell(s);
+  if(!t) return "";
+  const lbl = t.actual ? "actual" : "scheduled";
+  let extra = "";
+  if(t.plan!==null && t.diff!==0){
+    const cls = t.diff>0 ? "late" : "early";
+    extra = ` <span class="dtag ${cls}">${t.diff>0?"+":""}${t.diff}d vs plan</span>`;
+  }else if(t.plan!==null){
+    extra = ` <span class="dtag early">on plan</span>`;
+  }
+  const planTxt = t.plan!==null ? `plan ${t.plan}d → ` : "";
+  return `<div class="tsdwell">T/S DWELL <b>${planTxt}${t.cur}d</b> <i>(${lbl})</i>${extra}
+    <span class="dim">${fmtDT(s.tsArr)} → ${fmtDT(s.tsDep)}</span></div>`;
+}
+
 /* ---------- PO 팝업 ---------- */
 let poSelected = null;
 function cssVar(name, fb){
@@ -1442,7 +1532,7 @@ function showPO(s,i){
   p.innerHTML = `<button class="close" id="poclose" title="Close">✕</button>
      <h3>${s.vessel} ${s.voyage}</h3>
      <div class="sb">${s.booking} · ${list.length} container(s)</div>
-     ${eta}${cells}${note}<p class="hintclose">TAP ANYWHERE TO CLOSE · ESC</p>`;
+     ${tsDwellHTML(s)}${eta}${cells}${note}<p class="hintclose">TAP ANYWHERE TO CLOSE · ESC</p>`;
   p.hidden=false;
   document.querySelector('.tablerow').classList.add('open');
   document.getElementById('poclose').addEventListener('click',e=>{e.stopPropagation();closePO();});
