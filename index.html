@@ -76,6 +76,9 @@ html[data-theme="light"] .tile:hover{background:#F0F5F8;border-color:#0F2430}
 }
 
 #ship{display:none;max-width:1180px;margin:0 auto;padding:26px 22px 90px}
+#ship-title{cursor:pointer}
+#ship-title:hover,#q-title:hover{color:var(--sail)}
+#ship-title.busy{opacity:.55}
 .topbar{display:flex;align-items:center;gap:14px;padding-bottom:14px;border-bottom:1px solid var(--line-soft);flex-wrap:wrap}
 .btn{background:none;border:1px solid var(--line);padding:7px 14px;font-family:'Barlow Condensed';
   font-size:13px;letter-spacing:.16em;color:var(--fog)}
@@ -639,7 +642,7 @@ html[data-theme="light"] #qview td.near{background:rgba(154,107,18,.08)}
 <section id="ship">
   <div class="topbar">
     <button class="btn" id="back">← MENU</button>
-    <h1>SHIPMENT STATUS</h1>
+    <h1 id="ship-title" title="Click to reload data">SHIPMENT STATUS</h1>
     <div class="stamp" id="stamp"></div>
   </div>
   <div class="addbar">
@@ -1327,7 +1330,9 @@ function addBooking(){
           render(data);
           el.innerHTML=`<b>${bkg}</b> added — ${res.vessel||"?"} ${res.voyage||""}.`
             + (res.preShipment? " Not shipped yet." : "")
-            + ` It will refresh automatically from the next scheduled update.`;
+            + (res.savedToData
+                ? ` Saved — it stays on screen and refreshes on the next scheduled update.`
+                : ` It will appear from the next scheduled update.`);
         })
         .catch(()=>{
           if(CUR){ CUR.shipments.push(res); render(CUR); }
@@ -1688,6 +1693,31 @@ function render(data){
   safe(()=>buildOverview(data.shipments),"Overview");
   safe(()=>renderPOTable(),"PO table");
 }
+/* 제목 클릭 = 데이터 다시 받기.
+   location.reload()를 쓰면 비밀번호 화면으로 되돌아가므로 데이터만 갱신한다. */
+let refreshing = false;
+function refreshData(){
+  if(refreshing) return;
+  refreshing = true;
+  const t = document.getElementById("ship-title");
+  if(t) t.classList.add("busy");
+  const el = document.getElementById("rstatus");
+  if(el) el.innerHTML = "Reloading…";
+
+  Promise.all([
+    loadPO(), loadHistory(),
+    fetch(source(),{cache:"no-store"}).then(r=>r.ok?r.json():Promise.reject())
+  ]).then(([,,data])=>{
+    render(data);
+    if(el) el.innerHTML = `Reloaded — ${toKST(data.updated)}`;
+  }).catch(e=>{
+    if(el) el.innerHTML = `Reload failed — ${e.message||"no response"}`;
+  }).finally(()=>{
+    refreshing = false;
+    if(t) t.classList.remove("busy");
+  });
+}
+
 function setView(v){
   document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('on',t.dataset.view===v));
   document.getElementById('mapwrap').style.display = v==='map'?'grid':'none';
@@ -1709,9 +1739,15 @@ document.querySelectorAll(".tile").forEach(t=>t.addEventListener("click",()=>{
   show("ship"); setTimeout(()=>{ map&&map.invalidateSize(); document.getElementById('ship').scrollIntoView({block:'start'}); },80);
 }));
 document.getElementById("back").addEventListener("click",()=>show("menu"));
+document.getElementById("ship-title").addEventListener("click",refreshData);
 document.addEventListener("DOMContentLoaded",()=>{
   const qb=document.getElementById("qback");
   if(qb) qb.addEventListener("click",()=>show("menu"));
+  const qt=document.getElementById("q-title");
+  if(qt) qt.addEventListener("click",()=>{
+    if(typeof repaintCharts==="function") repaintCharts();
+    window.scrollTo(0,0);
+  });
 });
 document.getElementById("posave").addEventListener("click",applyPO);
 document.getElementById("poclear").addEventListener("click",clearPO);
@@ -1770,7 +1806,7 @@ document.getElementById("pw").focus();
  padding:9px 16px;background:#07141C;border-bottom:1px solid #1E3A4C;
  font-family:'Barlow Condensed',system-ui,sans-serif;letter-spacing:.14em;font-size:13px">
  <button id="qback" style="background:none;color:#8AA4B5;border:1px solid #1E3A4C;padding:5px 12px;cursor:pointer;font:inherit">← MENU</button>
- <span style="color:#DCE8EF">QUALITY ANALYSIS</span>
+ <span id="q-title" style="color:var(--paper);cursor:pointer" title="Click to redraw">QUALITY ANALYSIS</span>
  <span style="margin-left:auto;color:#3FD0A6;font-family:'IBM Plex Mono',monospace;font-size:11px">KOSSAN OQC</span>
 </div>
 <section id="qview">
