@@ -334,344 +334,6 @@ dd .dim{opacity:.65}
   #qview .wrap,#qview .container,#qview main,#qview section{padding-left:10px;padding-right:10px}
 }
 
-
-/* ================= PO / CONTAINER 매핑 =================
-   HMM에는 없는 사내 정보라 브라우저(localStorage)에 저장한다.
-   스프레드시트에서 두 열을 그대로 복사해 붙여넣으면 되고,
-   부킹번호 칸이 비어 있으면 위 행의 값을 이어받는다(fill-down). */
-const PO_KEY  = "oqc_po_map_v1";     // 서버 응답 캐시 (오프라인 대비)
-const KEY_KEY = "oqc_refresh_key";   // 저장용 키를 이 브라우저에 기억
-const PO_URL  = API.replace(/\/data$/,"") + "/po";
-const HIST_URL = API.replace(/\/data$/,"") + "/history";
-let HIST = {};
-
-/* 스케줄 변경 이력 (본선/항차/T-S 출항/ETB 변동) */
-async function loadHistory(){
-  try{
-    const r = await fetch(HIST_URL,{cache:"no-store"});
-    HIST = r.ok ? (await r.json() || {}) : {};
-  }catch(_){ HIST = {}; }
-  return HIST;
-}
-let PO = {}, POETA = {}, PHOTOS = {};
-
-/* 서버(Worker KV)에서 읽는다. 실패하면 마지막 캐시를 쓴다. */
-async function loadPO(){
-  try{
-    const r = await fetch(PO_URL, {cache:"no-store"});
-    if(!r.ok) throw new Error(r.status);
-    const j = await r.json() || {};
-    PO     = j.po  || j;          // 구버전 응답(부킹 키가 최상위)도 수용
-    POETA  = j.eta || {};
-    PHOTOS = j.photos || {};
-    try{ localStorage.setItem(PO_KEY, JSON.stringify({po:PO,eta:POETA,photos:PHOTOS})); }catch(_){}
-  }catch(_){
-    try{
-      const c = JSON.parse(localStorage.getItem(PO_KEY) || "{}") || {};
-      PO = c.po || c; POETA = c.eta || {}; PHOTOS = c.photos || {};
-    }catch(__){ PO = {}; POETA = {}; PHOTOS = {}; }
-  }
-  return PO;
-}
-
-function getKey(){
-  let k = "";
-  try{ k = localStorage.getItem(KEY_KEY) || ""; }catch(_){}
-  if(!k){
-    k = (prompt("Enter the refresh key to save PO mapping to the server:")||"").trim();
-    if(k){ try{ localStorage.setItem(KEY_KEY,k); }catch(_){} }
-  }
-  return k;
-}
-function forgetKey(){ try{ localStorage.removeItem(KEY_KEY); }catch(_){} }
-
-/* 서버에 저장. mode:"replace"면 전체 교체 */
-async function savePO(patch, mode, etaPatch, photoPatch){
-  const key = getKey();
-  if(!key) return {ok:false, msg:"No key entered — nothing was saved."};
-  const r = await fetch(PO_URL, {
-    method:"POST",
-    headers:{"Content-Type":"application/json","X-Refresh-Key":key},
-    body: JSON.stringify({po:patch, eta:etaPatch||{}, photos:photoPatch||{}, mode:mode||"merge"})
-  });
-  const res = await r.json().catch(()=>({}));
-  if(!r.ok){
-    if(r.status===401) forgetKey();
-    return {ok:false, msg: res.error || ("Save failed ("+r.status+")")};
-  }
-  PO = res.po || {}; POETA = res.eta || {}; PHOTOS = res.photos || {};
-  try{ localStorage.setItem(PO_KEY, JSON.stringify({po:PO,eta:POETA,photos:PHOTOS})); }catch(_){}
-  return {ok:true, res};
-}
-
-/* 붙여넣은 텍스트 → { 부킹번호: [PO 문자열, ...] } */
-function parsePO(text){
-  const map = {}, eta = {}, photos = {}, bad = [];
-  let cur = null, n = 0;
-  /* 날짜 정규화: 2026-08-02 / 2026/8/2 / 2026.08.02 → 2026-08-02 */
-  const normDate = v => {
-    const d = String(v||"").trim().replace(/[./]/g,"-");
-    if(!/^\d{4}-\d{1,2}-\d{1,2}$/.test(d)) return null;
-    const [y,m,dd] = d.split("-");
-    return `${y}-${String(m).padStart(2,"0")}-${String(dd).padStart(2,"0")}`;
-  };
-
-  text.split(/\r?\n/).forEach((line,ln)=>{
-    if(!line.trim()) return;
-
-    /* 부킹번호 + pCloud 상위 폴더 링크 → 그 부킹의 사진 폴더 등록
-       예: KULM40326600 https://u.pcloud.link/publink/show?code=XXXX
-       (상위 폴더 안에 FNG-0310-07-12 같은 컨테이너별 하위 폴더가 들어 있다) */
-    const ph = line.trim().match(/^(\S+)[\s,\t]+(https?:\/\/\S*pcloud\S*)$/i);
-    if(ph){
-      const code = (ph[2].match(/[?&]code=([A-Za-z0-9_-]+)/)||[])[1];
-      if(code) photos[ph[1].trim().toUpperCase()] = code;
-      return;
-    }
-
-    /* 부킹번호로 시작하는 줄은 "부킹 + 원 스케줄"만 등록한다 (PO 항목 없이도 가능).
-       예: KULM92606700 2026-08-02 */
-    const solo = line.trim().match(/^([A-Z]{4}\d{8})[\s,\t]+(\S+)?\s*$/i);
-    if(solo){
-      cur = solo[1].toUpperCase();
-      const d = normDate(solo[2]);
-      if(d) eta[cur] = d;
-      if(!map[cur]) map[cur] = [];      // 목록에 등록만 하고 PO는 비워둔다
-      return;
-    }
-    /* 탭 우선, 없으면 2칸 이상 공백으로 분리 */
-    const parts = line.includes("\t") ? line.split("\t") : line.split(/\s{2,}/);
-    const left  = (parts[0]||"").trim();
-    const right = (parts[1]||"").trim().toUpperCase();
-    const third = (parts[2]||"").trim();
-    if(right){
-      if(!/^[A-Z]{4}\d{8}$/.test(right)){ bad.push(ln+1); return; }
-      cur = right;
-      /* 3열이 있으면 그 부킹의 원 스케줄 도착일로 쓴다 (YYYY-MM-DD) */
-      const d = normDate(third);
-      if(d) eta[cur] = d;
-    }
-    if(!left) return;
-    if(!cur){ bad.push(ln+1); return; }   // 첫 행에 부킹번호가 없으면 귀속 불가
-    (map[cur] = map[cur] || []).push(left);
-    n++;
-  });
-  return { map, eta, photos, bad, n };
-}
-
-/* 카드/사이드바에 넣을 한 줄 요약 — "FNG031002 ×8, FNG031003 ×6 (14)" */
-/* 원 스케줄 대비 지연일 — 없으면 null */
-/* 원 스케줄 대비 지연 임계값 — Worker와 같은 값을 유지해야 한다 */
-const DELAY_WATCH_D = 4;
-const DELAY_ALERT_D = 7;
-function poDelay(s){
-  const orig = s.planEta || POETA[s.booking] || s.poEta;
-  if(!orig || !s.eta) return null;
-  const gap = (typeof s.delayDays === "number")
-    ? s.delayDays
-    : Math.round((new Date(s.eta.slice(0,10)) - new Date(orig))/86400000);
-  const level = s.alert
-    || (gap>=DELAY_ALERT_D ? "alert" : gap>=DELAY_WATCH_D ? "watch" : "ok");
-  return {gap, orig, level};
-}
-function delayHTML(s){
-  const d = poDelay(s);
-  if(!d) return "";
-  const cls = d.level==="alert" ? "late" : d.level==="watch" ? "watch" : "early";
-  const txt = d.gap>0 ? `${d.gap}d behind` : d.gap<0 ? `${-d.gap}d ahead` : "on plan";
-  return `<span class="dtag ${cls}" title="Original plan ${d.orig} · ${d.level.toUpperCase()}">${txt}</span>`;
-}
-/* 롤오버: 본선 예정 출항이 지났는데 선적 이벤트가 없는 상태 */
-function rolloverHTML(s){
-  if(!s.rollover) return "";
-  return `<span class="dtag roll" title="${s.rolloverNote||""}">ROLLOVER ${s.rolloverDays||0}d</span>`;
-}
-/* 최근 스케줄 변경 (이번 수집에서 바뀐 항목) */
-function changeHTML(s){
-  if(!Array.isArray(s.justChanged) || !s.justChanged.length) return "";
-  const t = s.justChanged.map(c=>`${c.label} ${c.from} → ${c.to}`).join(" / ");
-  return `<p class="note warn">Schedule changed — ${t}</p>`;
-}
-function poSummary(booking){
-  const list = PO[booking];
-  if(!list || !list.length) return "";
-  const lots = {};
-  list.forEach(v=>{ const m=v.match(/^(\S+)/); const k=m?m[1]:v; lots[k]=(lots[k]||0)+1; });
-  const parts = Object.keys(lots).map(k=>`${k} ×${lots[k]}`);
-  return `${parts.join(", ")} (${list.length})`;
-}
-
-function renderPOTable(){
-  const keys = Object.keys(PO).sort();
-  const el = document.getElementById("potable");
-  if(!el) return;
-  if(!keys.length){ el.innerHTML=""; return; }
-  el.innerHTML = `<table><thead><tr><th>BOOKING</th><th>LOTS</th><th>CONTAINERS</th></tr></thead><tbody>`
-    + keys.map(k=>{
-        const known = CUR && CUR.shipments.some(s=>s.booking===k);
-        return `<tr><td class="b">${k}${known?"":' <span class="l">(not tracked)</span>'}</td>`
-             + `<td class="l">${poSummary(k)}</td><td>${PO[k].length}</td></tr>`;
-      }).join("")
-    + `</tbody></table>`;
-}
-
-async function applyPO(){
-  const st = document.getElementById("postatus");
-  const btn = document.getElementById("posave");
-  const txt = document.getElementById("poin").value;
-  if(!txt.trim()){ st.textContent="Nothing to apply."; return; }
-  const { map, eta, photos, bad, n } = parsePO(txt);
-  const keys = Object.keys(map);
-  if(!keys.length && !Object.keys(photos).length){
-    st.innerHTML = `No rows parsed. The first line must carry a booking number.`;
-    return;
-  }
-  btn.disabled = true; st.textContent = "Saving to server…";
-  const out = await savePO(map, "merge", eta, photos);
-  btn.disabled = false;
-  renderPOTable();
-  if(CUR) render(CUR);
-  const ph = Object.keys(photos);
-  const parts = [];
-  if(n) parts.push(`${n} PO row(s) → ${keys.length} booking(s)`);
-  if(Object.keys(eta).length) parts.push(`${Object.keys(eta).length} original schedule date(s)`);
-  if(ph.length) parts.push(`${ph.length} photo folder(s): ${ph.join(", ")}`);
-  st.innerHTML = out.ok
-    ? (parts.length ? parts.join(" · ") : "Nothing recognised")
-      + ` — saved to server, visible on any device.`
-      + (bad.length? ` Skipped line(s): ${bad.slice(0,8).join(", ")}${bad.length>8?"…":""}.` : "")
-    : `Not saved — ${out.msg}`;
-}
-
-async function clearPO(){
-  if(!confirm("Remove ALL PO / container mappings from the server? This affects every device.")) return;
-  const st = document.getElementById("postatus");
-  st.textContent = "Clearing…";
-  const out = await savePO({}, "replace", {}, {});
-  renderPOTable();
-  if(CUR) render(CUR);
-  st.textContent = out.ok ? "Cleared on server." : ("Not cleared — " + out.msg);
-}
-
-
-/* ---------- T/S 체류일 ----------
-   계획: 처음 관측했을 때의 T/S 도착→출항 (이력 first 기록)
-   실제/현재: 지금 스케줄 기준. 본선 출항 이벤트가 있으면 실적으로 확정된 값이다. */
-function tsDwell(s){
-  if(!s.tsArr || !s.tsDep) return null;
-  const D = (a,b)=> (new Date(b+"Z") - new Date(a+"Z"))/86400000;
-  const cur = D(s.tsArr, s.tsDep);
-  if(!isFinite(cur)) return null;
-
-  const first = (HIST[s.booking]||[]).find(e=>e.first);
-  const plan = (first && first.tsArr && first.tsDep) ? D(first.tsArr, first.tsDep) : null;
-
-  /* 본선이 이미 T/S를 떠났으면 실적, 아니면 예정 */
-  const departed = (s.events||[]).some(e=>{
-    const m=(e.mode||"").toUpperCase(), st=(e.status||"").toUpperCase();
-    return s.vessel && m.includes(s.vessel.toUpperCase()) && st.includes("DEPARTURE");
-  });
-  return {
-    cur: Math.round(cur*10)/10,
-    plan: plan===null ? null : Math.round(plan*10)/10,
-    diff: plan===null ? null : Math.round((cur-plan)*10)/10,
-    actual: departed
-  };
-}
-function tsDwellHTML(s){
-  const t = tsDwell(s);
-  if(!t) return "";
-  const lbl = t.actual ? "actual" : "scheduled";
-  let extra = "";
-  if(t.plan!==null && t.diff!==0){
-    const cls = t.diff>0 ? "late" : "early";
-    extra = ` <span class="dtag ${cls}">${t.diff>0?"+":""}${t.diff}d vs plan</span>`;
-  }else if(t.plan!==null){
-    extra = ` <span class="dtag early">on plan</span>`;
-  }
-  const planTxt = t.plan!==null ? `plan ${t.plan}d → ` : "";
-  return `<div class="tsdwell">T/S DWELL <b>${planTxt}${t.cur}d</b> <i>(${lbl})</i>${extra}
-    <span class="dim">${fmtDT(s.tsArr)} → ${fmtDT(s.tsDep)}</span></div>`;
-}
-
-
-/* ---------- 로트 사진 (pCloud 공개 폴더) ----------
-   showpublink 로 폴더 목록을 받고 getpubthumb 로 썸네일을 띄운다. 5장씩 넘긴다. */
-const PC_API  = "https://api.pcloud.com";
-const PC_PROXY = API.replace(/\/data$/,"") + "/pcloud";
-const pcCache = {};
-/* 브라우저에서 api.pcloud.com 을 직접 부르면 CORS로 막히므로 워커를 경유한다 */
-async function pcList(code, folderid){
-  const key = code + "|" + (folderid||"");
-  if(pcCache[key]) return pcCache[key];
-  const u = `${PC_PROXY}?code=${encodeURIComponent(code)}` + (folderid?`&folderid=${folderid}`:"");
-  const r = await fetch(u,{cache:"no-store"});
-  const j = await r.json();
-  if(j.error) throw new Error(j.error);
-  pcCache[key] = j;
-  return j;
-}
-const pcThumb = (code,id,size) => `${PC_API}/getpubthumb?code=${encodeURIComponent(code)}&fileid=${id}&size=${size||"240x320"}&crop=1&type=jpg`;
-
-/* PO 항목 "FNG031007 (Container 12 of 18)" → 폴더명 "FNG-0310-07-12"
-   상위 폴더 하위에 이 이름의 폴더가 있고 그 안에 해당 컨테이너 사진이 들어 있다. */
-function poFolderName(poText){
-  const m = String(poText).match(/^([A-Z]+)(\d+)\s*\(\s*Container\s*(\d+)\s*of/i);
-  if(!m) return null;
-  const digits = m[2];                       // 031007
-  if(digits.length < 6) return null;
-  const a = digits.slice(0,4), b = digits.slice(4);   // 0310 / 07
-  const n = String(m[3]).padStart(2,"0");
-  return `${m[1].toUpperCase()}-${a}-${b}-${n}`;      // FNG-0310-07-12
-}
-
-const PAGE_N = 5;
-
-/* 상위 폴더에서 하위 폴더 목록을 받아 이름으로 folderid를 찾는다 */
-async function pcFolderId(code, folderName){
-  const top = await pcList(code);
-  const hit = (top.folders||[]).find(f =>
-    String(f.name).trim().toUpperCase() === folderName.toUpperCase());
-  return hit ? hit.folderid : null;
-}
-
-function renderGallery(el, label, code, folderName){
-  const head = txt => `<div class="gal-h"><b>${label}</b> ${txt}</div>`;
-  if(!code){ el.innerHTML = head(`<span class="dim">no photo link for this booking</span>`); return; }
-  el.innerHTML = head(`<span class="dim">loading…</span>`);
-
-  pcFolderId(code, folderName).then(fid=>{
-    if(!fid) throw new Error(`folder "${folderName}" not found`);
-    return pcList(code, fid);
-  }).then(data=>{
-    const files = data.files||[];
-    if(!files.length){ el.innerHTML = head(`<span class="dim">no images</span>`); return; }
-    let page = 0;
-    const pages = Math.ceil(files.length/PAGE_N);
-    const draw = () => {
-      const slice = files.slice(page*PAGE_N,(page+1)*PAGE_N);
-      el.innerHTML = head(
-          `<span class="dim">${folderName} · ${files.length} photos · ${page+1}/${pages}</span>
-           <span class="gal-nav">
-             <button class="gnav" data-d="-1" ${page===0?"disabled":""}>‹</button>
-             <button class="gnav" data-d="1" ${page>=pages-1?"disabled":""}>›</button>
-           </span>`)
-        + `<div class="gal">${slice.map(f=>`
-          <a class="gcell" href="${pcThumb(code,f.fileid,"1200x1600")}" target="_blank" rel="noopener"
-             title="${(f.name||"").replace(/"/g,"")}">
-            <img loading="lazy" src="${pcThumb(code,f.fileid,"240x320")}" alt="${(f.name||"").replace(/"/g,"")}">
-            <span class="gname">${f.name||""}</span></a>`).join("")}</div>`;
-      el.querySelectorAll(".gnav").forEach(b=>b.addEventListener("click",e=>{
-        e.stopPropagation(); page = Math.max(0,Math.min(pages-1,page+ +b.dataset.d)); draw();
-      }));
-    };
-    draw();
-  }).catch(e=>{
-    el.innerHTML = head(`<span class="warn">photos unavailable — ${e.message||e}</span>`);
-  });
-}
-
-/* ---------- PO 팝업 ---------- */
 #vtable{margin-top:0}
 .tablerow{grid-column:1/-1;display:grid;grid-template-columns:1fr;gap:12px;align-items:start}
 .tablerow.open{grid-template-columns:1fr}
@@ -1786,32 +1448,43 @@ async function pcList(code, folderid){
 }
 const pcThumb = (code,id,size) => `${PC_API}/getpubthumb?code=${encodeURIComponent(code)}&fileid=${id}&size=${size||"240x320"}&crop=1&type=jpg`;
 
-/* 부킹에 걸린 로트 전체 — 사진 링크 유무와 컨테이너 수를 함께 준다 */
-function bookingLots(booking){
-  const list = PO[booking]||[];
-  const cnt = {};
-  list.forEach(v=>{
-    const m = String(v).match(/^(\S+)/);
-    if(!m) return;
-    const k = m[1].toUpperCase();
-    cnt[k] = (cnt[k]||0) + 1;
-  });
-  return Object.keys(cnt).sort().map(lot=>({ lot, n: cnt[lot], code: PHOTOS[lot] || null }));
+/* PO 항목 "FNG031007 (Container 12 of 18)" → 폴더명 "FNG-0310-07-12"
+   상위 폴더 아래에 이 이름의 하위 폴더가 있고 그 안에 해당 컨테이너 사진이 들어 있다. */
+function poFolderName(poText){
+  const m = String(poText).match(/^([A-Z]+)(\d+)\s*\(\s*Container\s*(\d+)\s*of/i);
+  if(!m) return null;
+  const d = m[2];
+  if(d.length < 6) return null;
+  const n = String(m[3]).padStart(2,"0");
+  return `${m[1].toUpperCase()}-${d.slice(0,4)}-${d.slice(4)}-${n}`;
 }
 
 const PAGE_N = 5;
-function renderGallery(el, lot, code, nCntr){
-  const head = txt => `<div class="gal-h"><b>${lot}</b> <span class="dim">${nCntr} cntr</span> ${txt}</div>`;
-  if(!code){ el.innerHTML = head(`<span class="dim">no photo link registered</span>`); return; }
-  el.innerHTML = head(`<span class="dim">loading photos…</span>`);
-  pcList(code).then(files=>{
-    if(!files.length){ el.innerHTML = head(`<span class="dim">no images in folder</span>`); return; }
+/* 상위 폴더 목록에서 이름으로 하위 folderid를 찾는다 */
+async function pcFolderId(code, folderName){
+  const top = await pcList(code);
+  const hit = (top.folders||[]).find(f =>
+    String(f.name).trim().toUpperCase() === folderName.toUpperCase());
+  return hit ? hit.folderid : null;
+}
+
+function renderGallery(el, label, code, folderName){
+  const head = txt => `<div class="gal-h"><b>${label}</b> ${txt}</div>`;
+  if(!code){ el.innerHTML = head(`<span class="dim">no photo link for this booking</span>`); return; }
+  el.innerHTML = head(`<span class="dim">loading…</span>`);
+
+  pcFolderId(code, folderName).then(fid=>{
+    if(!fid) throw new Error(`folder "${folderName}" not found`);
+    return pcList(code, fid);
+  }).then(data=>{
+    const files = data.files||[];
+    if(!files.length){ el.innerHTML = head(`<span class="dim">no images</span>`); return; }
     let page = 0;
     const pages = Math.ceil(files.length/PAGE_N);
     const draw = () => {
       const slice = files.slice(page*PAGE_N,(page+1)*PAGE_N);
       el.innerHTML = head(
-          `<span class="dim">${files.length} photos · ${page+1}/${pages}</span>
+          `<span class="dim">${folderName} · ${files.length} photos · ${page+1}/${pages}</span>
            <span class="gal-nav">
              <button class="gnav" data-d="-1" ${page===0?"disabled":""}>‹</button>
              <button class="gnav" data-d="1" ${page>=pages-1?"disabled":""}>›</button>
