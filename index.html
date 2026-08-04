@@ -240,8 +240,11 @@ dd .dim{opacity:.65}
 .lane div{font-family:'IBM Plex Mono';font-size:12px;color:var(--fog)}
 .lane b{display:block;font-family:'Barlow Condensed';font-size:24px;color:var(--paper)}
 
-#mapwrap{display:none;grid-template-columns:1fr 320px;gap:16px;align-items:start}
-@media(max-width:860px){#mapwrap{grid-template-columns:1fr}}
+#mapwrap{display:none;grid-template-columns:1fr 320px;gap:16px;align-items:stretch}
+@media(max-width:860px){
+  #mapwrap{grid-template-columns:1fr}
+  #side{height:auto;max-height:none;overflow:visible}
+}
 #map{height:560px;border:1px solid var(--line);background:var(--well)}
 .leaflet-container{background:var(--well);font-family:'IBM Plex Sans'}
 .leaflet-tooltip.vsl-tip{background:var(--ink);border:1px solid var(--buoy);color:var(--paper);
@@ -249,7 +252,12 @@ dd .dim{opacity:.65}
 .leaflet-tooltip.vsl-tip::before{display:none}
 .leaflet-control-attribution{background:var(--hull)!important;color:var(--fog)!important;font-size:10px!important}
 .leaflet-control-attribution a{color:var(--fog)!important}
-#side{border:1px solid var(--line);background:var(--hull);padding:18px;min-height:200px}
+/* 지도와 같은 높이로 고정하고, 내용이 길면 패널 안에서만 스크롤한다 */
+#side{border:1px solid var(--line);background:var(--hull);padding:18px;
+  height:560px;overflow-y:auto;overscroll-behavior:contain}
+#side::-webkit-scrollbar{width:8px}
+#side::-webkit-scrollbar-thumb{background:var(--line);border-radius:4px}
+#side::-webkit-scrollbar-track{background:transparent}
 #side h3{font-family:'Barlow Condensed';font-size:20px;margin:0 0 4px}
 #side .sb{font-family:'IBM Plex Mono';font-size:12px;color:var(--fog);margin-bottom:14px}
 #side dl{margin:0;display:grid;grid-template-columns:auto 1fr;gap:7px 12px;font-size:12.5px}
@@ -1344,13 +1352,22 @@ function renderPOTable(){
   const el = document.getElementById("potable");
   if(!el) return;
   /* PO·원 스케줄·사진 중 하나라도 등록된 부킹을 모두 보여준다 */
+  /* LIST/MAP 표와 같은 기준(포트클랑 ETD)으로 정렬한다.
+     아직 수집되지 않은 부킹은 ETD를 모르므로 맨 뒤에 부킹번호순으로 둔다. */
+  const etdOf = b => {
+    const sh = CUR && (CUR.shipments||[]).find(x=>x.booking===b);
+    return sh ? (TS(sh.polDep) ?? TS(sh.eta) ?? Infinity) : Infinity;
+  };
   const keys = [...new Set([].concat(
     Object.keys(PO||{}), Object.keys(POETA||{}), Object.keys(PHOTOS||{})
-  ))].sort();
+  ))].sort((a,b)=>{
+    const d = etdOf(a) - etdOf(b);
+    return d || String(a).localeCompare(String(b));
+  });
   if(!keys.length){ el.innerHTML=""; return; }
 
   el.innerHTML = `<table><thead><tr>
-      <th>BOOKING</th><th>LOTS</th><th>CNTR</th><th>PHOTOS</th><th>ORIGINAL ETA</th>
+      <th>BOOKING</th><th>PKG ETD</th><th>LOTS</th><th>CNTR</th><th>PHOTOS</th><th>ORIGINAL ETA</th>
     </tr></thead><tbody>`
     + keys.map(k=>{
         const known  = CUR && CUR.shipments.some(s=>s.booking===k);
@@ -1359,6 +1376,8 @@ function renderPOTable(){
         const eta    = POETA[k] || null;
         return `<tr>
           <td class="b">${k}${known?"":' <span class="l">(not tracked)</span>'}</td>
+          <td class="l">${(()=>{const sh=CUR&&(CUR.shipments||[]).find(x=>x.booking===k);
+                              return sh?fmtDT(sh.polDep):"—";})()}</td>
           <td class="l">${poSummary(k) || "—"}</td>
           <td>${nCntr || "—"}</td>
           <td class="${hasPic?"yes":"no"}">${hasPic?"O":"X"}</td>
