@@ -1228,9 +1228,22 @@ function addBooking(){
     .then(r=>r.json())
     .then(res=>{
       if(res.error) throw new Error(res.error);
-      CUR.shipments.push(res);
-      el.innerHTML=`<b>${bkg}</b> added — ${res.vessel} ${res.voyage}. Reloading view.`;
-      setTimeout(()=>location.reload(),900);
+      el.innerHTML=`<b>${bkg}</b> added — ${res.vessel||"?"} ${res.voyage||""}. Refreshing…`;
+      inp.value="";
+      /* 새로고침하면 비밀번호 화면으로 되돌아가므로, 데이터만 다시 받아 화면을 갱신한다 */
+      return Promise.all([loadHistory(), fetch(source(),{cache:"no-store"})
+                .then(r=>r.ok?r.json():Promise.reject())])
+        .then(([,data])=>{
+          if(!data.shipments.some(x=>x.booking===bkg)) data.shipments.push(res);
+          render(data);
+          el.innerHTML=`<b>${bkg}</b> added — ${res.vessel||"?"} ${res.voyage||""}.`
+            + (res.preShipment? " Not shipped yet." : "")
+            + ` It will refresh automatically from the next scheduled update.`;
+        })
+        .catch(()=>{
+          CUR.shipments.push(res); render(CUR);
+          el.innerHTML=`<b>${bkg}</b> added — shown from the lookup result.`;
+        });
     })
     .catch(e=>{ el.innerHTML=`${bkg} lookup failed — ${e.message||"no response"}`; })
     .finally(()=>{ inp.disabled=false; document.getElementById("addbtn").disabled=false; });
