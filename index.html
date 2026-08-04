@@ -10,7 +10,21 @@
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <style>
 :root{--ink:#07141C;--hull:#0E2331;--line:#1E3A4C;--line-soft:#162C3B;
-  --fog:#8AA4B5;--paper:#DCE8EF;--sail:#3FD0A6;--buoy:#FF6B35;--dock:#F2C14E}
+  --fog:#8AA4B5;--paper:#DCE8EF;--sail:#3FD0A6;--buoy:#FF6B35;--dock:#F2C14E;
+  --well:#06121A;      /* 입력창 등 더 어두운 바탕 */
+  --hair:#12242F;      /* 표 구분선 */
+  --mapbg:#06121A;     /* 지도 배경 */
+  --tiles:dark_all;    /* 참고용 */
+  --onsail:#04231A;    /* --sail 위에 얹는 글자색 */
+  --warn:#F2C14E; --warn-bg:#3A2E12; --warn-line:#5C4A1E}
+
+/* 라이트 테마 — 같은 변수 이름을 덮어써서 전체가 따라오게 한다 */
+html[data-theme="light"]{
+  --ink:#F4F7F9; --hull:#FFFFFF; --line:#C9D6DF; --line-soft:#DDE6EC;
+  --fog:#5A7183; --paper:#0F2430; --sail:#0F9C77; --buoy:#D2521B; --dock:#A9791A;
+  --well:#EEF3F6; --hair:#E2EAEF; --mapbg:#E8EEF2; --onsail:#FFFFFF;
+  --warn:#8A6410; --warn-bg:#FBF1D8; --warn-line:#E4CF98}
+html[data-theme="light"] img,html[data-theme="light"] .leaflet-tile{filter:none}
 *{box-sizing:border-box} html,body{margin:0;padding:0}
 body{background:var(--ink);color:var(--paper);font-family:'IBM Plex Sans',system-ui,sans-serif;-webkit-font-smoothing:antialiased}
 button{font:inherit;color:inherit;cursor:pointer}
@@ -21,9 +35,20 @@ button{font:inherit;color:inherit;cursor:pointer}
 .gate-mark{font-family:'Barlow Condensed';font-size:13px;letter-spacing:.42em;color:var(--fog);margin-bottom:28px}
 #pw{width:100%;padding:13px 14px;background:var(--hull);border:1px solid var(--line);color:var(--paper);
   font-family:'IBM Plex Mono';font-size:15px;letter-spacing:.25em;text-align:center}
-.gate-btn{width:100%;margin-top:10px;padding:12px;background:var(--sail);color:#04231A;border:0;
+.gate-btn{width:100%;margin-top:10px;padding:12px;background:var(--sail);color:var(--onsail);border:0;
   font-family:'Barlow Condensed';font-size:16px;font-weight:700;letter-spacing:.18em}
 #gate-err{height:18px;margin-top:12px;font-size:12px;color:var(--buoy)}
+#themesw{display:flex;align-items:center;gap:10px;width:100%;margin-top:6px;padding:10px 12px;
+  background:none;border:1px solid var(--line);color:var(--fog);cursor:pointer;
+  font-family:'Barlow Condensed',sans-serif;letter-spacing:.18em;font-size:12px}
+#themesw:hover{border-color:var(--fog);color:var(--paper)}
+#themesw .knob{position:relative;width:34px;height:18px;border:1px solid var(--line);
+  background:var(--well);flex:none;transition:background .18s,border-color .18s}
+#themesw .knob::after{content:"";position:absolute;top:2px;left:2px;width:12px;height:12px;
+  background:var(--fog);transition:transform .18s,background .18s}
+#themesw[aria-checked="true"]{border-color:var(--sail);color:var(--paper)}
+#themesw[aria-checked="true"] .knob{border-color:var(--sail)}
+#themesw[aria-checked="true"] .knob::after{transform:translateX(16px);background:var(--sail)}
 
 #menu{min-height:100vh;display:grid;grid-template-columns:1fr 1fr}
 .tile{border:0;background:none;padding:48px 40px;text-align:left;display:flex;flex-direction:column;
@@ -39,13 +64,25 @@ button{font:inherit;color:inherit;cursor:pointer}
 .tile:hover .go{opacity:1}
 @media(max-width:760px){#menu{grid-template-columns:1fr}.tile{min-height:50vh}.tile+.tile{border-left:0;border-top:1px solid var(--line-soft)}}
 
+/* 라이트 모드에서는 두 메뉴 칸이 흰 배경에 묻히므로 각 칸에 테두리를 준다 */
+html[data-theme="light"] #menu{gap:18px;padding:18px;background:var(--ink)}
+html[data-theme="light"] .tile{
+  border:1.5px solid #1A2C38;background:var(--hull);
+  box-shadow:0 1px 0 rgba(15,36,48,.06)}
+html[data-theme="light"] .tile+.tile{border-left:1.5px solid #1A2C38}
+html[data-theme="light"] .tile:hover{background:#F0F5F8;border-color:#0F2430}
+@media(max-width:760px){
+  html[data-theme="light"] .tile+.tile{border-top:1.5px solid #1A2C38}
+}
+
 #ship{display:none;max-width:1180px;margin:0 auto;padding:26px 22px 90px}
 .topbar{display:flex;align-items:center;gap:14px;padding-bottom:14px;border-bottom:1px solid var(--line-soft);flex-wrap:wrap}
 .btn{background:none;border:1px solid var(--line);padding:7px 14px;font-family:'Barlow Condensed';
   font-size:13px;letter-spacing:.16em;color:var(--fog)}
 .btn:hover{color:var(--paper);border-color:var(--fog)}
 .topbar h1{font-family:'Barlow Condensed';font-weight:700;font-size:26px;letter-spacing:.06em;margin:0;flex:1}
-.stamp{font-family:'IBM Plex Mono';font-size:11px;color:var(--fog)}
+.stamp{font-family:'IBM Plex Mono';font-size:11px;color:var(--fog);line-height:1.7}
+.stamp .dim2{color:var(--fog);opacity:.62}
 #overview{border:1px solid var(--line);background:var(--hull);padding:22px 24px 18px;margin-bottom:16px}
 #overview h2{font-family:'Barlow Condensed';font-size:19px;letter-spacing:.06em;margin:0 0 4px}
 #overview .sub{font-family:'IBM Plex Mono';font-size:11px;color:var(--fog);margin-bottom:26px}
@@ -78,6 +115,36 @@ button{font:inherit;color:inherit;cursor:pointer}
   font-family:'IBM Plex Mono';font-size:13px;letter-spacing:.08em;padding:8px 12px;width:190px}
 .addbar input::placeholder{color:#3E586A}
 .addbar input:disabled{opacity:.5}
+#pobox{margin-top:14px;border:1px solid var(--line);background:var(--hull);padding:0 14px}
+#pobox summary{cursor:pointer;padding:11px 0;font-family:'Barlow Condensed',sans-serif;
+  letter-spacing:.12em;font-size:12.5px;color:var(--fog)}
+#pobox summary:hover{color:var(--paper)}
+#pobox[open] summary{border-bottom:1px solid var(--line);margin-bottom:12px}
+.pohelp{margin:0 0 10px;font-size:12px;line-height:1.7;color:var(--fog)}
+#poin{width:100%;min-height:120px;box-sizing:border-box;background:var(--well);color:var(--paper);
+  border:1px solid var(--line);padding:10px;font-family:'IBM Plex Mono',monospace;font-size:11.5px;
+  line-height:1.6;resize:vertical}
+#poin:focus{outline:none;border-color:var(--buoy)}
+.porow{display:flex;align-items:center;gap:10px;margin:10px 0 14px;flex-wrap:wrap}
+.btn.ghost{background:none}
+#postatus{font-size:12px;color:var(--fog)}
+#potable{margin-bottom:14px}
+#potable table{width:100%;border-collapse:collapse;font-size:11.5px}
+#potable th{text-align:left;font-family:'Barlow Condensed',sans-serif;letter-spacing:.1em;
+  font-size:11px;color:var(--fog);border-bottom:1px solid var(--line);padding:6px 8px}
+#potable td{padding:6px 8px;border-bottom:1px solid var(--hair);font-family:'IBM Plex Mono',monospace}
+#potable td.b{color:var(--buoy)}
+#potable td.l{color:var(--fog)}
+.evtl{margin-top:14px;border-top:1px solid var(--line);padding-top:10px}
+.evtl .ev{display:grid;grid-template-columns:64px 1fr auto;gap:8px;padding:5px 0;
+  font-size:11px;color:var(--fog);border-bottom:1px solid var(--hair)}
+.evtl .ev.now{color:var(--paper)}
+.evtl .et{font-family:'IBM Plex Mono',monospace}
+.evtl .el{font-family:'IBM Plex Mono',monospace;font-size:10px;opacity:.8}
+.warn{color:var(--warn)}
+.note.dim{opacity:.6;font-size:11px}
+.card.is-stale{opacity:.78}
+.tag.t-stale{background:var(--warn-bg);color:var(--warn);border-color:var(--warn-line)}
 #rstatus{margin-top:12px;font-size:12.5px;line-height:1.7;color:var(--fog)}
 #rstatus b{color:var(--buoy);font-family:'IBM Plex Mono';font-size:12px}
 #rstatus ul{margin:6px 0 0;padding-left:18px}
@@ -93,13 +160,13 @@ button{font:inherit;color:inherit;cursor:pointer}
 
 #mapwrap{display:none;grid-template-columns:1fr 320px;gap:16px;align-items:start}
 @media(max-width:860px){#mapwrap{grid-template-columns:1fr}}
-#map{height:560px;border:1px solid var(--line);background:#06121A}
-.leaflet-container{background:#06121A;font-family:'IBM Plex Sans'}
+#map{height:560px;border:1px solid var(--line);background:var(--well)}
+.leaflet-container{background:var(--well);font-family:'IBM Plex Sans'}
 .leaflet-tooltip.vsl-tip{background:var(--ink);border:1px solid var(--buoy);color:var(--paper);
   font-family:'Barlow Condensed';font-size:14px;letter-spacing:.06em;padding:4px 9px;box-shadow:none}
 .leaflet-tooltip.vsl-tip::before{display:none}
-.leaflet-control-attribution{background:rgba(7,20,28,.8)!important;color:#5E7A8C!important;font-size:10px!important}
-.leaflet-control-attribution a{color:#7C93A6!important}
+.leaflet-control-attribution{background:var(--hull)!important;color:var(--fog)!important;font-size:10px!important}
+.leaflet-control-attribution a{color:var(--fog)!important}
 #side{border:1px solid var(--line);background:var(--hull);padding:18px;min-height:200px}
 #side h3{font-family:'Barlow Condensed';font-size:20px;margin:0 0 4px}
 #side .sb{font-family:'IBM Plex Mono';font-size:12px;color:var(--fog);margin-bottom:14px}
@@ -181,12 +248,143 @@ button{font:inherit;color:inherit;cursor:pointer}
   footer{padding:0 12px 30px}
 }
 /* 품질 대시보드 모바일: 가로 넘침·차트 깨짐 방지 */
-#qview{max-width:100%;overflow-x:hidden}
+#qview{max-width:100%;overflow-x:hidden;background:var(--bg);color:var(--text)}
 #qview canvas{max-width:100%!important;height:auto!important}
 #qview table{display:block;overflow-x:auto;-webkit-overflow-scrolling:touch}
 @media(max-width:760px){
   #qview{font-size:13px}
   #qview .wrap,#qview .container,#qview main,#qview section{padding-left:10px;padding-right:10px}
+}
+
+
+/* ================= PO / CONTAINER 매핑 =================
+   HMM에는 없는 사내 정보라 브라우저(localStorage)에 저장한다.
+   스프레드시트에서 두 열을 그대로 복사해 붙여넣으면 되고,
+   부킹번호 칸이 비어 있으면 위 행의 값을 이어받는다(fill-down). */
+const PO_KEY  = "oqc_po_map_v1";     // 서버 응답 캐시 (오프라인 대비)
+const KEY_KEY = "oqc_refresh_key";   // 저장용 키를 이 브라우저에 기억
+const PO_URL  = API.replace(/\/data$/,"") + "/po";
+let PO = {};
+
+/* 서버(Worker KV)에서 읽는다. 실패하면 마지막 캐시를 쓴다. */
+async function loadPO(){
+  try{
+    const r = await fetch(PO_URL, {cache:"no-store"});
+    if(!r.ok) throw new Error(r.status);
+    PO = await r.json() || {};
+    try{ localStorage.setItem(PO_KEY, JSON.stringify(PO)); }catch(_){}
+  }catch(_){
+    try{ PO = JSON.parse(localStorage.getItem(PO_KEY) || "{}") || {}; }catch(__){ PO = {}; }
+  }
+  return PO;
+}
+
+function getKey(){
+  let k = "";
+  try{ k = localStorage.getItem(KEY_KEY) || ""; }catch(_){}
+  if(!k){
+    k = (prompt("Enter the refresh key to save PO mapping to the server:")||"").trim();
+    if(k){ try{ localStorage.setItem(KEY_KEY,k); }catch(_){} }
+  }
+  return k;
+}
+function forgetKey(){ try{ localStorage.removeItem(KEY_KEY); }catch(_){} }
+
+/* 서버에 저장. mode:"replace"면 전체 교체 */
+async function savePO(patch, mode){
+  const key = getKey();
+  if(!key) return {ok:false, msg:"No key entered — nothing was saved."};
+  const r = await fetch(PO_URL, {
+    method:"POST",
+    headers:{"Content-Type":"application/json","X-Refresh-Key":key},
+    body: JSON.stringify({po:patch, mode:mode||"merge"})
+  });
+  const res = await r.json().catch(()=>({}));
+  if(!r.ok){
+    if(r.status===401) forgetKey();
+    return {ok:false, msg: res.error || ("Save failed ("+r.status+")")};
+  }
+  PO = res.po || {};
+  try{ localStorage.setItem(PO_KEY, JSON.stringify(PO)); }catch(_){}
+  return {ok:true, res};
+}
+
+/* 붙여넣은 텍스트 → { 부킹번호: [PO 문자열, ...] } */
+function parsePO(text){
+  const map = {}, bad = [];
+  let cur = null, n = 0;
+  text.split(/\r?\n/).forEach((line,ln)=>{
+    if(!line.trim()) return;
+    /* 탭 우선, 없으면 2칸 이상 공백으로 분리 */
+    const parts = line.includes("\t") ? line.split("\t") : line.split(/\s{2,}/);
+    const left  = (parts[0]||"").trim();
+    const right = (parts[1]||"").trim().toUpperCase();
+    if(right){
+      if(!/^[A-Z]{4}\d{8}$/.test(right)){ bad.push(ln+1); return; }
+      cur = right;
+    }
+    if(!left) return;
+    if(!cur){ bad.push(ln+1); return; }   // 첫 행에 부킹번호가 없으면 귀속 불가
+    (map[cur] = map[cur] || []).push(left);
+    n++;
+  });
+  return { map, bad, n };
+}
+
+/* 카드/사이드바에 넣을 한 줄 요약 — "FNG031002 ×8, FNG031003 ×6 (14)" */
+function poSummary(booking){
+  const list = PO[booking];
+  if(!list || !list.length) return "";
+  const lots = {};
+  list.forEach(v=>{ const m=v.match(/^(\S+)/); const k=m?m[1]:v; lots[k]=(lots[k]||0)+1; });
+  const parts = Object.keys(lots).map(k=>`${k} ×${lots[k]}`);
+  return `${parts.join(", ")} (${list.length})`;
+}
+
+function renderPOTable(){
+  const keys = Object.keys(PO).sort();
+  const el = document.getElementById("potable");
+  if(!el) return;
+  if(!keys.length){ el.innerHTML=""; return; }
+  el.innerHTML = `<table><thead><tr><th>BOOKING</th><th>LOTS</th><th>CONTAINERS</th></tr></thead><tbody>`
+    + keys.map(k=>{
+        const known = CUR && CUR.shipments.some(s=>s.booking===k);
+        return `<tr><td class="b">${k}${known?"":' <span class="l">(not tracked)</span>'}</td>`
+             + `<td class="l">${poSummary(k)}</td><td>${PO[k].length}</td></tr>`;
+      }).join("")
+    + `</tbody></table>`;
+}
+
+async function applyPO(){
+  const st = document.getElementById("postatus");
+  const btn = document.getElementById("posave");
+  const txt = document.getElementById("poin").value;
+  if(!txt.trim()){ st.textContent="Nothing to apply."; return; }
+  const { map, bad, n } = parsePO(txt);
+  const keys = Object.keys(map);
+  if(!keys.length){
+    st.innerHTML = `No rows parsed. The first line must carry a booking number.`;
+    return;
+  }
+  btn.disabled = true; st.textContent = "Saving to server…";
+  const out = await savePO(map, "merge");
+  btn.disabled = false;
+  renderPOTable();
+  if(CUR) render(CUR);
+  st.innerHTML = out.ok
+    ? `${n} row(s) mapped to ${keys.length} booking(s) — saved to server, visible on any device.`
+      + (bad.length? ` Skipped line(s): ${bad.slice(0,8).join(", ")}${bad.length>8?"…":""}.` : "")
+    : `Not saved — ${out.msg}`;
+}
+
+async function clearPO(){
+  if(!confirm("Remove ALL PO / container mappings from the server? This affects every device.")) return;
+  const st = document.getElementById("postatus");
+  st.textContent = "Clearing…";
+  const out = await savePO({}, "replace");
+  renderPOTable();
+  if(CUR) render(CUR);
+  st.textContent = out.ok ? "Cleared on server." : ("Not cleared — " + out.msg);
 }
 
 /* ---------- PO 팝업 ---------- */
@@ -230,6 +428,22 @@ footer{max-width:1180px;margin:0 auto;padding:0 22px 40px;color:#4E6B7D;font-siz
 
 <style id="qview-css">
 #qview{display:none}
+/* 품질 화면은 자체 변수 세트를 쓴다 — 라이트 테마에서 같은 이름만 덮어쓴다 */
+html[data-theme="light"] #qview{
+  --bg:#F4F7F9; --panel:#FFFFFF; --panel2:#EEF3F6; --line:#D5DFE7; --line2:#BFCDD8;
+  --text:#0F2430; --muted:#5A7183; --dim:#8496A4;
+  --blue:#1668C4; --blueDim:rgba(22,104,196,.10);
+  --gA:#C8402F; --gB:#9A6B12; --gC:#1668C4; --ok:#0F8F62;
+}
+html[data-theme="light"] #qview .overlay{background:rgba(24,38,48,.42)}
+html[data-theme="light"] #qview .modal{box-shadow:0 24px 60px rgba(20,40,55,.22)}
+html[data-theme="light"] #qview table.bd .grp{background:#E4EBF1}
+html[data-theme="light"] #qview .badge.hit{background:rgba(200,64,47,.10);border-color:rgba(200,64,47,.35)}
+html[data-theme="light"] #qview .grade.A{background:rgba(200,64,47,.12)}
+html[data-theme="light"] #qview .grade.B{background:rgba(154,107,18,.14)}
+html[data-theme="light"] #qview .grade.C{background:rgba(22,104,196,.12)}
+html[data-theme="light"] #qview td.viol{background:rgba(200,64,47,.07)}
+html[data-theme="light"] #qview td.near{background:rgba(154,107,18,.08)}
 #qview{
   --bg:#0B0E13; --panel:#12161E; --panel2:#0E1219; --line:#202836; --line2:#2A3446;
   --text:#E7ECF3; --muted:#7E8AA0; --dim:#4A566B;
@@ -262,6 +476,9 @@ footer{max-width:1180px;margin:0 auto;padding:0 22px 40px;color:#4E6B7D;font-siz
   <input id="pw" type="password" placeholder="password" autocomplete="current-password">
   <button class="gate-btn" id="gate-go">ENTER</button>
   <div id="gate-err"></div>
+  <button id="themesw" type="button" role="switch" aria-checked="false">
+    <span class="knob"></span><span class="lbl">LIGHT MODE</span>
+  </button>
 </div></div>
 
 <main id="menu" hidden>
@@ -291,6 +508,21 @@ footer{max-width:1180px;margin:0 auto;padding:0 22px 40px;color:#4E6B7D;font-siz
     <button class="btn" id="addbtn">Add</button>
   </div>
   <div id="rstatus"></div>
+
+  <details id="pobox">
+    <summary>PO / CONTAINER MAPPING — paste from spreadsheet</summary>
+    <p class="pohelp">Paste two columns: PO/container on the left, booking number on the right.
+       Leave the booking cell blank to reuse the one above (fill-down), exactly as it appears in your sheet.
+       Saved on the server, so it shows up on every device. The first save asks for the refresh key.</p>
+    <textarea id="poin" spellcheck="false" placeholder="FNG031002 (Container 15 of 22)&#9;KULM63616300&#10;FNG031002 (Container 16 of 22)&#10;FNG031002 (Container 17 of 22)&#10;..."></textarea>
+    <div class="porow">
+      <button class="btn" id="posave">Apply</button>
+      <button class="btn ghost" id="poclear">Clear all</button>
+      <span id="postatus"></span>
+    </div>
+    <div id="potable"></div>
+  </details>
+
   <div class="tabs">
     <button class="tab on" data-view="map">MAP</button>
     <button class="tab" data-view="list">LIST</button>
@@ -298,6 +530,7 @@ footer{max-width:1180px;margin:0 auto;padding:0 22px 40px;color:#4E6B7D;font-siz
   <div class="lane">
     <div>CARRIER<b>HMM</b></div>
     <div>POL<b>PORT KLANG</b></div>
+    <div>REFRESH<b id="lane-refresh">3× / DAY</b></div>
     <div>POD<b>LOS ANGELES</b></div>
     <div>BOOKINGS<b id="n-bkg">—</b></div>
     <div>EARLIEST ARRIVAL<b id="n-eta">—</b></div>
@@ -417,12 +650,40 @@ const FALLBACK = {
   ]
 };
 
+/* ---------- 항구명 정규화 ----------
+   Worker의 names는 "PORT KLANG,MALAYSIA"처럼 국가가 붙고, 지도 좌표를
+   승계한 건은 "P1","P2"로 폴백되어 있다. legs에서 실제 항구명을 만들어 보완한다. */
+const shortPort = n => !n ? "" : String(n).split(",")[0].replace(/\s+/g," ").trim().toUpperCase();
+
+function portNames(s){
+  const raw = Array.isArray(s.names) ? s.names : [];
+  const isPlaceholder = !raw.length || raw.every(n=>/^P\d+$/.test(n));
+  let list;
+  if(!isPlaceholder){
+    list = raw.map(shortPort);
+  }else if(Array.isArray(s.legs) && s.legs.length){
+    list = [shortPort(s.legs[0].pol), ...s.legs.map(l=>shortPort(l.pod))];
+  }else{
+    list = raw.map((n,i)=>shortPort(n)||("P"+(i+1)));
+  }
+  /* 좌표 개수에 맞춰 길이를 보정 (부족하면 마지막 항구를 반복) */
+  const need = Array.isArray(s.route) ? s.route.length : list.length;
+  while(list.length < need) list.push(list[list.length-1]||"—");
+  return list.slice(0, need);
+}
+
+/* 연속 중복 항구(같은 항 내 선석 이동 등)는 라벨을 비워 겹침을 막는다 */
+const dedupeLabels = names => names.map((n,i)=> i>0 && n===names[i-1] ? "" : n);
+
 /* ---------- 좌표 유틸 ---------- */
 const wrap = p => [p[0], p[1] < -30 ? p[1] + 360 : p[1]];   // 태평양 연속 표시
 const unwrap = l => ((l + 180) % 360) - 180;
 
 /* HMM이 준 idx/ratio를 그대로 적용 */
 function locate(s){
+  /* 지도 조회에 실패한 건(mapError)은 route가 없다 — 화면이 죽지 않도록 null 반환 */
+  if(!Array.isArray(s.route) || s.route.length < 2) return null;
+  const nm = portNames(s);
   const r = s.route.map(wrap);
   const i = Math.min(s.idx, r.length - 2);
   const a = r[i], b = r[i+1], f = s.ratio;
@@ -432,8 +693,9 @@ function locate(s){
   const done = i + f, total = r.length - 1;
   return {
     pos, i, f,
-    from: s.names[i], to: s.names[i+1],
-    phase: atPort ? `${s.names[i]} — berthed` : `${s.names[i]} → ${s.names[i+1]}`,
+    names: nm,
+    from: nm[i], to: nm[i+1],
+    phase: atPort ? `${nm[i]} — berthed` : `${nm[i]} → ${nm[i+1]}`,
     atPort,
     pct: done / total
   };
@@ -453,24 +715,27 @@ function sortByETD(list){
   return [...list].sort((a,b)=>TS(a.polDep)-TS(b.polDep));
 }
 
-const fmtDT = s => s.slice(5,10).replace("-","/")+" "+s.slice(11,16);
-const fmtD  = s => s.slice(5,10).replace("-","/");
+/* 직항(피더 없음) 화물은 tsArr/tsDep가 null이므로 방어한다 */
+const fmtDT = s => !s ? "—" : s.slice(5,10).replace("-","/")+" "+s.slice(11,16);
+const fmtD  = s => !s ? "—" : s.slice(5,10).replace("-","/");
 
 /* ---------- MAP ---------- */
 let map, markers=[];
 function initMap(data){
   map = L.map('map',{worldCopyJump:false,minZoom:2}).setView([25,175],3);
-  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',
+  tileLayer = L.tileLayer(TILE[THEME],
     {attribution:'&copy; OpenStreetMap &copy; CARTO', subdomains:'abcd', maxZoom:10}).addTo(map);
 
   const portSeen = {};
   data.shipments.forEach(s=>{
+    if(!Array.isArray(s.route) || s.route.length<2){ markers.push(null); return; }
     const r = s.route.map(wrap);
     L.polyline(r,{color:'#1E3A4C',weight:1.5,dashArray:'4,6'}).addTo(map);
     r.forEach((p,k)=>{
       const key = p[0].toFixed(2)+","+p[1].toFixed(2);
       if(portSeen[key]) return; portSeen[key]=1;
-      L.circleMarker(p,{radius:4,color:'#8AA4B5',weight:1.5,fillColor:'#07141C',fillOpacity:1})
+      L.circleMarker(p,{radius:4,color:cssVar('--fog','#8AA4B5'),weight:1.5,
+                        fillColor:cssVar('--ink','#07141C'),fillOpacity:1})
         .bindTooltip(s.names[k],{className:'vsl-tip',direction:'top'}).addTo(map);
     });
   });
@@ -482,37 +747,58 @@ function initMap(data){
     const key = lat.toFixed(1)+","+lng.toFixed(1);
     seen[key]=(seen[key]||0)+1;
     if(seen[key]>1){ lat += 0.9*(seen[key]-1); lng += 1.4*(seen[key]-1); }
-    const m = L.circleMarker([lat,lng],{radius:8,color:'#FF6B35',weight:2,
+    const m = L.circleMarker([lat,lng],{radius:8,color:cssVar('--buoy','#FF6B35'),weight:2,
       fillColor:'#FF6B35',fillOpacity:L2.atPort?1:0.45}).addTo(map);
     m.bindTooltip(`${s.vessel} ${s.voyage}`,{className:'vsl-tip',direction:'top',offset:[0,-6]});
-    m.on('click',()=>{ closePO(); select(s,idx,false); });
+    m.on('click',()=>{ select(s,idx,false); showPO(s,idx); });
     markers.push(m);
   });
   map.fitBounds(L.featureGroup(markers).getBounds().pad(0.35));
 }
 
 function showSide(s,L2){
+  const nm = portNames(s);
+  const geo = L2
+    ? `<dt>STATUS</dt><dd>${L2.phase}</dd>
+       <dt>SEGMENT</dt><dd>${L2.i+1} / ${s.route.length-1} · ${(L2.f*100).toFixed(1)}%</dd>
+       <dt>POSITION</dt><dd>${L2.pos[0].toFixed(3)}° , ${unwrap(L2.pos[1]).toFixed(3)}°</dd>`
+    : `<dt>STATUS</dt><dd class="warn">Position unavailable — HMM map lookup failed</dd>`;
+
+  /* PO 매핑은 붙여넣기로 등록된 로컬 데이터 */
+  const po = poSummary(s.booking);
+  const poRow = po ? `<dt>PO / LOT</dt><dd>${po}</dd>` : "";
+
+  /* 최근 이벤트 타임라인 */
+  const ev = Array.isArray(s.events) && s.events.length
+    ? `<div class="evtl">${s.events.slice(0,6).map((e,k)=>
+        `<div class="ev${k?"":" now"}"><span class="et">${fmtDT(e.at)}</span>
+         <span class="es">${e.status}</span><span class="el">${shortPort(e.loc)}</span></div>`).join("")}</div>`
+    : "";
+
+  const chk = s.checkedAt
+    ? `<dt>CHECKED</dt><dd>${toKST(s.checkedAt)} · ${ago(s.checkedAt)}${s.staleItem?' <b class="warn">(retry pending)</b>':''}</dd>` : "";
+
   document.getElementById('side').innerHTML=`
     <h3>${s.vessel} ${s.voyage}</h3>
-    <div class="sb">${s.booking} · ${s.svc} · IMO ${s.imo||"—"}</div>
+    <div class="sb">${s.booking} · ${s.svc} · ${s.cntrQty||s.containers&&s.containers.length||"—"} CNTR</div>
     <dl>
-      <dt>STATUS</dt><dd>${L2.phase}</dd>
-      <dt>SEGMENT</dt><dd>${L2.i+1} / ${s.route.length-1} · ${(L2.f*100).toFixed(1)}%</dd>
-      <dt>POSITION</dt><dd>${L2.pos[0].toFixed(3)}° , ${unwrap(L2.pos[1]).toFixed(3)}°</dd>
-      <dt>ROUTE</dt><dd>${s.names.join(" → ")}</dd>
+      ${geo}
+      <dt>ROUTE</dt><dd>${dedupeLabels(nm).filter(Boolean).join(" → ")}</dd>
       <dt>PKG ETD</dt><dd>${fmtDT(s.polDep)}</dd>
       <dt>SIN ETA</dt><dd>${fmtDT(s.tsArr)}</dd>
       <dt>SIN ETD</dt><dd>${fmtDT(s.tsDep)}</dd>
       <dt>LA ETB</dt><dd>${fmtDT(s.eta)}</dd>
-      <dt>FEEDER</dt><dd>${s.feeder}</dd>
-      <dt>LATEST</dt><dd>${s.last}</dd>
-    </dl>`;
+      <dt>DEST ETA</dt><dd>${fmtDT(s.destEta)}</dd>
+      <dt>FEEDER</dt><dd>${s.feeder||"— (direct)"}</dd>
+      ${poRow}${chk}
+      <dt>LATEST</dt><dd>${s.last||"—"}</dd>
+    </dl>${ev}`;
 }
 function select(s,i,pan){
   showSide(s,locate(s));
   document.querySelectorAll('#vtbody tr').forEach(t=>t.classList.toggle('on',+t.dataset.i===i));
-  if(pan && markers[i]) map.panTo(markers[i].getLatLng());
-  if(markers[i]) markers[i].openTooltip();
+  if(pan && markers[i] && markers[i].getLatLng) map.panTo(markers[i].getLatLng());
+  if(markers[i] && markers[i].openTooltip) markers[i].openTooltip();
 }
 
 /* ---------- 표 ---------- */
@@ -534,43 +820,64 @@ function buildTable(data){
 /* ---------- LIST 카드 ---------- */
 function cardHTML(s){
   const L2 = locate(s);
-  const cls = L2.atPort ? "t-dock" : (L2.i === s.route.length-2 ? "t-sail" : "t-sail");
-  const n = s.route.length-1;
-  let nodes="";
-  s.names.forEach((nm,k)=>{
-    const x = k/n*100;
-    const c = k===s.names.length-1 ? "node end" : (k <= L2.i ? "node on" : "node");
-    nodes += `<div class="${c}" style="left:${x}%"></div><div class="node-lb" style="left:${x}%">${nm}</div>`;
-  });
-  const pos = (L2.pct*100).toFixed(1);
-  return `<article class="card">
+  const stale = s.staleItem ? `<span class="tag t-stale" title="이 건은 최근 조회에 실패해 이전 값이 표시됩니다">STALE</span>` : "";
+
+  let railHTML;
+  if(!L2){
+    railHTML = `<p class="note warn">Position unavailable — HMM map lookup failed. Schedule below is current.</p>`;
+  }else{
+    const nm = dedupeLabels(L2.names);
+    const n = L2.names.length-1;
+    let nodes="";
+    nm.forEach((label,k)=>{
+      const x = k/n*100;
+      const c = k===nm.length-1 ? "node end" : (k <= L2.i ? "node on" : "node");
+      nodes += `<div class="${c}" style="left:${x}%"></div>`
+             + (label?`<div class="node-lb" style="left:${x}%">${label}</div>`:"");
+    });
+    const pos = (L2.pct*100).toFixed(1);
+    railHTML = `<div class="rail"><div class="rail-line"></div><div class="rail-done" style="width:${pos}%"></div>
+        ${nodes}<div class="ship-icon" style="left:${pos}%">▮</div>
+        <div class="pct">${Math.round(L2.pct*100)}%</div></div>`;
+  }
+  const cls = !L2 ? "t-dock" : (L2.atPort ? "t-dock" : "t-sail");
+  const phase = L2 ? L2.phase : "No position";
+  const po = poSummary(s.booking);
+  return `<article class="card${s.staleItem?" is-stale":""}">
     <div class="card-hd"><span class="bkg">${s.booking}</span>
       <span class="vsl">${s.vessel} ${s.voyage}</span>
-      <span class="tag ${cls}">${L2.phase}</span></div>
+      <span class="tag ${cls}">${phase}</span>${stale}</div>
     <div class="card-bd">
-      <div class="rail"><div class="rail-line"></div><div class="rail-done" style="width:${pos}%"></div>
-        ${nodes}<div class="ship-icon" style="left:${pos}%">▮</div>
-        <div class="pct">${Math.round(L2.pct*100)}%</div></div>
+      ${railHTML}
       <div class="grid">
         <div class="f"><label>PKG ETD</label><span>${fmtDT(s.polDep)}</span></div>
         <div class="f"><label>SIN ETA</label><span>${fmtDT(s.tsArr)}</span></div>
         <div class="f"><label>SIN ETD</label><span>${fmtDT(s.tsDep)}</span></div>
         <div class="f"><label>LA ETB</label><span>${fmtDT(s.eta)}</span></div>
         <div class="f"><label>SERVICE</label><span>${s.svc}</span></div>
-        <div class="f"><label>FEEDER</label><span>${s.feeder}</span></div>
+        <div class="f"><label>FEEDER</label><span>${s.feeder||"— (direct)"}</span></div>
+        <div class="f"><label>CNTR</label><span>${s.cntrQty||"—"}</span></div>
+        <div class="f"><label>PO / LOT</label><span>${po||"—"}</span></div>
       </div>
-      <p class="note">Latest event — ${s.last}</p>
+      <p class="note">Latest event — ${s.last||"—"}</p>
+      ${s.checkedAt?`<p class="note dim">Checked ${toKST(s.checkedAt)} · ${ago(s.checkedAt)}</p>`:""}
     </div></article>`;
 }
 
 /* ---------- 갱신 ---------- */
 let CUR=null;
 function ago(ts){
-  const m=Math.round((Date.now()-new Date(ts.replace(" ","T")+"+09:00").getTime())/60000);
+  /* Worker는 UTC로 "2026-08-03 23:13Z"를 준다. Z가 있으면 UTC, 없으면 KST로 해석 */
+  const t = ts.trim().replace(" ","T");
+  const iso = /Z$/i.test(t) ? t : t+"+09:00";
+  const m=Math.round((Date.now()-new Date(iso).getTime())/60000);
   return m<60 ? m+"m ago" : m<1440 ? Math.round(m/60)+"h ago" : Math.round(m/1440)+"d ago";
 }
 /* 자동 수집 시각 (한국시간) — Worker의 Cron과 일치시켜야 합니다 */
 const CRON_KST = [8.1667, 14.1667, 20.1667];   // 08:10 / 14:10 / 20:10
+/* 화면에 표시할 수집 주기 문구 (Worker의 Cron 설정과 일치시켜야 합니다) */
+const CRON_LABEL = "08:10 / 14:10 / 20:10 KST";
+const hhmm = f => String(Math.floor(f)).padStart(2,"0")+":"+String(Math.round((f%1)*60)).padStart(2,"0");
 
 function nextRun(){
   const now=new Date();
@@ -582,16 +889,31 @@ function nextRun(){
   const m=Math.round(wait/60000);
   return m<60 ? m+"m" : Math.floor(m/60)+"h "+(m%60?m%60+"m ":"")+"";
 }
+/* "2026-08-03 23:13Z"(UTC) → "08-04 08:13 KST" */
+function toKST(ts){
+  if(!ts) return "—";
+  const t = String(ts).trim().replace(" ","T");
+  const d = new Date(/Z$/i.test(t) ? t : t+"+09:00");
+  if(isNaN(d)) return ts;
+  const k = new Date(d.getTime() + 9*3600000);
+  const p = n => String(n).padStart(2,"0");
+  return `${p(k.getUTCMonth()+1)}-${p(k.getUTCDate())} ${p(k.getUTCHours())}:${p(k.getUTCMinutes())} KST`;
+}
+
 function stampText(d){
+  const lr = document.getElementById("lane-refresh");
+  if(lr) lr.textContent = CRON_KST.length + "× / DAY";
   document.getElementById("stamp").innerHTML =
-    `HMM retrieved ${d.updated} · ${ago(d.updated)}` +
-    `<span style="color:#3E586A"> · next update in ${nextRun()}</span>`;
+    `HMM retrieved ${toKST(d.updated)} · ${ago(d.updated)}` +
+    (d.stale ? `<span class="warn"> · no new HMM events</span>` : "") +
+    `<span class="dim2"> · next update in ${nextRun()}</span>` +
+    `<span class="dim2"> · ${CRON_KST.length}× daily (${CRON_LABEL})</span>`;
 }
 
 /* ---------- 종합 도표 (전 선적 한 화면) ---------- */
 function buildOverview(list){
-  const active = list.filter(s=>{ const L=locate(s); return L.pct>0 && L.pct<1; });
-  const rows = list.map((s,i)=>({s,L:locate(s),i}));
+  const rows = list.map((s,i)=>({s,L:locate(s),i})).filter(r=>r.L);
+  const active = rows.filter(r=>r.L.pct>0 && r.L.pct<1);
 
   // 라벨 겹침 방지: 진행률 순으로 정렬해 3단 높이를 번갈아 배치
   const sorted=[...rows].sort((a,b)=>a.L.pct-b.L.pct);
@@ -610,7 +932,7 @@ function buildOverview(list){
 
   document.getElementById("overview").innerHTML=`
     <h2>ALL SHIPMENTS · PORT KLANG → LOS ANGELES</h2>
-    <div class="sub">In transit ${active.length} of ${list.length} · by port-call segment</div>
+    <div class="sub">In transit ${active.length} of ${list.length} · by port-call segment${rows.length<list.length?` · ${list.length-rows.length} without position`:""}</div>
     <div class="orail">
       <div class="base"></div>
       <div class="cap" style="left:0"></div><div class="cap-lb" style="left:0">PORT KLANG</div>
@@ -632,7 +954,7 @@ function rowsHTML(list){
   return list.map((s,i)=>`
     <tr data-i="${i}">
       <td><span class="nm">${s.vessel}</span><span class="vy">${s.voyage}</span>
-          <span class="bk">${s.booking} · IMO ${s.imo||"—"}</span></td>
+          <span class="bk">${s.booking} · ${s.cntrQty||"—"} CNTR${s.staleItem?" · STALE":""}</span></td>
       <td data-l="PKG ETD"><span class="dt">${fmtDT(s.polDep)}</span><span class="est">${TS(s.polDep)<=now?"actual":"scheduled"}</span></td>
       <td data-l="SIN ETD"><span class="dt">${fmtDT(s.tsDep)}</span><span class="est">${TS(s.tsDep)<=now?"actual":"scheduled"}</span></td>
       <td data-l="LA ETB"><span class="dt">${fmtDT(s.eta)}</span><span class="est">ETB</span></td>
@@ -674,23 +996,161 @@ function addBooking(){
     .finally(()=>{ inp.disabled=false; document.getElementById("addbtn").disabled=false; });
 }
 
+
+/* ================= PO / CONTAINER 매핑 =================
+   HMM에는 없는 사내 정보라 브라우저(localStorage)에 저장한다.
+   스프레드시트에서 두 열을 그대로 복사해 붙여넣으면 되고,
+   부킹번호 칸이 비어 있으면 위 행의 값을 이어받는다(fill-down). */
+const PO_KEY  = "oqc_po_map_v1";     // 서버 응답 캐시 (오프라인 대비)
+const KEY_KEY = "oqc_refresh_key";   // 저장용 키를 이 브라우저에 기억
+const PO_URL  = API.replace(/\/data$/,"") + "/po";
+let PO = {};
+
+/* 서버(Worker KV)에서 읽는다. 실패하면 마지막 캐시를 쓴다. */
+async function loadPO(){
+  try{
+    const r = await fetch(PO_URL, {cache:"no-store"});
+    if(!r.ok) throw new Error(r.status);
+    PO = await r.json() || {};
+    try{ localStorage.setItem(PO_KEY, JSON.stringify(PO)); }catch(_){}
+  }catch(_){
+    try{ PO = JSON.parse(localStorage.getItem(PO_KEY) || "{}") || {}; }catch(__){ PO = {}; }
+  }
+  return PO;
+}
+
+function getKey(){
+  let k = "";
+  try{ k = localStorage.getItem(KEY_KEY) || ""; }catch(_){}
+  if(!k){
+    k = (prompt("Enter the refresh key to save PO mapping to the server:")||"").trim();
+    if(k){ try{ localStorage.setItem(KEY_KEY,k); }catch(_){} }
+  }
+  return k;
+}
+function forgetKey(){ try{ localStorage.removeItem(KEY_KEY); }catch(_){} }
+
+/* 서버에 저장. mode:"replace"면 전체 교체 */
+async function savePO(patch, mode){
+  const key = getKey();
+  if(!key) return {ok:false, msg:"No key entered — nothing was saved."};
+  const r = await fetch(PO_URL, {
+    method:"POST",
+    headers:{"Content-Type":"application/json","X-Refresh-Key":key},
+    body: JSON.stringify({po:patch, mode:mode||"merge"})
+  });
+  const res = await r.json().catch(()=>({}));
+  if(!r.ok){
+    if(r.status===401) forgetKey();
+    return {ok:false, msg: res.error || ("Save failed ("+r.status+")")};
+  }
+  PO = res.po || {};
+  try{ localStorage.setItem(PO_KEY, JSON.stringify(PO)); }catch(_){}
+  return {ok:true, res};
+}
+
+/* 붙여넣은 텍스트 → { 부킹번호: [PO 문자열, ...] } */
+function parsePO(text){
+  const map = {}, bad = [];
+  let cur = null, n = 0;
+  text.split(/\r?\n/).forEach((line,ln)=>{
+    if(!line.trim()) return;
+    /* 탭 우선, 없으면 2칸 이상 공백으로 분리 */
+    const parts = line.includes("\t") ? line.split("\t") : line.split(/\s{2,}/);
+    const left  = (parts[0]||"").trim();
+    const right = (parts[1]||"").trim().toUpperCase();
+    if(right){
+      if(!/^[A-Z]{4}\d{8}$/.test(right)){ bad.push(ln+1); return; }
+      cur = right;
+    }
+    if(!left) return;
+    if(!cur){ bad.push(ln+1); return; }   // 첫 행에 부킹번호가 없으면 귀속 불가
+    (map[cur] = map[cur] || []).push(left);
+    n++;
+  });
+  return { map, bad, n };
+}
+
+/* 카드/사이드바에 넣을 한 줄 요약 — "FNG031002 ×8, FNG031003 ×6 (14)" */
+function poSummary(booking){
+  const list = PO[booking];
+  if(!list || !list.length) return "";
+  const lots = {};
+  list.forEach(v=>{ const m=v.match(/^(\S+)/); const k=m?m[1]:v; lots[k]=(lots[k]||0)+1; });
+  const parts = Object.keys(lots).map(k=>`${k} ×${lots[k]}`);
+  return `${parts.join(", ")} (${list.length})`;
+}
+
+function renderPOTable(){
+  const keys = Object.keys(PO).sort();
+  const el = document.getElementById("potable");
+  if(!el) return;
+  if(!keys.length){ el.innerHTML=""; return; }
+  el.innerHTML = `<table><thead><tr><th>BOOKING</th><th>LOTS</th><th>CONTAINERS</th></tr></thead><tbody>`
+    + keys.map(k=>{
+        const known = CUR && CUR.shipments.some(s=>s.booking===k);
+        return `<tr><td class="b">${k}${known?"":' <span class="l">(not tracked)</span>'}</td>`
+             + `<td class="l">${poSummary(k)}</td><td>${PO[k].length}</td></tr>`;
+      }).join("")
+    + `</tbody></table>`;
+}
+
+async function applyPO(){
+  const st = document.getElementById("postatus");
+  const btn = document.getElementById("posave");
+  const txt = document.getElementById("poin").value;
+  if(!txt.trim()){ st.textContent="Nothing to apply."; return; }
+  const { map, bad, n } = parsePO(txt);
+  const keys = Object.keys(map);
+  if(!keys.length){
+    st.innerHTML = `No rows parsed. The first line must carry a booking number.`;
+    return;
+  }
+  btn.disabled = true; st.textContent = "Saving to server…";
+  const out = await savePO(map, "merge");
+  btn.disabled = false;
+  renderPOTable();
+  if(CUR) render(CUR);
+  st.innerHTML = out.ok
+    ? `${n} row(s) mapped to ${keys.length} booking(s) — saved to server, visible on any device.`
+      + (bad.length? ` Skipped line(s): ${bad.slice(0,8).join(", ")}${bad.length>8?"…":""}.` : "")
+    : `Not saved — ${out.msg}`;
+}
+
+async function clearPO(){
+  if(!confirm("Remove ALL PO / container mappings from the server? This affects every device.")) return;
+  const st = document.getElementById("postatus");
+  st.textContent = "Clearing…";
+  const out = await savePO({}, "replace");
+  renderPOTable();
+  if(CUR) render(CUR);
+  st.textContent = out.ok ? "Cleared on server." : ("Not cleared — " + out.msg);
+}
+
 /* ---------- PO 팝업 ---------- */
 let poSelected = null;
+function cssVar(name, fb){
+  const v = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+  return v || fb;
+}
 function paintMarkers(){
+  const on1 = cssVar('--sail','#3FD0A6'), off = cssVar('--buoy','#FF6B35');
   markers.forEach((m,k)=>{
+    if(!m || !m.setStyle) return;
     const on = (k===poSelected);
-    m.setStyle({color: on?'#3FD0A6':'#FF6B35', fillColor: on?'#3FD0A6':'#FF6B35'});
+    m.setStyle({color: on?on1:off, fillColor: on?on1:off});
     if(on) m.bringToFront();
   });
 }
 function showPO(s,i){
   poSelected = i; paintMarkers();
-  const list = s.pos || [];
+  const list = PO[s.booking] || s.pos || [];
   let cells;
   if(!list.length){
-    cells = `<p class="hint" style="margin:0">No PO data loaded for this vessel yet.</p>`;
+    cells = `<p class="hint" style="margin:0">No PO mapping for this booking yet — `
+          + `use “PO / CONTAINER MAPPING” above to paste it in.</p>`;
   }else{
-    const CELLS = 15;
+    const CELLS = Math.max(list.length, 1);
     let out = "";
     for(let k=0;k<CELLS;k++){
       const v = list[k];
@@ -751,6 +1211,7 @@ function render(data){
   if(dropped) document.getElementById("rstatus").innerHTML=
     `Removed <b>${dropped}</b> shipment(s) that arrived over 7 days ago.`;
   initMap(data); buildTable(data); buildOverview(data.shipments);
+  renderPOTable();
 }
 function setView(v){
   document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('on',t.dataset.view===v));
@@ -777,9 +1238,42 @@ document.addEventListener("DOMContentLoaded",()=>{
   const qb=document.getElementById("qback");
   if(qb) qb.addEventListener("click",()=>show("menu"));
 });
+document.getElementById("posave").addEventListener("click",applyPO);
+document.getElementById("poclear").addEventListener("click",clearPO);
 document.getElementById("addbtn").addEventListener("click",addBooking);
 document.getElementById("newbkg").addEventListener("keydown",e=>{if(e.key==="Enter")addBooking();});
 document.querySelectorAll(".tab").forEach(t=>t.addEventListener("click",()=>setView(t.dataset.view)));
+
+/* ================= 테마 =================
+   기본은 다크. 게이트의 스위치를 켜면 라이트로 전환되고 선택은 브라우저에 남는다.
+   지도 타일도 함께 바꾼다(라이트 배경에 다크 타일은 읽히지 않음). */
+const THEME_KEY = "oqc_theme";
+let THEME = "dark";
+const TILE = {
+  dark : 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',
+  light: 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png'
+};
+let tileLayer = null;
+
+function applyTheme(t){
+  THEME = (t === "light") ? "light" : "dark";
+  document.documentElement.setAttribute("data-theme", THEME);
+  const sw = document.getElementById("themesw");
+  if(sw) sw.setAttribute("aria-checked", THEME === "light" ? "true" : "false");
+  if(tileLayer) tileLayer.setUrl(TILE[THEME]);
+  if(typeof repaintCharts === "function") repaintCharts();
+  try{ localStorage.setItem(THEME_KEY, THEME); }catch(_){}
+}
+function initTheme(){
+  let saved = null;
+  try{ saved = localStorage.getItem(THEME_KEY); }catch(_){}
+  applyTheme(saved || "dark");
+}
+document.addEventListener("DOMContentLoaded", ()=>{
+  initTheme();
+  const sw = document.getElementById("themesw");
+  if(sw) sw.addEventListener("click", ()=> applyTheme(THEME === "light" ? "dark" : "light"));
+});
 
 function unlock(){
   if(document.getElementById("pw").value.trim()!=="kossan"){
@@ -787,8 +1281,10 @@ function unlock(){
   }
   document.getElementById("gate").remove();
   show("menu"); setView('map');
-  fetch(source(),{cache:"no-store"}).then(r=>r.ok?r.json():Promise.reject())
-    .then(render).catch(()=>render(FALLBACK));
+  Promise.all([
+    loadPO(),
+    fetch(source(),{cache:"no-store"}).then(r=>r.ok?r.json():Promise.reject()).catch(()=>FALLBACK)
+  ]).then(([,data])=>render(data));
 }
 document.getElementById("gate-go").addEventListener("click",unlock);
 document.getElementById("pw").addEventListener("keydown",e=>{if(e.key==="Enter")unlock();});
@@ -948,26 +1444,36 @@ ITEMS.forEach(it=>{
   ichips.appendChild(b);
 });
 
-Chart.defaults.color='#7E8AA0';
+/* 차트 색은 #qview의 CSS 변수에서 읽어 테마를 따라가게 한다 */
+function qvar(name, fb){
+  const el = document.getElementById('qview');
+  if(!el) return fb;
+  const v = getComputedStyle(el).getPropertyValue('--'+name).trim();
+  return v || fb;
+}
+Chart.defaults.color = qvar('muted','#7E8AA0');
 Chart.defaults.font.family="'IBM Plex Mono',monospace";
 Chart.defaults.font.size=10.5;
 let chart=null;
 function isOff(it,v){ return it.dir==='hi' ? (it.s1incl? v>it.s1 : v>=it.s1) : v<it.s1; }
 function isNear(it,v){ if(it.s2==null) return false; return it.dir==='hi' ? (v>=it.s2 && !isOff(it,v)) : (v<it.s2 && !isOff(it,v)); }
+window.repaintCharts = function(){
+  try{ Chart.defaults.color = qvar('muted','#7E8AA0'); draw(); }catch(_){}
+};
 function draw(){
   const worst = lotWorst(curItem);
   if(chart) chart.destroy();
-  const barColor = worst.map(v=> v==null?'#2A3446': isOff(curItem,v)?'#FF6D5E': isNear(curItem,v)?'#F5B84F':'#4DA3FF');
+  const barColor = worst.map(v=> v==null?qvar('line2','#2A3446'): isOff(curItem,v)?qvar('gA','#FF6D5E'): isNear(curItem,v)?qvar('gB','#F5B84F'):qvar('blue','#4DA3FF'));
   const ds=[{type:'bar',label:'Lot 최악값',data:worst,backgroundColor:barColor,borderRadius:5,maxBarThickness:52},
-    {type:'line',label:'S1 한계',data:lots.map(()=>curItem.s1),borderColor:'#FF6D5E',borderWidth:1.6,borderDash:[6,4],pointRadius:0}];
-  if(curItem.s2!=null) ds.push({type:'line',label:'S2 경계',data:lots.map(()=>curItem.s2),borderColor:'#F5B84F',borderWidth:1.2,borderDash:[3,4],pointRadius:0});
+    {type:'line',label:'S1 한계',data:lots.map(()=>curItem.s1),borderColor:qvar('gA','#FF6D5E'),borderWidth:1.6,borderDash:[6,4],pointRadius:0}];
+  if(curItem.s2!=null) ds.push({type:'line',label:'S2 경계',data:lots.map(()=>curItem.s2),borderColor:qvar('gB','#F5B84F'),borderWidth:1.2,borderDash:[3,4],pointRadius:0});
   chart=new Chart(document.getElementById('chart'),{
     data:{labels:lots,datasets:ds},
     options:{responsive:true,maintainAspectRatio:false,
-      plugins:{legend:{display:false},tooltip:{backgroundColor:'#12161E',borderColor:'#2A3446',borderWidth:1,
+      plugins:{legend:{display:false},tooltip:{backgroundColor:qvar('panel','#12161E'),borderColor:qvar('line2','#2A3446'),borderWidth:1,
         callbacks:{title:c=>'Lot '+lots[c[0].dataIndex]+' ('+lotMonth(lots[c[0].dataIndex])+' 제조)'}}},
-      scales:{x:{grid:{color:'#1A2130'}},
-              y:{grid:{color:'#1A2130'},title:{display:true,text:curItem.name+(curItem.unit?' ('+curItem.unit+')':'')+' — 스펙: '+curItem.specTxt,color:'#7E8AA0',font:{size:11}}}}
+      scales:{x:{grid:{color:qvar('line','#1A2130')}},
+              y:{grid:{color:qvar('line','#1A2130')},title:{display:true,text:curItem.name+(curItem.unit?' ('+curItem.unit+')':'')+' — 스펙: '+curItem.specTxt,color:'#7E8AA0',font:{size:11}}}}
     }});
   const last = worst[worst.length-1];
   let marginTxt='—', cls='ok';
