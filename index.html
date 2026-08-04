@@ -130,7 +130,13 @@ html[data-theme="light"] .tile:hover{background:#F0F5F8;border-color:#0F2430}
   letter-spacing:.12em;font-size:12.5px;color:var(--fog)}
 #pobox summary:hover{color:var(--paper)}
 #pobox[open] summary{border-bottom:1px solid var(--line);margin-bottom:12px}
-.pohelp{margin:0 0 10px;font-size:12px;line-height:1.7;color:var(--fog)}
+.pohelp{margin:0 0 10px;font-size:12px;line-height:1.65;color:var(--fog)}
+ol.pohelp{padding-left:20px}
+ol.pohelp li{margin-bottom:8px}
+ol.pohelp b{color:var(--paper);font-weight:600}
+.pohelp code{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--sail);
+  background:var(--well);padding:1px 5px;border-radius:3px;display:inline-block;margin-top:3px}
+.pohelp.note-small{font-size:11.5px;opacity:.8}
 #poin{width:100%;min-height:120px;box-sizing:border-box;background:var(--well);color:var(--paper);
   border:1px solid var(--line);padding:10px;font-family:'IBM Plex Mono',monospace;font-size:11.5px;
   line-height:1.6;resize:vertical}
@@ -790,15 +796,18 @@ html[data-theme="light"] #qview td.near{background:rgba(154,107,18,.08)}
   <div id="rstatus"></div>
 
   <details id="pobox">
-    <summary>PO / CONTAINER MAPPING — paste from spreadsheet</summary>
-    <p class="pohelp">Paste two columns: PO/container on the left, booking number on the right.
-       Leave the booking cell blank to reuse the one above (fill-down), exactly as it appears in your sheet.
-       Optional third column on the first row of each booking = original planned arrival (YYYY-MM-DD),
-       used to show days behind/ahead of plan. You can also paste booking + date only, one per line
-       (e.g. <code>KULM92606700 2026-08-02</code>), without any PO rows.
-       To attach photos to a lot, paste <code>FNG031008 https://u.pcloud.link/publink/show?code=…</code>.
-       Saved on the server, so it shows up on every device. The first save asks for the refresh key.</p>
-    <textarea id="poin" spellcheck="false" placeholder="FNG031002 (Container 15 of 22)&#9;KULM63616300&#10;FNG031002 (Container 16 of 22)&#10;FNG031002 (Container 17 of 22)&#10;..."></textarea>
+    <summary>MAPPING — paste from spreadsheet</summary>
+    <ol class="pohelp">
+      <li><b>PO / containers</b> — PO on the left, booking on the right. Leave the booking cell blank
+          to reuse the one above.<br><code>FNG031007 (Container 12 of 18)&#9;KULM40326600</code></li>
+      <li><b>Original schedule</b> — booking + planned arrival (YYYY-MM-DD). Drives the delay badges
+          and email alerts.<br><code>KULM40326600 2026-08-23</code></li>
+      <li><b>Photos</b> — booking + pCloud folder link, one per booking. Each container must be a
+          subfolder named <code>FNG-0310-07-12</code>.<br><code>KULM40326600 https://u.pcloud.link/publink/show?code=…</code></li>
+    </ol>
+    <p class="pohelp note-small">Mix all three freely — each line is read on its own.
+       Saved on the server, so it shows on every device. The first save asks for the refresh key.</p>
+    <textarea id="poin" spellcheck="false" placeholder="FNG031007 (Container 12 of 18)&#9;KULM40326600&#10;FNG031007 (Container 13 of 18)&#10;KULM40326600 2026-08-23&#10;KULM40326600 https://u.pcloud.link/publink/show?code=..."></textarea>
     <div class="porow">
       <button class="btn" id="posave">Apply</button>
       <button class="btn ghost" id="poclear">Clear all</button>
@@ -1843,7 +1852,7 @@ function showPO(s,i){
   let cells;
   if(!list.length){
     cells = `<p class="hint" style="margin:0">No PO mapping for this booking yet — `
-          + `use “PO / CONTAINER MAPPING” above to paste it in.</p>`;
+          + `use “MAPPING” above to paste it in.</p>`;
   }else{
     const CELLS = Math.max(list.length, 1);
     let out = "";
