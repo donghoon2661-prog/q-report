@@ -172,6 +172,22 @@ html[data-theme="light"] .tile:hover{background:#F0F5F8;border-color:#0F2430}
   border-bottom:1px dotted var(--line)}
 #alertbar .ai:hover{color:var(--buoy)}
 .dtag.watch{color:var(--dock);border-color:var(--dock)}
+.galbox{margin-top:14px;border-top:1px solid var(--line);padding-top:10px;cursor:default}
+.gal-h{font-family:'IBM Plex Mono';font-size:11px;color:var(--paper);margin-bottom:8px;
+  display:flex;align-items:center;gap:8px}
+.gal-h .dim{color:var(--fog);font-size:10.5px}
+.gal-nav{margin-left:auto;display:flex;gap:6px}
+.gnav{background:none;border:1px solid var(--line);color:var(--fog);width:26px;height:24px;
+  font-size:14px;line-height:1;border-radius:3px}
+.gnav:hover:not(:disabled){color:var(--paper);border-color:var(--fog)}
+.gnav:disabled{opacity:.3;cursor:default}
+.gal{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
+@media(max-width:700px){.gal{grid-template-columns:repeat(2,1fr)}}
+.gcell{display:block;border:1px solid var(--line);background:var(--well);text-decoration:none}
+.gcell img{width:100%;height:88px;object-fit:cover;display:block}
+.gcell .gname{display:block;padding:4px 6px;font-family:'IBM Plex Mono';font-size:9px;
+  color:var(--fog);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.gcell:hover{border-color:var(--sail)}
 .tsdwell{font-family:'IBM Plex Mono';font-size:11.5px;color:var(--fog);
   border:1px solid var(--line);padding:9px 12px;margin:0 0 14px;line-height:1.8}
 .tsdwell b{color:var(--paper);font-size:13px}
@@ -316,7 +332,7 @@ async function loadHistory(){
   }catch(_){ HIST = {}; }
   return HIST;
 }
-let PO = {}, POETA = {};
+let PO = {}, POETA = {}, PHOTOS = {};
 
 /* 서버(Worker KV)에서 읽는다. 실패하면 마지막 캐시를 쓴다. */
 async function loadPO(){
@@ -324,14 +340,15 @@ async function loadPO(){
     const r = await fetch(PO_URL, {cache:"no-store"});
     if(!r.ok) throw new Error(r.status);
     const j = await r.json() || {};
-    PO    = j.po  || j;          // 구버전 응답(부킹 키가 최상위)도 수용
-    POETA = j.eta || {};
-    try{ localStorage.setItem(PO_KEY, JSON.stringify({po:PO,eta:POETA})); }catch(_){}
+    PO     = j.po  || j;          // 구버전 응답(부킹 키가 최상위)도 수용
+    POETA  = j.eta || {};
+    PHOTOS = j.photos || {};
+    try{ localStorage.setItem(PO_KEY, JSON.stringify({po:PO,eta:POETA,photos:PHOTOS})); }catch(_){}
   }catch(_){
     try{
       const c = JSON.parse(localStorage.getItem(PO_KEY) || "{}") || {};
-      PO = c.po || c; POETA = c.eta || {};
-    }catch(__){ PO = {}; POETA = {}; }
+      PO = c.po || c; POETA = c.eta || {}; PHOTOS = c.photos || {};
+    }catch(__){ PO = {}; POETA = {}; PHOTOS = {}; }
   }
   return PO;
 }
@@ -348,27 +365,27 @@ function getKey(){
 function forgetKey(){ try{ localStorage.removeItem(KEY_KEY); }catch(_){} }
 
 /* 서버에 저장. mode:"replace"면 전체 교체 */
-async function savePO(patch, mode, etaPatch){
+async function savePO(patch, mode, etaPatch, photoPatch){
   const key = getKey();
   if(!key) return {ok:false, msg:"No key entered — nothing was saved."};
   const r = await fetch(PO_URL, {
     method:"POST",
     headers:{"Content-Type":"application/json","X-Refresh-Key":key},
-    body: JSON.stringify({po:patch, eta:etaPatch||{}, mode:mode||"merge"})
+    body: JSON.stringify({po:patch, eta:etaPatch||{}, photos:photoPatch||{}, mode:mode||"merge"})
   });
   const res = await r.json().catch(()=>({}));
   if(!r.ok){
     if(r.status===401) forgetKey();
     return {ok:false, msg: res.error || ("Save failed ("+r.status+")")};
   }
-  PO = res.po || {}; POETA = res.eta || {};
-  try{ localStorage.setItem(PO_KEY, JSON.stringify({po:PO,eta:POETA})); }catch(_){}
+  PO = res.po || {}; POETA = res.eta || {}; PHOTOS = res.photos || {};
+  try{ localStorage.setItem(PO_KEY, JSON.stringify({po:PO,eta:POETA,photos:PHOTOS})); }catch(_){}
   return {ok:true, res};
 }
 
 /* 붙여넣은 텍스트 → { 부킹번호: [PO 문자열, ...] } */
 function parsePO(text){
-  const map = {}, eta = {}, bad = [];
+  const map = {}, eta = {}, photos = {}, bad = [];
   let cur = null, n = 0;
   /* 날짜 정규화: 2026-08-02 / 2026/8/2 / 2026.08.02 → 2026-08-02 */
   const normDate = v => {
@@ -380,6 +397,15 @@ function parsePO(text){
 
   text.split(/\r?\n/).forEach((line,ln)=>{
     if(!line.trim()) return;
+
+    /* 로트 + pCloud 공개 링크 → 사진 폴더 등록
+       예: FNG031008 https://u.pcloud.link/publink/show?code=XXXX */
+    const ph = line.trim().match(/^(\S+)[\s,\t]+(https?:\/\/\S*pcloud\S*)$/i);
+    if(ph){
+      const code = (ph[2].match(/[?&]code=([A-Za-z0-9_-]+)/)||[])[1];
+      if(code) photos[ph[1].trim().toUpperCase()] = code;
+      return;
+    }
 
     /* 부킹번호로 시작하는 줄은 "부킹 + 원 스케줄"만 등록한다 (PO 항목 없이도 가능).
        예: KULM92606700 2026-08-02 */
@@ -408,14 +434,14 @@ function parsePO(text){
     (map[cur] = map[cur] || []).push(left);
     n++;
   });
-  return { map, eta, bad, n };
+  return { map, eta, photos, bad, n };
 }
 
 /* 카드/사이드바에 넣을 한 줄 요약 — "FNG031002 ×8, FNG031003 ×6 (14)" */
 /* 원 스케줄 대비 지연일 — 없으면 null */
 /* 원 스케줄 대비 지연 임계값 — Worker와 같은 값을 유지해야 한다 */
-const DELAY_WATCH_D = 7;
-const DELAY_ALERT_D = 10;
+const DELAY_WATCH_D = 4;
+const DELAY_ALERT_D = 7;
 function poDelay(s){
   const orig = s.planEta || POETA[s.booking] || s.poEta;
   if(!orig || !s.eta) return null;
@@ -472,14 +498,14 @@ async function applyPO(){
   const btn = document.getElementById("posave");
   const txt = document.getElementById("poin").value;
   if(!txt.trim()){ st.textContent="Nothing to apply."; return; }
-  const { map, eta, bad, n } = parsePO(txt);
+  const { map, eta, photos, bad, n } = parsePO(txt);
   const keys = Object.keys(map);
-  if(!keys.length){
+  if(!keys.length && !Object.keys(photos).length){
     st.innerHTML = `No rows parsed. The first line must carry a booking number.`;
     return;
   }
   btn.disabled = true; st.textContent = "Saving to server…";
-  const out = await savePO(map, "merge", eta);
+  const out = await savePO(map, "merge", eta, photos);
   btn.disabled = false;
   renderPOTable();
   if(CUR) render(CUR);
@@ -493,7 +519,7 @@ async function clearPO(){
   if(!confirm("Remove ALL PO / container mappings from the server? This affects every device.")) return;
   const st = document.getElementById("postatus");
   st.textContent = "Clearing…";
-  const out = await savePO({}, "replace", {});
+  const out = await savePO({}, "replace", {}, {});
   renderPOTable();
   if(CUR) render(CUR);
   st.textContent = out.ok ? "Cleared on server." : ("Not cleared — " + out.msg);
@@ -538,6 +564,62 @@ function tsDwellHTML(s){
   const planTxt = t.plan!==null ? `plan ${t.plan}d → ` : "";
   return `<div class="tsdwell">T/S DWELL <b>${planTxt}${t.cur}d</b> <i>(${lbl})</i>${extra}
     <span class="dim">${fmtDT(s.tsArr)} → ${fmtDT(s.tsDep)}</span></div>`;
+}
+
+
+/* ---------- 로트 사진 (pCloud 공개 폴더) ----------
+   showpublink 로 폴더 목록을 받고 getpubthumb 로 썸네일을 띄운다. 5장씩 넘긴다. */
+const PC_API = "https://api.pcloud.com";
+const pcCache = {};
+async function pcList(code){
+  if(pcCache[code]) return pcCache[code];
+  const r = await fetch(`${PC_API}/showpublink?code=${encodeURIComponent(code)}`,{cache:"no-store"});
+  const j = await r.json();
+  if(j.result!==0) throw new Error(j.error||("pCloud error "+j.result));
+  const meta = j.metadata||{};
+  const files = (meta.contents||(meta.isfolder?[]:[meta]))
+    .filter(f=>!f.isfolder && /\.(jpe?g|png|webp|gif|heic)$/i.test(f.name||""))
+    .sort((a,b)=>String(a.name).localeCompare(String(b.name),undefined,{numeric:true}));
+  pcCache[code] = files;
+  return files;
+}
+const pcThumb = (code,id,size) => `${PC_API}/getpubthumb?code=${encodeURIComponent(code)}&fileid=${id}&size=${size||"320x240"}&crop=1&type=jpg`;
+
+/* 부킹에 걸린 로트들 중 사진이 등록된 것 */
+function lotsWithPhotos(booking){
+  const list = PO[booking]||[];
+  const lots = [...new Set(list.map(v=>{const m=String(v).match(/^(\S+)/);return m?m[1].toUpperCase():"";}))];
+  return lots.filter(l=>PHOTOS[l]);
+}
+
+const PAGE_N = 5;
+function renderGallery(el, lot, code){
+  el.innerHTML = `<div class="gal-h">${lot} <span class="dim">loading photos…</span></div>`;
+  pcList(code).then(files=>{
+    if(!files.length){ el.innerHTML = `<div class="gal-h">${lot} <span class="dim">no images</span></div>`; return; }
+    let page = 0;
+    const pages = Math.ceil(files.length/PAGE_N);
+    const draw = () => {
+      const slice = files.slice(page*PAGE_N,(page+1)*PAGE_N);
+      el.innerHTML = `
+        <div class="gal-h">${lot} <span class="dim">${files.length} photos · ${page+1}/${pages}</span>
+          <span class="gal-nav">
+            <button class="gnav" data-d="-1" ${page===0?"disabled":""}>‹</button>
+            <button class="gnav" data-d="1" ${page>=pages-1?"disabled":""}>›</button>
+          </span></div>
+        <div class="gal">${slice.map(f=>`
+          <a class="gcell" href="${pcThumb(code,f.fileid,"1600x1200")}" target="_blank" rel="noopener"
+             title="${(f.name||"").replace(/"/g,"")}">
+            <img loading="lazy" src="${pcThumb(code,f.fileid,"320x240")}" alt="${(f.name||"").replace(/"/g,"")}">
+            <span class="gname">${f.name||""}</span></a>`).join("")}</div>`;
+      el.querySelectorAll(".gnav").forEach(b=>b.addEventListener("click",e=>{
+        e.stopPropagation(); page = Math.max(0,Math.min(pages-1,page+ +b.dataset.d)); draw();
+      }));
+    };
+    draw();
+  }).catch(e=>{
+    el.innerHTML = `<div class="gal-h">${lot} <span class="warn">photos unavailable — ${e.message||e}</span></div>`;
+  });
 }
 
 /* ---------- PO 팝업 ---------- */
@@ -670,6 +752,7 @@ html[data-theme="light"] #qview td.near{background:rgba(154,107,18,.08)}
        Optional third column on the first row of each booking = original planned arrival (YYYY-MM-DD),
        used to show days behind/ahead of plan. You can also paste booking + date only, one per line
        (e.g. <code>KULM92606700 2026-08-02</code>), without any PO rows.
+       To attach photos to a lot, paste <code>FNG031008 https://u.pcloud.link/publink/show?code=…</code>.
        Saved on the server, so it shows up on every device. The first save asks for the refresh key.</p>
     <textarea id="poin" spellcheck="false" placeholder="FNG031002 (Container 15 of 22)&#9;KULM63616300&#10;FNG031002 (Container 16 of 22)&#10;FNG031002 (Container 17 of 22)&#10;..."></textarea>
     <div class="porow">
@@ -1390,7 +1473,7 @@ async function loadHistory(){
   }catch(_){ HIST = {}; }
   return HIST;
 }
-let PO = {}, POETA = {};
+let PO = {}, POETA = {}, PHOTOS = {};
 
 /* 서버(Worker KV)에서 읽는다. 실패하면 마지막 캐시를 쓴다. */
 async function loadPO(){
@@ -1398,14 +1481,15 @@ async function loadPO(){
     const r = await fetch(PO_URL, {cache:"no-store"});
     if(!r.ok) throw new Error(r.status);
     const j = await r.json() || {};
-    PO    = j.po  || j;          // 구버전 응답(부킹 키가 최상위)도 수용
-    POETA = j.eta || {};
-    try{ localStorage.setItem(PO_KEY, JSON.stringify({po:PO,eta:POETA})); }catch(_){}
+    PO     = j.po  || j;          // 구버전 응답(부킹 키가 최상위)도 수용
+    POETA  = j.eta || {};
+    PHOTOS = j.photos || {};
+    try{ localStorage.setItem(PO_KEY, JSON.stringify({po:PO,eta:POETA,photos:PHOTOS})); }catch(_){}
   }catch(_){
     try{
       const c = JSON.parse(localStorage.getItem(PO_KEY) || "{}") || {};
-      PO = c.po || c; POETA = c.eta || {};
-    }catch(__){ PO = {}; POETA = {}; }
+      PO = c.po || c; POETA = c.eta || {}; PHOTOS = c.photos || {};
+    }catch(__){ PO = {}; POETA = {}; PHOTOS = {}; }
   }
   return PO;
 }
@@ -1422,27 +1506,27 @@ function getKey(){
 function forgetKey(){ try{ localStorage.removeItem(KEY_KEY); }catch(_){} }
 
 /* 서버에 저장. mode:"replace"면 전체 교체 */
-async function savePO(patch, mode, etaPatch){
+async function savePO(patch, mode, etaPatch, photoPatch){
   const key = getKey();
   if(!key) return {ok:false, msg:"No key entered — nothing was saved."};
   const r = await fetch(PO_URL, {
     method:"POST",
     headers:{"Content-Type":"application/json","X-Refresh-Key":key},
-    body: JSON.stringify({po:patch, eta:etaPatch||{}, mode:mode||"merge"})
+    body: JSON.stringify({po:patch, eta:etaPatch||{}, photos:photoPatch||{}, mode:mode||"merge"})
   });
   const res = await r.json().catch(()=>({}));
   if(!r.ok){
     if(r.status===401) forgetKey();
     return {ok:false, msg: res.error || ("Save failed ("+r.status+")")};
   }
-  PO = res.po || {}; POETA = res.eta || {};
-  try{ localStorage.setItem(PO_KEY, JSON.stringify({po:PO,eta:POETA})); }catch(_){}
+  PO = res.po || {}; POETA = res.eta || {}; PHOTOS = res.photos || {};
+  try{ localStorage.setItem(PO_KEY, JSON.stringify({po:PO,eta:POETA,photos:PHOTOS})); }catch(_){}
   return {ok:true, res};
 }
 
 /* 붙여넣은 텍스트 → { 부킹번호: [PO 문자열, ...] } */
 function parsePO(text){
-  const map = {}, eta = {}, bad = [];
+  const map = {}, eta = {}, photos = {}, bad = [];
   let cur = null, n = 0;
   /* 날짜 정규화: 2026-08-02 / 2026/8/2 / 2026.08.02 → 2026-08-02 */
   const normDate = v => {
@@ -1454,6 +1538,15 @@ function parsePO(text){
 
   text.split(/\r?\n/).forEach((line,ln)=>{
     if(!line.trim()) return;
+
+    /* 로트 + pCloud 공개 링크 → 사진 폴더 등록
+       예: FNG031008 https://u.pcloud.link/publink/show?code=XXXX */
+    const ph = line.trim().match(/^(\S+)[\s,\t]+(https?:\/\/\S*pcloud\S*)$/i);
+    if(ph){
+      const code = (ph[2].match(/[?&]code=([A-Za-z0-9_-]+)/)||[])[1];
+      if(code) photos[ph[1].trim().toUpperCase()] = code;
+      return;
+    }
 
     /* 부킹번호로 시작하는 줄은 "부킹 + 원 스케줄"만 등록한다 (PO 항목 없이도 가능).
        예: KULM92606700 2026-08-02 */
@@ -1482,14 +1575,14 @@ function parsePO(text){
     (map[cur] = map[cur] || []).push(left);
     n++;
   });
-  return { map, eta, bad, n };
+  return { map, eta, photos, bad, n };
 }
 
 /* 카드/사이드바에 넣을 한 줄 요약 — "FNG031002 ×8, FNG031003 ×6 (14)" */
 /* 원 스케줄 대비 지연일 — 없으면 null */
 /* 원 스케줄 대비 지연 임계값 — Worker와 같은 값을 유지해야 한다 */
-const DELAY_WATCH_D = 7;
-const DELAY_ALERT_D = 10;
+const DELAY_WATCH_D = 4;
+const DELAY_ALERT_D = 7;
 function poDelay(s){
   const orig = s.planEta || POETA[s.booking] || s.poEta;
   if(!orig || !s.eta) return null;
@@ -1546,14 +1639,14 @@ async function applyPO(){
   const btn = document.getElementById("posave");
   const txt = document.getElementById("poin").value;
   if(!txt.trim()){ st.textContent="Nothing to apply."; return; }
-  const { map, eta, bad, n } = parsePO(txt);
+  const { map, eta, photos, bad, n } = parsePO(txt);
   const keys = Object.keys(map);
-  if(!keys.length){
+  if(!keys.length && !Object.keys(photos).length){
     st.innerHTML = `No rows parsed. The first line must carry a booking number.`;
     return;
   }
   btn.disabled = true; st.textContent = "Saving to server…";
-  const out = await savePO(map, "merge", eta);
+  const out = await savePO(map, "merge", eta, photos);
   btn.disabled = false;
   renderPOTable();
   if(CUR) render(CUR);
@@ -1567,7 +1660,7 @@ async function clearPO(){
   if(!confirm("Remove ALL PO / container mappings from the server? This affects every device.")) return;
   const st = document.getElementById("postatus");
   st.textContent = "Clearing…";
-  const out = await savePO({}, "replace", {});
+  const out = await savePO({}, "replace", {}, {});
   renderPOTable();
   if(CUR) render(CUR);
   st.textContent = out.ok ? "Cleared on server." : ("Not cleared — " + out.msg);
@@ -1612,6 +1705,62 @@ function tsDwellHTML(s){
   const planTxt = t.plan!==null ? `plan ${t.plan}d → ` : "";
   return `<div class="tsdwell">T/S DWELL <b>${planTxt}${t.cur}d</b> <i>(${lbl})</i>${extra}
     <span class="dim">${fmtDT(s.tsArr)} → ${fmtDT(s.tsDep)}</span></div>`;
+}
+
+
+/* ---------- 로트 사진 (pCloud 공개 폴더) ----------
+   showpublink 로 폴더 목록을 받고 getpubthumb 로 썸네일을 띄운다. 5장씩 넘긴다. */
+const PC_API = "https://api.pcloud.com";
+const pcCache = {};
+async function pcList(code){
+  if(pcCache[code]) return pcCache[code];
+  const r = await fetch(`${PC_API}/showpublink?code=${encodeURIComponent(code)}`,{cache:"no-store"});
+  const j = await r.json();
+  if(j.result!==0) throw new Error(j.error||("pCloud error "+j.result));
+  const meta = j.metadata||{};
+  const files = (meta.contents||(meta.isfolder?[]:[meta]))
+    .filter(f=>!f.isfolder && /\.(jpe?g|png|webp|gif|heic)$/i.test(f.name||""))
+    .sort((a,b)=>String(a.name).localeCompare(String(b.name),undefined,{numeric:true}));
+  pcCache[code] = files;
+  return files;
+}
+const pcThumb = (code,id,size) => `${PC_API}/getpubthumb?code=${encodeURIComponent(code)}&fileid=${id}&size=${size||"320x240"}&crop=1&type=jpg`;
+
+/* 부킹에 걸린 로트들 중 사진이 등록된 것 */
+function lotsWithPhotos(booking){
+  const list = PO[booking]||[];
+  const lots = [...new Set(list.map(v=>{const m=String(v).match(/^(\S+)/);return m?m[1].toUpperCase():"";}))];
+  return lots.filter(l=>PHOTOS[l]);
+}
+
+const PAGE_N = 5;
+function renderGallery(el, lot, code){
+  el.innerHTML = `<div class="gal-h">${lot} <span class="dim">loading photos…</span></div>`;
+  pcList(code).then(files=>{
+    if(!files.length){ el.innerHTML = `<div class="gal-h">${lot} <span class="dim">no images</span></div>`; return; }
+    let page = 0;
+    const pages = Math.ceil(files.length/PAGE_N);
+    const draw = () => {
+      const slice = files.slice(page*PAGE_N,(page+1)*PAGE_N);
+      el.innerHTML = `
+        <div class="gal-h">${lot} <span class="dim">${files.length} photos · ${page+1}/${pages}</span>
+          <span class="gal-nav">
+            <button class="gnav" data-d="-1" ${page===0?"disabled":""}>‹</button>
+            <button class="gnav" data-d="1" ${page>=pages-1?"disabled":""}>›</button>
+          </span></div>
+        <div class="gal">${slice.map(f=>`
+          <a class="gcell" href="${pcThumb(code,f.fileid,"1600x1200")}" target="_blank" rel="noopener"
+             title="${(f.name||"").replace(/"/g,"")}">
+            <img loading="lazy" src="${pcThumb(code,f.fileid,"320x240")}" alt="${(f.name||"").replace(/"/g,"")}">
+            <span class="gname">${f.name||""}</span></a>`).join("")}</div>`;
+      el.querySelectorAll(".gnav").forEach(b=>b.addEventListener("click",e=>{
+        e.stopPropagation(); page = Math.max(0,Math.min(pages-1,page+ +b.dataset.d)); draw();
+      }));
+    };
+    draw();
+  }).catch(e=>{
+    el.innerHTML = `<div class="gal-h">${lot} <span class="warn">photos unavailable — ${e.message||e}</span></div>`;
+  });
 }
 
 /* ---------- PO 팝업 ---------- */
@@ -1674,7 +1823,22 @@ function showPO(s,i){
   p.hidden=false;
   document.querySelector('.tablerow').classList.add('open');
   document.getElementById('poclose').addEventListener('click',e=>{e.stopPropagation();closePO();});
-  p.onclick = e => { if(!e.target.closest('.pocell')) closePO(); };
+  /* 로트별 사진 */
+  const gw = document.getElementById("galwrap");
+  if(gw){
+    const lots = lotsWithPhotos(s.booking);
+    gw.innerHTML = "";
+    lots.forEach(lot=>{
+      const box = document.createElement("div");
+      box.className = "galbox";
+      gw.appendChild(box);
+      renderGallery(box, lot, PHOTOS[lot]);
+    });
+  }
+  p.onclick = e => {
+    if(e.target.closest('.pocell') || e.target.closest('.galbox')) return;
+    closePO();
+  };
 }
 document.addEventListener('keydown',e=>{ if(e.key==="Escape") closePO(); });
 function closePO(){
