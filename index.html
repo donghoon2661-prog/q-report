@@ -135,6 +135,16 @@ html[data-theme="light"] .tile:hover{background:#F0F5F8;border-color:#0F2430}
 #potable td{padding:6px 8px;border-bottom:1px solid var(--hair);font-family:'IBM Plex Mono',monospace}
 #potable td.b{color:var(--buoy)}
 #potable td.l{color:var(--fog)}
+.schist{margin-top:14px;border-top:1px solid var(--line);padding-top:10px}
+.sh-h{font-family:'Barlow Condensed',sans-serif;letter-spacing:.14em;font-size:11px;
+  color:var(--fog);margin-bottom:8px}
+.schist .sh{display:grid;grid-template-columns:96px 1fr;gap:8px;padding:5px 0;
+  font-size:11px;border-bottom:1px solid var(--hair)}
+.schist .st{font-family:'IBM Plex Mono';font-size:10px;color:var(--fog)}
+.schist .sc{font-family:'IBM Plex Mono';font-size:10.5px;color:var(--paper);line-height:1.6}
+.schist .sc s{color:var(--fog)}
+.schist .sc b{color:var(--dock);font-weight:600}
+.schist .sc.dim{color:var(--fog)}
 .evtl{margin-top:14px;border-top:1px solid var(--line);padding-top:10px}
 .evtl .ev{display:grid;grid-template-columns:64px 1fr auto;gap:8px;padding:5px 0;
   font-size:11px;color:var(--fog);border-bottom:1px solid var(--hair)}
@@ -279,6 +289,17 @@ dd .dim{opacity:.65}
 const PO_KEY  = "oqc_po_map_v1";     // 서버 응답 캐시 (오프라인 대비)
 const KEY_KEY = "oqc_refresh_key";   // 저장용 키를 이 브라우저에 기억
 const PO_URL  = API.replace(/\/data$/,"") + "/po";
+const HIST_URL = API.replace(/\/data$/,"") + "/history";
+let HIST = {};
+
+/* 스케줄 변경 이력 (본선/항차/T-S 출항/ETB 변동) */
+async function loadHistory(){
+  try{
+    const r = await fetch(HIST_URL,{cache:"no-store"});
+    HIST = r.ok ? (await r.json() || {}) : {};
+  }catch(_){ HIST = {}; }
+  return HIST;
+}
 let PO = {}, POETA = {};
 
 /* 서버(Worker KV)에서 읽는다. 실패하면 마지막 캐시를 쓴다. */
@@ -903,6 +924,21 @@ function showSide(s,L2){
   const rRow = s.rollover
     ? `<dt>ROLLOVER</dt><dd class="warn">Not loaded on ${s.vessel} ${s.voyage} — ${s.rolloverDays||0}d past ETD</dd>` : "";
 
+  /* 스케줄 변경 이력 — tsDep(SIN ETD)이 밀리는지 추적하는 용도 */
+  const log = (HIST[s.booking]||[]).slice().reverse();
+  const FL = {vessel:"VESSEL", voyage:"VOYAGE", tsDep:"SIN ETD", eta:"LA ETB", destEta:"DEST ETA"};
+  const shortV = v => /^\d{4}-\d\d-\d\dT/.test(v||"") ? fmtDT(v) : v;
+  const histHTML = log.length
+    ? `<div class="schist"><div class="sh-h">SCHEDULE CHANGES</div>` + log.map(e=>{
+        if(e.first) return `<div class="sh"><span class="st">${toKST(e.at)}</span>`
+          + `<span class="sc dim">first seen · SIN ETD ${fmtDT(e.tsDep)} · LA ETB ${fmtDT(e.eta)}</span></div>`;
+        return `<div class="sh"><span class="st">${toKST(e.at)}</span><span class="sc">`
+          + (e.changes||[]).map(c=>`${FL[c.field]||c.label} <s>${shortV(c.from)}</s> → <b>${shortV(c.to)}</b>`).join("<br>")
+          + `</span></div>`;
+      }).join("") + `</div>`
+    : `<div class="schist"><div class="sh-h">SCHEDULE CHANGES</div>
+       <div class="sh"><span class="sc dim">No changes recorded yet — tracking started with this build.</span></div></div>`;
+
   /* 최근 이벤트 타임라인 */
   const ev = Array.isArray(s.events) && s.events.length
     ? `<div class="evtl">${s.events.slice(0,6).map((e,k)=>
@@ -927,7 +963,7 @@ function showSide(s,L2){
       <dt>FEEDER</dt><dd>${s.feeder||"— (direct)"}</dd>
       ${poRow}${dRow}${rRow}${chk}
       <dt>LATEST</dt><dd>${s.last||"—"}</dd>
-    </dl>${ev}`;
+    </dl>${histHTML}${ev}`;
 }
 function select(s,i,pan){
   showSide(s,locate(s));
@@ -1159,6 +1195,17 @@ function addBooking(){
 const PO_KEY  = "oqc_po_map_v1";     // 서버 응답 캐시 (오프라인 대비)
 const KEY_KEY = "oqc_refresh_key";   // 저장용 키를 이 브라우저에 기억
 const PO_URL  = API.replace(/\/data$/,"") + "/po";
+const HIST_URL = API.replace(/\/data$/,"") + "/history";
+let HIST = {};
+
+/* 스케줄 변경 이력 (본선/항차/T-S 출항/ETB 변동) */
+async function loadHistory(){
+  try{
+    const r = await fetch(HIST_URL,{cache:"no-store"});
+    HIST = r.ok ? (await r.json() || {}) : {};
+  }catch(_){ HIST = {}; }
+  return HIST;
+}
 let PO = {}, POETA = {};
 
 /* 서버(Worker KV)에서 읽는다. 실패하면 마지막 캐시를 쓴다. */
@@ -1496,9 +1543,9 @@ function unlock(){
   document.getElementById("gate").remove();
   show("menu"); setView('map');
   Promise.all([
-    loadPO(),
+    loadPO(), loadHistory(),
     fetch(source(),{cache:"no-store"}).then(r=>r.ok?r.json():Promise.reject()).catch(()=>FALLBACK)
-  ]).then(([,data])=>render(data));
+  ]).then(([,,data])=>render(data));
 }
 document.getElementById("gate-go").addEventListener("click",unlock);
 document.getElementById("pw").addEventListener("keydown",e=>{if(e.key==="Enter")unlock();});
