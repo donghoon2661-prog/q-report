@@ -175,6 +175,10 @@ html[data-theme="light"] .tile:hover{background:#F0F5F8;border-color:#0F2430}
 .gal-title{margin-top:16px;font-family:'Barlow Condensed',sans-serif;letter-spacing:.14em;
   font-size:11px;color:var(--fog);border-top:1px solid var(--line);padding-top:12px}
 .galbox.nolink{opacity:.55}
+.pocell.has-photo{cursor:pointer}
+.pocell.has-photo:hover{border-color:var(--sail)}
+.pocell.sel{border-color:var(--sail);background:rgba(63,208,166,.10)}
+.gal-title.dim{opacity:.6}
 .gal-h b{color:var(--paper)}
 .galbox{margin-top:12px;border-left:2px solid var(--line);padding:2px 0 2px 10px;cursor:default}
 .gal-h{font-family:'IBM Plex Mono';font-size:11px;color:var(--paper);margin-bottom:8px;
@@ -185,12 +189,19 @@ html[data-theme="light"] .tile:hover{background:#F0F5F8;border-color:#0F2430}
   font-size:14px;line-height:1;border-radius:3px}
 .gnav:hover:not(:disabled){color:var(--paper);border-color:var(--fog)}
 .gnav:disabled{opacity:.3;cursor:default}
-.gal{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
-@media(max-width:700px){.gal{grid-template-columns:repeat(2,1fr)}}
-.gcell{display:block;border:1px solid var(--line);background:var(--well);text-decoration:none}
-.gcell img{width:100%;height:88px;object-fit:cover;display:block}
-.gcell .gname{display:block;padding:4px 6px;font-family:'IBM Plex Mono';font-size:9px;
+/* 원본이 세로 사진(810x1080)이라 썸네일도 세로 비율로 잡는다.
+   minmax(0,1fr)이 없으면 격자가 컨테이너를 밀어내 레이아웃이 깨진다. */
+.gal{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px;
+  max-width:100%;box-sizing:border-box}
+.gcell{display:block;border:1px solid var(--line);background:var(--well);
+  text-decoration:none;min-width:0;overflow:hidden}
+.gcell img{width:100%;aspect-ratio:3/4;height:auto;object-fit:cover;display:block}
+.gcell .gname{display:block;padding:3px 5px;font-family:'IBM Plex Mono';font-size:8.5px;
   color:var(--fog);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+@media(max-width:700px){
+  .gal{gap:5px}
+  .gcell .gname{font-size:7.5px;padding:2px 4px}
+}
 .gcell:hover{border-color:var(--sail)}
 .tsdwell{font-family:'IBM Plex Mono';font-size:11.5px;color:var(--fog);
   border:1px solid var(--line);padding:9px 12px;margin:0 0 14px;line-height:1.8}
@@ -402,8 +413,9 @@ function parsePO(text){
   text.split(/\r?\n/).forEach((line,ln)=>{
     if(!line.trim()) return;
 
-    /* 로트 + pCloud 공개 링크 → 사진 폴더 등록
-       예: FNG031008 https://u.pcloud.link/publink/show?code=XXXX */
+    /* 부킹번호 + pCloud 상위 폴더 링크 → 그 부킹의 사진 폴더 등록
+       예: KULM40326600 https://u.pcloud.link/publink/show?code=XXXX
+       (상위 폴더 안에 FNG-0310-07-12 같은 컨테이너별 하위 폴더가 들어 있다) */
     const ph = line.trim().match(/^(\S+)[\s,\t]+(https?:\/\/\S*pcloud\S*)$/i);
     if(ph){
       const code = (ph[2].match(/[?&]code=([A-Za-z0-9_-]+)/)||[])[1];
@@ -583,50 +595,65 @@ const PC_API  = "https://api.pcloud.com";
 const PC_PROXY = API.replace(/\/data$/,"") + "/pcloud";
 const pcCache = {};
 /* 브라우저에서 api.pcloud.com 을 직접 부르면 CORS로 막히므로 워커를 경유한다 */
-async function pcList(code){
-  if(pcCache[code]) return pcCache[code];
-  const r = await fetch(`${PC_PROXY}?code=${encodeURIComponent(code)}`,{cache:"no-store"});
+async function pcList(code, folderid){
+  const key = code + "|" + (folderid||"");
+  if(pcCache[key]) return pcCache[key];
+  const u = `${PC_PROXY}?code=${encodeURIComponent(code)}` + (folderid?`&folderid=${folderid}`:"");
+  const r = await fetch(u,{cache:"no-store"});
   const j = await r.json();
   if(j.error) throw new Error(j.error);
-  pcCache[code] = j.files || [];
-  return pcCache[code];
+  pcCache[key] = j;
+  return j;
 }
-const pcThumb = (code,id,size) => `${PC_API}/getpubthumb?code=${encodeURIComponent(code)}&fileid=${id}&size=${size||"320x240"}&crop=1&type=jpg`;
+const pcThumb = (code,id,size) => `${PC_API}/getpubthumb?code=${encodeURIComponent(code)}&fileid=${id}&size=${size||"240x320"}&crop=1&type=jpg`;
 
-/* 부킹에 걸린 로트 전체 — 사진 링크 유무와 컨테이너 수를 함께 준다 */
-function bookingLots(booking){
-  const list = PO[booking]||[];
-  const cnt = {};
-  list.forEach(v=>{
-    const m = String(v).match(/^(\S+)/);
-    if(!m) return;
-    const k = m[1].toUpperCase();
-    cnt[k] = (cnt[k]||0) + 1;
-  });
-  return Object.keys(cnt).sort().map(lot=>({ lot, n: cnt[lot], code: PHOTOS[lot] || null }));
+/* PO 항목 "FNG031007 (Container 12 of 18)" → 폴더명 "FNG-0310-07-12"
+   상위 폴더 하위에 이 이름의 폴더가 있고 그 안에 해당 컨테이너 사진이 들어 있다. */
+function poFolderName(poText){
+  const m = String(poText).match(/^([A-Z]+)(\d+)\s*\(\s*Container\s*(\d+)\s*of/i);
+  if(!m) return null;
+  const digits = m[2];                       // 031007
+  if(digits.length < 6) return null;
+  const a = digits.slice(0,4), b = digits.slice(4);   // 0310 / 07
+  const n = String(m[3]).padStart(2,"0");
+  return `${m[1].toUpperCase()}-${a}-${b}-${n}`;      // FNG-0310-07-12
 }
 
 const PAGE_N = 5;
-function renderGallery(el, lot, code, nCntr){
-  const head = txt => `<div class="gal-h"><b>${lot}</b> <span class="dim">${nCntr} cntr</span> ${txt}</div>`;
-  if(!code){ el.innerHTML = head(`<span class="dim">no photo link registered</span>`); return; }
-  el.innerHTML = head(`<span class="dim">loading photos…</span>`);
-  pcList(code).then(files=>{
-    if(!files.length){ el.innerHTML = head(`<span class="dim">no images in folder</span>`); return; }
+
+/* 상위 폴더에서 하위 폴더 목록을 받아 이름으로 folderid를 찾는다 */
+async function pcFolderId(code, folderName){
+  const top = await pcList(code);
+  const hit = (top.folders||[]).find(f =>
+    String(f.name).trim().toUpperCase() === folderName.toUpperCase());
+  return hit ? hit.folderid : null;
+}
+
+function renderGallery(el, label, code, folderName){
+  const head = txt => `<div class="gal-h"><b>${label}</b> ${txt}</div>`;
+  if(!code){ el.innerHTML = head(`<span class="dim">no photo link for this booking</span>`); return; }
+  el.innerHTML = head(`<span class="dim">loading…</span>`);
+
+  pcFolderId(code, folderName).then(fid=>{
+    if(!fid) throw new Error(`folder "${folderName}" not found`);
+    return pcList(code, fid);
+  }).then(data=>{
+    const files = data.files||[];
+    if(!files.length){ el.innerHTML = head(`<span class="dim">no images</span>`); return; }
     let page = 0;
     const pages = Math.ceil(files.length/PAGE_N);
     const draw = () => {
       const slice = files.slice(page*PAGE_N,(page+1)*PAGE_N);
       el.innerHTML = head(
-          `<span class="dim">${files.length} photos · ${page+1}/${pages}</span>
+          `<span class="dim">${folderName} · ${files.length} photos · ${page+1}/${pages}</span>
            <span class="gal-nav">
              <button class="gnav" data-d="-1" ${page===0?"disabled":""}>‹</button>
              <button class="gnav" data-d="1" ${page>=pages-1?"disabled":""}>›</button>
            </span>`)
         + `<div class="gal">${slice.map(f=>`
-          <a class="gcell" href="${pcThumb(code,f.fileid,"1600x1200")}" target="_blank" rel="noopener"
+          <a class="gcell" href="${pcThumb(code,f.fileid,"1200x1600")}" target="_blank" rel="noopener"
              title="${(f.name||"").replace(/"/g,"")}">
-            <img loading="lazy" src="${pcThumb(code,f.fileid,"320x240")}" alt="${(f.name||"").replace(/"/g,"")}">
+            <img loading="lazy" src="${pcThumb(code,f.fileid,"240x320")}" alt="${(f.name||"").replace(/"/g,"")}">
             <span class="gname">${f.name||""}</span></a>`).join("")}</div>`;
       el.querySelectorAll(".gnav").forEach(b=>b.addEventListener("click",e=>{
         e.stopPropagation(); page = Math.max(0,Math.min(pages-1,page+ +b.dataset.d)); draw();
@@ -646,7 +673,8 @@ function renderGallery(el, lot, code, nCntr){
 #popanel{cursor:pointer}
 #popanel .pogrid,#popanel .close{cursor:default}
 #popanel .close{cursor:pointer}
-#popanel{border:1px solid var(--sail);background:var(--hull);padding:16px}
+#popanel{border:1px solid var(--sail);background:var(--hull);padding:16px;
+  max-width:100%;box-sizing:border-box;overflow-x:hidden}
 #popanel[hidden]{display:none}
 #popanel .close{float:right;background:none;border:1px solid var(--line);color:var(--fog);
   font-family:'IBM Plex Mono';font-size:13px;line-height:1;padding:5px 10px;cursor:pointer}
@@ -1555,8 +1583,9 @@ function parsePO(text){
   text.split(/\r?\n/).forEach((line,ln)=>{
     if(!line.trim()) return;
 
-    /* 로트 + pCloud 공개 링크 → 사진 폴더 등록
-       예: FNG031008 https://u.pcloud.link/publink/show?code=XXXX */
+    /* 부킹번호 + pCloud 상위 폴더 링크 → 그 부킹의 사진 폴더 등록
+       예: KULM40326600 https://u.pcloud.link/publink/show?code=XXXX
+       (상위 폴더 안에 FNG-0310-07-12 같은 컨테이너별 하위 폴더가 들어 있다) */
     const ph = line.trim().match(/^(\S+)[\s,\t]+(https?:\/\/\S*pcloud\S*)$/i);
     if(ph){
       const code = (ph[2].match(/[?&]code=([A-Za-z0-9_-]+)/)||[])[1];
@@ -1736,15 +1765,17 @@ const PC_API  = "https://api.pcloud.com";
 const PC_PROXY = API.replace(/\/data$/,"") + "/pcloud";
 const pcCache = {};
 /* 브라우저에서 api.pcloud.com 을 직접 부르면 CORS로 막히므로 워커를 경유한다 */
-async function pcList(code){
-  if(pcCache[code]) return pcCache[code];
-  const r = await fetch(`${PC_PROXY}?code=${encodeURIComponent(code)}`,{cache:"no-store"});
+async function pcList(code, folderid){
+  const key = code + "|" + (folderid||"");
+  if(pcCache[key]) return pcCache[key];
+  const u = `${PC_PROXY}?code=${encodeURIComponent(code)}` + (folderid?`&folderid=${folderid}`:"");
+  const r = await fetch(u,{cache:"no-store"});
   const j = await r.json();
   if(j.error) throw new Error(j.error);
-  pcCache[code] = j.files || [];
-  return pcCache[code];
+  pcCache[key] = j;
+  return j;
 }
-const pcThumb = (code,id,size) => `${PC_API}/getpubthumb?code=${encodeURIComponent(code)}&fileid=${id}&size=${size||"320x240"}&crop=1&type=jpg`;
+const pcThumb = (code,id,size) => `${PC_API}/getpubthumb?code=${encodeURIComponent(code)}&fileid=${id}&size=${size||"240x320"}&crop=1&type=jpg`;
 
 /* 부킹에 걸린 로트 전체 — 사진 링크 유무와 컨테이너 수를 함께 준다 */
 function bookingLots(booking){
@@ -1777,9 +1808,9 @@ function renderGallery(el, lot, code, nCntr){
              <button class="gnav" data-d="1" ${page>=pages-1?"disabled":""}>›</button>
            </span>`)
         + `<div class="gal">${slice.map(f=>`
-          <a class="gcell" href="${pcThumb(code,f.fileid,"1600x1200")}" target="_blank" rel="noopener"
+          <a class="gcell" href="${pcThumb(code,f.fileid,"1200x1600")}" target="_blank" rel="noopener"
              title="${(f.name||"").replace(/"/g,"")}">
-            <img loading="lazy" src="${pcThumb(code,f.fileid,"320x240")}" alt="${(f.name||"").replace(/"/g,"")}">
+            <img loading="lazy" src="${pcThumb(code,f.fileid,"240x320")}" alt="${(f.name||"").replace(/"/g,"")}">
             <span class="gname">${f.name||""}</span></a>`).join("")}</div>`;
       el.querySelectorAll(".gnav").forEach(b=>b.addEventListener("click",e=>{
         e.stopPropagation(); page = Math.max(0,Math.min(pages-1,page+ +b.dataset.d)); draw();
@@ -1820,9 +1851,12 @@ function showPO(s,i){
       const v = list[k];
       if(!v){ out += `<div class="pocell empty">—</div>`; continue; }
       const m = v.match(/^(\S+)\s*\(Container\s*(\d+)\s*of\s*(\d+)\)/i);
+      const fn = poFolderName(v);
+      const attr = fn ? ` data-folder="${fn}" data-k="${k}" title="Click to view photos — ${fn}"` : "";
+      const cls = fn ? "pocell has-photo" : "pocell";
       out += m
-        ? `<div class="pocell"><span class="po">${m[1]}</span><span class="cn">${m[2]} / ${m[3]}</span></div>`
-        : `<div class="pocell"><span class="po">${v}</span></div>`;
+        ? `<div class="${cls}"${attr}><span class="po">${m[1]}</span><span class="cn">${m[2]} / ${m[3]}</span></div>`
+        : `<div class="${cls}"${attr}><span class="po">${v}</span></div>`;
     }
     cells = `<div class="pogrid">${out}</div>
       <div class="polegend">
@@ -1852,18 +1886,25 @@ function showPO(s,i){
   p.hidden=false;
   document.querySelector('.tablerow').classList.add('open');
   document.getElementById('poclose').addEventListener('click',e=>{e.stopPropagation();closePO();});
-  /* 로트별 사진 */
+  /* PO 칸을 누르면 그 컨테이너 폴더의 사진을 아래에 표시 */
   const gw = document.getElementById("galwrap");
+  const code = PHOTOS[s.booking] || null;
   if(gw){
-    const lots = bookingLots(s.booking);
-    gw.innerHTML = lots.length
-      ? `<div class="gal-title">PHOTOS BY PO / LOT — ${lots.length} lot(s) in this booking</div>` : "";
-    lots.forEach(({lot,n,code})=>{
-      const box = document.createElement("div");
-      box.className = "galbox" + (code ? "" : " nolink");
-      gw.appendChild(box);
-      renderGallery(box, lot, code, n);
-    });
+    gw.innerHTML = code
+      ? `<div class="gal-title">Select a PO / container above to see its photos</div>`
+      : `<div class="gal-title dim">No photo link registered for ${s.booking}</div>`;
+    if(code){
+      p.querySelectorAll(".pocell.has-photo").forEach(cell=>{
+        cell.addEventListener("click", ev=>{
+          ev.stopPropagation();
+          p.querySelectorAll(".pocell").forEach(c=>c.classList.remove("sel"));
+          cell.classList.add("sel");
+          const label = (list[+cell.dataset.k]||"").replace(/\s*\(/," (");
+          gw.innerHTML = `<div class="galbox"></div>`;
+          renderGallery(gw.querySelector(".galbox"), label, code, cell.dataset.folder);
+        });
+      });
+    }
   }
   p.onclick = e => {
     if(e.target.closest('.pocell') || e.target.closest('.galbox')) return;
