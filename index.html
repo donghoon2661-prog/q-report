@@ -1847,7 +1847,8 @@ function showPO(s,i){
   p.innerHTML = `<button class="close" id="poclose" title="Close">✕</button>
      <h3>${s.vessel} ${s.voyage}</h3>
      <div class="sb">${s.booking} · ${list.length} container(s)</div>
-     ${tsDwellHTML(s)}${eta}${cells}${note}<p class="hintclose">TAP ANYWHERE TO CLOSE · ESC</p>`;
+     ${tsDwellHTML(s)}${eta}${cells}${note}<div id="galwrap"></div>
+     <p class="hintclose">TAP ANYWHERE TO CLOSE · ESC</p>`;
   p.hidden=false;
   document.querySelector('.tablerow').classList.add('open');
   document.getElementById('poclose').addEventListener('click',e=>{e.stopPropagation();closePO();});
