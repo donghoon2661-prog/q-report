@@ -761,12 +761,17 @@ function locate(s){
   if(!Array.isArray(s.route) || s.route.length < 2) return null;
   const nm = portNames(s);
   const r = s.route.map(wrap);
-  const i = Math.min(s.idx, r.length - 2);
-  const a = r[i], b = r[i+1], f = s.ratio;
+  /* HMM은 위치를 못 잡으면 currentRouteIndex 를 -1 로 주기도 한다.
+     범위를 벗어난 값이 들어오면 좌표 참조에서 터지므로 반드시 보정한다. */
+  const idx = Number.isFinite(s.idx) ? s.idx : 0;
+  const i = Math.max(0, Math.min(idx, r.length - 2));
+  const f = Number.isFinite(s.ratio) ? Math.max(0, Math.min(1, s.ratio)) : 0;
+  const a = r[i], b = r[i+1];
+  if(!a || !b) return null;
   const pos = [a[0] + (b[0]-a[0])*f, a[1] + (b[1]-a[1])*f];
 
   const atPort = f < 0.01;
-  const done = i + f, total = r.length - 1;
+  const done = i + f, total = Math.max(1, r.length - 1);
   return {
     pos, i, f,
     names: nm,
