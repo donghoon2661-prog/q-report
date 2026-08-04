@@ -921,6 +921,13 @@ const fmtD  = s => !s ? "—" : s.slice(5,10).replace("-","/");
 /* ---------- MAP ---------- */
 let map, markers=[];
 function initMap(data){
+  /* render()가 여러 번 불릴 수 있다 — 기존 지도를 먼저 파기하지 않으면
+     Leaflet이 "Map container is already initialized"로 실패한다. */
+  if(map){
+    try{ map.remove(); }catch(_){}
+    map = null; tileLayer = null;
+  }
+  markers = [];
   map = L.map('map',{worldCopyJump:false,minZoom:2}).setView([25,175],3);
   tileLayer = L.tileLayer(TILE[THEME],
     {attribution:'&copy; OpenStreetMap &copy; CARTO', subdomains:'abcd', maxZoom:10}).addTo(map);
@@ -1563,6 +1570,16 @@ function closePO(){
 
 /* ---------- 라우팅 ---------- */
 function render(data){
+  /* 같은 부킹이 두 번 들어올 수 있다(Add 재시도 등) — 최신 항목만 남긴다 */
+  const seen = new Map();
+  (data.shipments||[]).forEach(s=>{
+    const old = seen.get(s.booking);
+    if(!old) { seen.set(s.booking, s); return; }
+    const t = x => Date.parse(String(x.checkedAt||"").replace(" ","T").replace("Z","")+"Z") || 0;
+    if(t(s) >= t(old)) seen.set(s.booking, s);
+  });
+  data.shipments = [...seen.values()];
+
   const before = data.shipments.length;
   data.shipments = sortByETD(prune(data.shipments));
   const dropped = before - data.shipments.length;
@@ -1573,9 +1590,15 @@ function render(data){
   document.getElementById("cardlist").innerHTML=data.shipments.map(cardHTML).join("");
   if(dropped) document.getElementById("rstatus").innerHTML=
     `Removed <b>${dropped}</b> shipment(s) that arrived over 7 days ago.`;
-  alertBanner(data);
-  initMap(data); buildTable(data); buildOverview(data.shipments);
-  renderPOTable();
+  /* 한 구역이 실패해도 나머지 화면은 그린다 */
+  const safe = (fn,label)=>{ try{ fn(); }catch(e){ console.error(label,e);
+    const el=document.getElementById("rstatus");
+    if(el) el.innerHTML += `<div class="warn">${label} failed — ${e.message||e}</div>`; } };
+  safe(()=>alertBanner(data),"Alert banner");
+  safe(()=>initMap(data),"Map");
+  safe(()=>buildTable(data),"Table");
+  safe(()=>buildOverview(data.shipments),"Overview");
+  safe(()=>renderPOTable(),"PO table");
 }
 function setView(v){
   document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('on',t.dataset.view===v));
