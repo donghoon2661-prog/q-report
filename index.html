@@ -579,19 +579,17 @@ function tsDwellHTML(s){
 
 /* ---------- 로트 사진 (pCloud 공개 폴더) ----------
    showpublink 로 폴더 목록을 받고 getpubthumb 로 썸네일을 띄운다. 5장씩 넘긴다. */
-const PC_API = "https://api.pcloud.com";
+const PC_API  = "https://api.pcloud.com";
+const PC_PROXY = API.replace(/\/data$/,"") + "/pcloud";
 const pcCache = {};
+/* 브라우저에서 api.pcloud.com 을 직접 부르면 CORS로 막히므로 워커를 경유한다 */
 async function pcList(code){
   if(pcCache[code]) return pcCache[code];
-  const r = await fetch(`${PC_API}/showpublink?code=${encodeURIComponent(code)}`,{cache:"no-store"});
+  const r = await fetch(`${PC_PROXY}?code=${encodeURIComponent(code)}`,{cache:"no-store"});
   const j = await r.json();
-  if(j.result!==0) throw new Error(j.error||("pCloud error "+j.result));
-  const meta = j.metadata||{};
-  const files = (meta.contents||(meta.isfolder?[]:[meta]))
-    .filter(f=>!f.isfolder && /\.(jpe?g|png|webp|gif|heic)$/i.test(f.name||""))
-    .sort((a,b)=>String(a.name).localeCompare(String(b.name),undefined,{numeric:true}));
-  pcCache[code] = files;
-  return files;
+  if(j.error) throw new Error(j.error);
+  pcCache[code] = j.files || [];
+  return pcCache[code];
 }
 const pcThumb = (code,id,size) => `${PC_API}/getpubthumb?code=${encodeURIComponent(code)}&fileid=${id}&size=${size||"320x240"}&crop=1&type=jpg`;
 
@@ -1734,19 +1732,17 @@ function tsDwellHTML(s){
 
 /* ---------- 로트 사진 (pCloud 공개 폴더) ----------
    showpublink 로 폴더 목록을 받고 getpubthumb 로 썸네일을 띄운다. 5장씩 넘긴다. */
-const PC_API = "https://api.pcloud.com";
+const PC_API  = "https://api.pcloud.com";
+const PC_PROXY = API.replace(/\/data$/,"") + "/pcloud";
 const pcCache = {};
+/* 브라우저에서 api.pcloud.com 을 직접 부르면 CORS로 막히므로 워커를 경유한다 */
 async function pcList(code){
   if(pcCache[code]) return pcCache[code];
-  const r = await fetch(`${PC_API}/showpublink?code=${encodeURIComponent(code)}`,{cache:"no-store"});
+  const r = await fetch(`${PC_PROXY}?code=${encodeURIComponent(code)}`,{cache:"no-store"});
   const j = await r.json();
-  if(j.result!==0) throw new Error(j.error||("pCloud error "+j.result));
-  const meta = j.metadata||{};
-  const files = (meta.contents||(meta.isfolder?[]:[meta]))
-    .filter(f=>!f.isfolder && /\.(jpe?g|png|webp|gif|heic)$/i.test(f.name||""))
-    .sort((a,b)=>String(a.name).localeCompare(String(b.name),undefined,{numeric:true}));
-  pcCache[code] = files;
-  return files;
+  if(j.error) throw new Error(j.error);
+  pcCache[code] = j.files || [];
+  return pcCache[code];
 }
 const pcThumb = (code,id,size) => `${PC_API}/getpubthumb?code=${encodeURIComponent(code)}&fileid=${id}&size=${size||"320x240"}&crop=1&type=jpg`;
 
