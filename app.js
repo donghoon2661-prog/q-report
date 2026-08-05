@@ -241,6 +241,15 @@ function locate(s){
   };
 }
 
+/* STALE이 며칠째 지속되고 있는지. 3일 이상이면 경고색으로 승격한다. */
+const STALE_WARN_DAYS = 3;
+function staleAgeDays(s){
+  if(!s.staleSince) return 0;
+  const t = Date.parse(String(s.staleSince).replace(" ","T").replace("Z","")+"Z");
+  if(!Number.isFinite(t)) return 0;
+  return (Date.now() - t) / 86400000;
+}
+
 /* ---------- 정렬 · 만료 ---------- */
 /* 값이 없거나 형식이 어긋나면 NaN이 되어 정렬이 무너지므로 null로 정규화한다 */
 const TS = s => { const t = s ? new Date(String(s).replace(" ","T")+"Z").getTime() : NaN;
@@ -414,7 +423,9 @@ function buildTable(data){
 function cardHTML(s){
   const L2 = locate(s);
   const pre = s.preShipment ? `<span class="dtag pre">NOT SHIPPED</span>` : "";
-  const stale = s.staleItem ? `<span class="tag t-stale" title="이 건은 최근 조회에 실패해 이전 값이 표시됩니다">STALE</span>` : "";
+  const staleOld = s.staleItem && staleAgeDays(s) >= STALE_WARN_DAYS;
+  const stale = s.staleItem
+    ? `<span class="tag t-stale${staleOld?" t-stale-old":""}" title="이 건은 최근 조회에 실패해 이전 값이 표시됩니다${staleOld?` (${Math.floor(staleAgeDays(s))}일째)`:""}">STALE</span>` : "";
 
   let railHTML;
   if(!L2){
@@ -633,7 +644,7 @@ function rowsHTML(list){
   return list.map((s,i)=>`
     <tr data-i="${i}">
       <td><span class="nm">${s.vessel}</span><span class="vy">${s.voyage}</span>
-          <span class="bk">${s.booking} · ${s.cntrQty||"—"} CNTR${s.staleItem?" · STALE":""}</span></td>
+          <span class="bk">${s.booking} · ${s.cntrQty||"—"} CNTR${s.staleItem?` · <b class="stale-txt${staleAgeDays(s)>=STALE_WARN_DAYS?" old":""}">STALE</b>`:""}</span></td>
       <td data-l="PKG ETD"><span class="dt">${fmtDT(s.polDep)}</span><span class="est">${TS(s.polDep)!==null && TS(s.polDep)<=now?"actual":"scheduled"}</span></td>
       <td data-l="SIN ETD"><span class="dt">${fmtDT(s.tsDep)}</span><span class="est">${TS(s.tsDep)!==null && TS(s.tsDep)<=now?"actual":"scheduled"}</span></td>
       <td data-l="LA ETB"><span class="dt">${fmtDT(s.eta)}</span>${gapBox(s)}<span class="est">ETB</span></td>
