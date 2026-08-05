@@ -37,6 +37,7 @@ const I18N = {
     datePanel:'제조일자 → 워크시트 → 백데이터',
     lot:'Lot', sector:'섹터', s1off:'S1 Off-spec', s2near:'S2 근접',
     resolvedTag:'해소됨', noDetect:'신 기준(v10.8) 탐지 없음 — 전 항목 스펙 이내',
+    resolvedReasonPrefix:'해소 사유', resolvedDatePrefix:'해소일', resolvedReasonTypo:'오타 정정',
     off:'Off-spec 한계 (S1)', near:'근접 밴드 경계 (S2)', worstByLot:'Lot 최악값',
     mfgMonth:'제조월', sheetCount:'워크시트', clickForFiles:'개 · 클릭하여 파일 목록',
     openBackdata:'→ 백데이터 열기', sectors_:'섹터', cellHighlight:'셀 강조 = v10.8 기준 Off-spec(적) / 근접(황)',
@@ -53,6 +54,7 @@ const I18N = {
     datePanel:'Mfg Date → Worksheet → Backdata',
     lot:'Lot', sector:'Sectors', s1off:'S1 Off-spec', s2near:'S2 Near-limit',
     resolvedTag:'Resolved', noDetect:'No detections under v10.8 criteria — all items within spec',
+    resolvedReasonPrefix:'Resolved reason', resolvedDatePrefix:'Resolved on', resolvedReasonTypo:'Typo correction',
     off:'Off-spec limit (S1)', near:'Near-limit boundary (S2)', worstByLot:'Worst value by Lot',
     mfgMonth:'Mfg month', sheetCount:'worksheet(s)', clickForFiles:' · click for file list',
     openBackdata:'→ Open backdata', sectors_:'sectors', cellHighlight:'Highlighted cells = v10.8 Off-spec (red) / Near-limit (yellow)',
@@ -66,6 +68,10 @@ const I18N = {
 function t(key){ return I18N[LANG][key]; }
 function noteOf(d){ return LANG==='en' && d.note_en ? d.note_en : d.note; }
 function whyOf(d){ return LANG==='en' && d.why_en ? d.why_en : d.why; }
+function resolvedReasonText(d){
+  if(d.resolved_reason==='TYPO') return t('resolvedReasonTypo');
+  return d.resolved_reason || '—';
+}
 
 /* index.json → 각 시트 JSON 병렬 로드 → DATA 형태로 조립 */
 async function loadCOA(){
@@ -100,7 +106,8 @@ function coaError(msg){
   st.id = 'qres-style';
   st.textContent = '#qview .det-row.resolved{opacity:.55}'+
     '#qview .resolved-tag{font-family:var(--mono);font-size:9.5px;letter-spacing:.06em;'+
-    'color:var(--ok,#3FCF8E);border:1px solid var(--ok,#3FCF8E);border-radius:10px;padding:1px 7px;margin-right:4px}'+
+    'color:var(--ok,#3FCF8E);border:1px solid var(--ok,#3FCF8E);border-radius:10px;padding:1px 7px;margin-right:4px;cursor:pointer}'+
+    '#qview .resolved-detail{font-family:var(--mono);font-size:10px;color:var(--ok,#3FCF8E);margin-top:4px}'+
     '#qview .lang-toggle{font-family:var(--mono);font-size:11px;color:var(--muted,#7E8AA0);'+
     'display:flex;align-items:center;gap:4px;user-select:none;margin-left:12px}'+
     '#qview .lang-toggle span{cursor:pointer;padding:3px 8px;border-radius:12px;border:1px solid transparent}'+
@@ -238,11 +245,23 @@ function buildQuality(){
     dl.innerHTML = dets.length ? dets.map(d=>
       '<div class="det-row'+(d.resolved?' resolved':'')+'" style="border-left-color:var(--g'+d.grade+')">'+
         '<div class="top"><span class="grade '+d.grade+'">'+d.grade+'</span>'+
-        (d.resolved ? '<span class="resolved-tag">'+t('resolvedTag')+'</span>' : '')+
+        (d.resolved ? '<span class="resolved-tag" data-toggle-reason>'+t('resolvedTag')+'</span>' : '')+
         '<span class="item">'+d.size+' / '+d.item+'</span><span class="val">'+d.gv+'</span></div>'+
         '<div class="note">'+noteOf(d)+'</div>'+
+        (d.resolved ? '<div class="resolved-detail" style="display:none">'+
+          t('resolvedReasonPrefix')+': '+resolvedReasonText(d)+
+          (d.resolved_date ? ' · '+t('resolvedDatePrefix')+' '+d.resolved_date : '')+
+          '</div>' : '')+
         '<div class="lot">'+t('lot')+' '+d.lot+' · p.'+d.pages+' · '+t('cell')+' '+d.cell+'</div></div>').join('')
       : '<div class="empty-note">'+t('noDetect')+'</div>';
+    dl.querySelectorAll('[data-toggle-reason]').forEach(tag=>{
+      tag.addEventListener('click', e=>{
+        e.stopPropagation();
+        const row = tag.closest('.det-row');
+        const detail = row.querySelector('.resolved-detail');
+        if(detail) detail.style.display = detail.style.display==='none' ? 'block' : 'none';
+      });
+    });
     btn.addEventListener('click',()=>{
       const open = dl.style.display!=='none';
       dl.style.display = open?'none':'block';
@@ -252,6 +271,10 @@ function buildQuality(){
   });
 
   /* ── 중앙 차트 ── */
+  /* 차트 섹션 전체를 try/catch로 감싼다 — 여기서 예외가 나도
+     아래 우측 패널(제조일자→백데이터)과 모달 이벤트 바인딩은 반드시 실행되게 하기 위함.
+     이전에 이 경계가 없어서 Chart.js 쪽 에러 하나가 우측 패널 전체를 날린 적이 있었다. */
+  try {
   const ichips = document.getElementById('ichips');
   let curItem = ITEMS.find(i=>i.id==='fin');
   ITEMS.forEach(it=>{
@@ -312,6 +335,9 @@ function buildQuality(){
       '<div class="mcard"><div class="l">'+t('status')+'</div><div class="v '+cls+'">'+(cls==='bad'?t('statusOff'):cls==='warn'?t('statusNear'):t('statusOk'))+'</div></div>';
   }
   draw();
+  } catch(chartErr) {
+    console.error('[quality] chart section failed, continuing with other panels:', chartErr);
+  }
 
   /* ── 우측: 제조일자 ── */
   const byDate={};
