@@ -379,6 +379,7 @@ function select(s,i,pan){
 }
 
 /* ---------- 표 ---------- */
+const SIGNAL_DAYS = 5;   /* 느낌표 표시 유지 기간 — SIGNAL_DAYS를 쓰는 GAP_REMARK보다 먼저 선언해야 한다 */
 const GAP_REMARK = `<p class="gapremark">The <b>!</b> mark appears when the LA ETB has moved
   against the original plan, and disappears automatically ${SIGNAL_DAYS} days after the change was
   detected. Click the number box at any time to see the full change log.</p>`;
@@ -565,8 +566,6 @@ function buildOverview(list){
 /* ---------- ETB 변동 로그 ----------
    /history 에 쌓인 스케줄 변경 중 LA ETB(eta) 가 바뀐 것만 뽑아
    원 스케줄 대비 편차가 며칠에서 며칠로 옮겨갔는지로 환산한다. */
-const SIGNAL_DAYS = 5;   /* 느낌표 표시 유지 기간 */
-
 function etaChangeLog(booking){
   const plan = POETA[booking] || null;
   const log = (HIST[booking]||[]).filter(e => Array.isArray(e.changes)
