@@ -244,7 +244,12 @@ ol.pohelp b{color:var(--paper);font-weight:600}
 .dtag.early{color:var(--sail);border-color:var(--sail)}
 .dtag.ontime{color:var(--fog)}
 dd .dim{opacity:.65}
-.tag.t-stale{background:var(--warn-bg);color:var(--warn);border-color:var(--warn-line)}
+/* 3일 미만은 무채색(정보성), 3일 이상 지속되면 노란색으로 승격해 눈에 띄게 한다 */
+.tag.t-stale{background:var(--well);color:var(--fog);border-color:var(--line)}
+.tag.t-stale.t-stale-old{background:var(--warn-bg);color:var(--warn);border-color:var(--warn-line);
+  font-weight:600}
+.stale-txt{color:inherit}
+.stale-txt.old{color:var(--warn);font-weight:600}
 #rstatus{margin-top:12px;font-size:12.5px;line-height:1.7;color:var(--fog)}
 #rstatus b{color:var(--buoy);font-family:'IBM Plex Mono';font-size:12px}
 #rstatus ul{margin:6px 0 0;padding-left:18px}
