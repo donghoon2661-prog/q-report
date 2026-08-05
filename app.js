@@ -241,15 +241,6 @@ function locate(s){
   };
 }
 
-/* STALE이 며칠째 지속되고 있는지. 3일 이상이면 경고색으로 승격한다. */
-const STALE_WARN_DAYS = 3;
-function staleAgeDays(s){
-  if(!s.staleSince) return 0;
-  const t = Date.parse(String(s.staleSince).replace(" ","T").replace("Z","")+"Z");
-  if(!Number.isFinite(t)) return 0;
-  return (Date.now() - t) / 86400000;
-}
-
 /* ---------- 정렬 · 만료 ---------- */
 /* 값이 없거나 형식이 어긋나면 NaN이 되어 정렬이 무너지므로 null로 정규화한다 */
 const TS = s => { const t = s ? new Date(String(s).replace(" ","T")+"Z").getTime() : NaN;
@@ -320,6 +311,40 @@ function initMap(data){
   map.fitBounds(L.featureGroup(markers).getBounds().pad(0.35));
 }
 
+/* ---------- 원 스케줄 병기 ---------- */
+/* HIST에서 해당 필드의 최초 관측값. 변경 이력이 있으면 가장 오래된 변경의 from,
+   없으면 first 기록의 값. eta는 이력이 없을 때 MAPPING의 POETA로 대체. */
+function origOf(bkg, field){
+  const log = HIST[bkg] || [];
+  for(const e of log){
+    if(!Array.isArray(e.changes)) continue;
+    const c = e.changes.find(x => x.field === field);
+    if(c && c.from) return c.from;
+  }
+  const f = log.find(e => e.first);
+  if(f && f[field]) return f[field];
+  if(field === "eta" && POETA[bkg]) return POETA[bkg];
+  return null;
+}
+/* 날짜만 있는 값(POETA)도 안전하게 표기 */
+const fmtAny = v => !v ? "\u2014"
+  : /[T ]\d\d:/.test(String(v)) ? fmtDT(v) : String(v).slice(5,10).replace("-","/");
+const tsLoose = v => { const a = TS(v); return a !== null ? a : (v ? TS(v + "T00:00:00") : null); };
+
+/* 날짜 한 칸 — 지난 시각이면 actual, 원 스케줄이 다르면 오른쪽에 병기 */
+function dtCell(s, field){
+  const cur = s[field], t = TS(cur);
+  if(t === null) return fmtDT(cur);
+  const done  = t <= Date.now();
+  const orig  = origOf(s.booking, field);
+  const ot    = tsLoose(orig);
+  const moved = ot !== null && ot !== t;
+  const dd    = moved ? Math.round((t - ot) / DAY) : 0;
+  return `${fmtDT(cur)}<span class="sest">${done ? "actual" : "scheduled"}</span>`
+       + (moved ? `<span class="sorig">(orig ${fmtAny(orig)}${
+           dd ? ` <b class="${dd > 0 ? "warn" : ""}">${dd > 0 ? "+" : ""}${dd}d</b>` : ""})</span>` : "");
+}
+
 function showSide(s,L2){
   const nm = portNames(s);
   const geo = L2
@@ -369,12 +394,12 @@ function showSide(s,L2){
     <dl>
       ${geo}
       <dt>ROUTE</dt><dd>${dedupeLabels(nm).filter(Boolean).join(" → ")}</dd>
-      <dt>PKG ETD</dt><dd>${fmtDT(s.polDep)}</dd>
-      <dt>SIN ETA</dt><dd>${fmtDT(s.tsArr)}</dd>
-      <dt>SIN ETD</dt><dd>${fmtDT(s.tsDep)}</dd>
+      <dt>PKG ETD</dt><dd>${dtCell(s,"polDep")}</dd>
+      <dt>SIN ETA</dt><dd>${dtCell(s,"tsArr")}</dd>
+      <dt>SIN ETD</dt><dd>${dtCell(s,"tsDep")}</dd>
       ${(()=>{const t=tsDwell(s);return t?`<dt>T/S DWELL</dt><dd>${t.plan!==null?`plan ${t.plan}d → `:""}<b>${t.cur}d</b> <span class="dim">(${t.actual?"actual":"scheduled"})</span>${t.diff!==null&&t.diff!==0?` <span class="${t.diff>0?"warn":""}">${t.diff>0?"+":""}${t.diff}d</span>`:""}</dd>`:"";})()}
-      <dt>LA ETB</dt><dd>${fmtDT(s.eta)}</dd>
-      <dt>DEST ETA</dt><dd>${fmtDT(s.destEta)}</dd>
+      <dt>LA ETB</dt><dd>${dtCell(s,"eta")}</dd>
+      <dt>DEST ETA</dt><dd>${dtCell(s,"destEta")}</dd>
       <dt>FEEDER</dt><dd>${s.feeder||"— (direct)"}</dd>
       ${synthNote}${poRow}${dRow}${rRow}${chk}
       <dt>LATEST</dt><dd>${s.last||"—"}</dd>
@@ -423,9 +448,7 @@ function buildTable(data){
 function cardHTML(s){
   const L2 = locate(s);
   const pre = s.preShipment ? `<span class="dtag pre">NOT SHIPPED</span>` : "";
-  const staleOld = s.staleItem && staleAgeDays(s) >= STALE_WARN_DAYS;
-  const stale = s.staleItem
-    ? `<span class="tag t-stale${staleOld?" t-stale-old":""}" title="이 건은 최근 조회에 실패해 이전 값이 표시됩니다${staleOld?` (${Math.floor(staleAgeDays(s))}일째)`:""}">STALE</span>` : "";
+  const stale = s.staleItem ? `<span class="tag t-stale" title="이 건은 최근 조회에 실패해 이전 값이 표시됩니다">STALE</span>` : "";
 
   let railHTML;
   if(!L2){
@@ -644,7 +667,7 @@ function rowsHTML(list){
   return list.map((s,i)=>`
     <tr data-i="${i}">
       <td><span class="nm">${s.vessel}</span><span class="vy">${s.voyage}</span>
-          <span class="bk">${s.booking} · ${s.cntrQty||"—"} CNTR${s.staleItem?` · <b class="stale-txt${staleAgeDays(s)>=STALE_WARN_DAYS?" old":""}">STALE</b>`:""}</span></td>
+          <span class="bk">${s.booking} · ${s.cntrQty||"—"} CNTR${s.staleItem?" · STALE":""}</span></td>
       <td data-l="PKG ETD"><span class="dt">${fmtDT(s.polDep)}</span><span class="est">${TS(s.polDep)!==null && TS(s.polDep)<=now?"actual":"scheduled"}</span></td>
       <td data-l="SIN ETD"><span class="dt">${fmtDT(s.tsDep)}</span><span class="est">${TS(s.tsDep)!==null && TS(s.tsDep)<=now?"actual":"scheduled"}</span></td>
       <td data-l="LA ETB"><span class="dt">${fmtDT(s.eta)}</span>${gapBox(s)}<span class="est">ETB</span></td>

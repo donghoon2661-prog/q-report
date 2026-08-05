@@ -244,12 +244,7 @@ ol.pohelp b{color:var(--paper);font-weight:600}
 .dtag.early{color:var(--sail);border-color:var(--sail)}
 .dtag.ontime{color:var(--fog)}
 dd .dim{opacity:.65}
-/* 3일 미만은 무채색(정보성), 3일 이상 지속되면 노란색으로 승격해 눈에 띄게 한다 */
-.tag.t-stale{background:var(--well);color:var(--fog);border-color:var(--line)}
-.tag.t-stale.t-stale-old{background:var(--warn-bg);color:var(--warn);border-color:var(--warn-line);
-  font-weight:600}
-.stale-txt{color:inherit}
-.stale-txt.old{color:var(--warn);font-weight:600}
+.tag.t-stale{background:var(--warn-bg);color:var(--warn);border-color:var(--warn-line)}
 #rstatus{margin-top:12px;font-size:12.5px;line-height:1.7;color:var(--fog)}
 #rstatus b{color:var(--buoy);font-family:'IBM Plex Mono';font-size:12px}
 #rstatus ul{margin:6px 0 0;padding-left:18px}
@@ -450,3 +445,9 @@ html[data-theme="light"] #qview td.near{background:rgba(154,107,18,.08)}
 @media (min-width:901px) and (max-width:1200px){#qview main{grid-template-columns:270px 1fr 270px;gap:10px;padding:10px 12px}
 }
 
+
+/* 사이드패널 날짜 — actual/scheduled 태그 + 원 스케줄 병기 */
+#side .sest{color:var(--fog);font-size:10px;font-family:'IBM Plex Mono';
+  letter-spacing:.1em;margin-left:8px}
+#side .sorig{color:var(--fog);font-size:11px;font-family:'IBM Plex Mono';margin-left:8px}
+#side .sorig b{font-weight:600}
