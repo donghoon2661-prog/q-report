@@ -28,7 +28,7 @@ const COA_DIR = 'data/coa/';
 let DATA = { sheets: [], detections: [] };
 
 /* ── i18n ── UI 라벨만 관리. detection의 note/why는 파일 자체의 note_en/why_en을 사용 */
-let LANG = 'ko';
+let LANG = 'en';
 const I18N = {
   ko:{
     title:'품질 관제 대시보드', subtitle:'COA 검사 기준 v10.8 (실스펙·사이즈별)',
@@ -123,7 +123,7 @@ function injectLangToggle(){
   if(!chips || document.getElementById('langToggle')) return;
   const box = document.createElement('div');
   box.className = 'lang-toggle'; box.id = 'langToggle';
-  box.innerHTML = '<span data-l="ko" class="on">KOR</span><span class="sep">|</span><span data-l="en">ENG</span>';
+  box.innerHTML = '<span data-l="ko">KOR</span><span class="sep">|</span><span data-l="en" class="on">ENG</span>';
   box.querySelectorAll('span[data-l]').forEach(el=>{
     el.addEventListener('click', ()=>{
       const lang = el.dataset.l;
@@ -179,6 +179,7 @@ function renderStaticLabels(){
     captureSubtitleSuffix();
     buildQuality();
     injectLangToggle();
+    renderStaticLabels(); // 기본 언어가 'en'이므로 부팅 시에도 고정 라벨(h1/h2)을 한 번 갱신
   } catch(e) {
     coaError(String(e.message || e));
   }
