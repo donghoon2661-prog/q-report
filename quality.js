@@ -51,6 +51,17 @@ function coaError(msg){
   console.error('[quality] COA load failed:', msg);
 }
 
+/* resolved 배지 스타일 — style.css 재배포 없이 바로 동작하도록 인라인 주입 */
+(function injectResolvedStyle(){
+  if(document.getElementById('qres-style')) return;
+  const st = document.createElement('style');
+  st.id = 'qres-style';
+  st.textContent = '#qview .det-row.resolved{opacity:.55}'+
+    '#qview .resolved-tag{font-family:var(--mono);font-size:9.5px;letter-spacing:.06em;'+
+    'color:var(--ok,#3FCF8E);border:1px solid var(--ok,#3FCF8E);border-radius:10px;padding:1px 7px;margin-right:4px}';
+  document.head.appendChild(st);
+})();
+
 (async function boot(){
   try {
     DATA = await loadCOA();
@@ -90,8 +101,9 @@ function buildQuality(){
   DATA.detections.forEach(d=>detBySheet[d.sheet].push(d));
 
   /* ── 헤더 요약 ── */
-  const nS1 = DATA.detections.filter(d=>d.tier==='S1').length;
-  const nS2 = DATA.detections.filter(d=>d.tier==='S2').length;
+  const openDets = DATA.detections.filter(d=>!d.resolved);
+  const nS1 = openDets.filter(d=>d.tier==='S1').length;
+  const nS2 = openDets.filter(d=>d.tier==='S2').length;
   document.getElementById('chips').innerHTML =
     '<span class="chip">Lot<b>'+lots.length+'</b></span>'+
     '<span class="chip">섹터<b>'+DATA.sheets.reduce((a,s)=>a+s.sectors.length,0)+'</b></span>'+
@@ -102,16 +114,18 @@ function buildQuality(){
   const left = document.getElementById('left');
   DATA.sheets.forEach(s=>{
     const dets = detBySheet[s.name];
+    const openCount = dets.filter(d=>!d.resolved).length;
     const slots = [...new Set(s.sectors.map(x=>x.lot))].join(' · ');
     const btn = document.createElement('button');
     btn.className='sheet-item'; btn.setAttribute('aria-expanded','false');
     btn.innerHTML = '<span class="nm">'+s.name+'<span class="lots">Lot '+slots+'</span></span>'+
-                    '<span class="badge '+(dets.length?'hit':'zero')+'">'+dets.length+'</span>';
+                    '<span class="badge '+(openCount?'hit':'zero')+'">'+openCount+'</span>';
     const dl = document.createElement('div');
     dl.className='det-list'; dl.style.display='none';
     dl.innerHTML = dets.length ? dets.map(d=>
-      '<div class="det-row" style="border-left-color:var(--g'+d.grade+')">'+
+      '<div class="det-row'+(d.resolved?' resolved':'')+'" style="border-left-color:var(--g'+d.grade+')">'+
         '<div class="top"><span class="grade '+d.grade+'">'+d.grade+'</span>'+
+        (d.resolved ? '<span class="resolved-tag">해소됨</span>' : '')+
         '<span class="item">'+d.size+' / '+d.item+'</span><span class="val">'+d.gv+'</span></div>'+
         '<div class="note">'+d.note+'</div>'+
         '<div class="lot">Lot '+d.lot+' · p.'+d.pages+' · 셀 '+d.cell+'</div></div>').join('')
@@ -282,8 +296,9 @@ function buildQuality(){
 
   /* ── 모바일 탭 전환 ── */
   const mq = window.matchMedia('(max-width:900px)');
-  document.getElementById('tbBadge').textContent = DATA.detections.length || '';
-  if(!DATA.detections.length) document.getElementById('tbBadge').style.display='none';
+  const openTotal = DATA.detections.filter(d=>!d.resolved).length;
+  document.getElementById('tbBadge').textContent = openTotal || '';
+  if(!openTotal) document.getElementById('tbBadge').style.display='none';
   document.querySelectorAll('.tabbar button').forEach(b=>{
     b.addEventListener('click',()=>{
       document.querySelectorAll('.tabbar button').forEach(x=>x.classList.remove('on'));
