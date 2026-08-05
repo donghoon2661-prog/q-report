@@ -16,14 +16,56 @@ const ITEMS = [
   {id:'aa_e', name:'AA Elongation Min', dir:'lo', s1:400, s2:440, key:'aa_e_min', unit:'%', specTxt:'≥ 400'},
   {id:'powder', name:'Powder', dir:'hi', s1:1.5, s2:1.2, s1incl:true, key:'powder', unit:'', specTxt:'Max 1.50'},
   {id:'len', name:'Length Min', dir:'lo', s1:240, s2:243, key:'len_min', unit:'mm', specTxt:'≥ 240'},
-  {id:'cuff', name:'Thk Cuff Min', dir:'lo', s1:0.05, s2:null, key:'cuff_min', unit:'mm', specTxt:'≥ 0.05 · 근접밴드 없음'},
-  {id:'palm', name:'Thk Palm Min', dir:'lo', s1:0.06, s2:null, key:'palm_min', unit:'mm', specTxt:'≥ 0.06 · 근접밴드 없음'},
-  {id:'fin', name:'Thk Finger Min', dir:'lo', s1:0.08, s2:null, key:'fin_min', unit:'mm', specTxt:'≥ 0.08 · 근접밴드 없음'},
-  {id:'width', name:'Width 경계 여유', dir:'lo', s1:0, s2:1, key:null, unit:'mm', specTxt:'사이즈별 ±5, 0 = 스펙 경계', margin:true},
+  {id:'cuff', name:'Thk Cuff Min', dir:'lo', s1:0.05, s2:null, key:'cuff_min', unit:'mm', specTxt:'≥ 0.05 · 근접밴드 없음', specTxt_en:'≥ 0.05 · no near-limit band'},
+  {id:'palm', name:'Thk Palm Min', dir:'lo', s1:0.06, s2:null, key:'palm_min', unit:'mm', specTxt:'≥ 0.06 · 근접밴드 없음', specTxt_en:'≥ 0.06 · no near-limit band'},
+  {id:'fin', name:'Thk Finger Min', dir:'lo', s1:0.08, s2:null, key:'fin_min', unit:'mm', specTxt:'≥ 0.08 · 근접밴드 없음', specTxt_en:'≥ 0.08 · no near-limit band'},
+  {id:'width', name:'Width 경계 여유', name_en:'Width Boundary Margin', dir:'lo', s1:0, s2:1, key:null, unit:'mm', specTxt:'사이즈별 ±5, 0 = 스펙 경계', specTxt_en:'±5 per size, 0 = spec boundary', margin:true},
 ];
+function itemName(it){ return LANG==='en' && it.name_en ? it.name_en : it.name; }
+function itemSpecTxt(it){ return LANG==='en' && it.specTxt_en ? it.specTxt_en : it.specTxt; }
 
 const COA_DIR = 'data/coa/';
 let DATA = { sheets: [], detections: [] };
+
+/* ── i18n ── UI 라벨만 관리. detection의 note/why는 파일 자체의 note_en/why_en을 사용 */
+let LANG = 'ko';
+const I18N = {
+  ko:{
+    title:'품질 관제 대시보드', subtitle:'COA 검사 기준 v10.8 (실스펙·사이즈별)',
+    detPanel:'워크시트별 DETECTION', detHint:'건수 클릭 → 상세',
+    chartPanel:'스펙 관제 — Lot별 최악값 vs 허용 한계',
+    datePanel:'제조일자 → 워크시트 → 백데이터',
+    lot:'Lot', sector:'섹터', s1off:'S1 Off-spec', s2near:'S2 근접',
+    resolvedTag:'해소됨', noDetect:'신 기준(v10.8) 탐지 없음 — 전 항목 스펙 이내',
+    off:'Off-spec 한계 (S1)', near:'근접 밴드 경계 (S2)', worstByLot:'Lot 최악값',
+    mfgMonth:'제조월', sheetCount:'워크시트', clickForFiles:'개 · 클릭하여 파일 목록',
+    openBackdata:'→ 백데이터 열기', sectors_:'섹터', cellHighlight:'셀 강조 = v10.8 기준 Off-spec(적) / 근접(황)',
+    latestLot:'최신 Lot', marginToLimit:'허용 한계까지 여유', allTimeWorst:'전체 기간 최악값', status:'판정 상태',
+    statusOff:'OFF-SPEC', statusNear:'근접', statusOk:'정상',
+    mfgDate:'제조일', pages:'Pages', itemHeader:'항목',
+    legendPrefix:'강조:', legendOff:'적색 = Off-spec(S1)', legendNear:'황색 = 근접 밴드(S2)', legendNote:'검사 기준 v10.8 (Thickness는 근접 밴드 없음)',
+    unmapped:'미상', cell:'셀',
+  },
+  en:{
+    title:'Quality Monitoring Dashboard', subtitle:'COA inspection criteria v10.8 (actual spec, per size)',
+    detPanel:'DETECTION by Worksheet', detHint:'Click count → details',
+    chartPanel:'Spec Monitoring — Worst value per Lot vs Limit',
+    datePanel:'Mfg Date → Worksheet → Backdata',
+    lot:'Lot', sector:'Sectors', s1off:'S1 Off-spec', s2near:'S2 Near-limit',
+    resolvedTag:'Resolved', noDetect:'No detections under v10.8 criteria — all items within spec',
+    off:'Off-spec limit (S1)', near:'Near-limit boundary (S2)', worstByLot:'Worst value by Lot',
+    mfgMonth:'Mfg month', sheetCount:'worksheet(s)', clickForFiles:' · click for file list',
+    openBackdata:'→ Open backdata', sectors_:'sectors', cellHighlight:'Highlighted cells = v10.8 Off-spec (red) / Near-limit (yellow)',
+    latestLot:'Latest Lot', marginToLimit:'Margin to limit', allTimeWorst:'All-time worst', status:'Status',
+    statusOff:'OFF-SPEC', statusNear:'Near-limit', statusOk:'Normal',
+    mfgDate:'Mfg date', pages:'Pages', itemHeader:'Item',
+    legendPrefix:'Legend:', legendOff:'Red = Off-spec (S1)', legendNear:'Yellow = Near-limit band (S2)', legendNote:'Criteria v10.8 (Thickness has no near-limit band)',
+    unmapped:'Unknown', cell:'Cell',
+  }
+};
+function t(key){ return I18N[LANG][key]; }
+function noteOf(d){ return LANG==='en' && d.note_en ? d.note_en : d.note; }
+function whyOf(d){ return LANG==='en' && d.why_en ? d.why_en : d.why; }
 
 /* index.json → 각 시트 JSON 병렬 로드 → DATA 형태로 조립 */
 async function loadCOA(){
@@ -51,26 +93,97 @@ function coaError(msg){
   console.error('[quality] COA load failed:', msg);
 }
 
-/* resolved 배지 스타일 — style.css 재배포 없이 바로 동작하도록 인라인 주입 */
+/* resolved 배지 + 언어 토글 스타일 — style.css 재배포 없이 바로 동작하도록 인라인 주입 */
 (function injectResolvedStyle(){
   if(document.getElementById('qres-style')) return;
   const st = document.createElement('style');
   st.id = 'qres-style';
   st.textContent = '#qview .det-row.resolved{opacity:.55}'+
     '#qview .resolved-tag{font-family:var(--mono);font-size:9.5px;letter-spacing:.06em;'+
-    'color:var(--ok,#3FCF8E);border:1px solid var(--ok,#3FCF8E);border-radius:10px;padding:1px 7px;margin-right:4px}';
+    'color:var(--ok,#3FCF8E);border:1px solid var(--ok,#3FCF8E);border-radius:10px;padding:1px 7px;margin-right:4px}'+
+    '#qview .lang-toggle{font-family:var(--mono);font-size:11px;color:var(--muted,#7E8AA0);'+
+    'display:flex;align-items:center;gap:4px;user-select:none;margin-left:12px}'+
+    '#qview .lang-toggle span{cursor:pointer;padding:3px 8px;border-radius:12px;border:1px solid transparent}'+
+    '#qview .lang-toggle span.on{color:var(--blue,#4DA3FF);background:var(--blueDim,rgba(77,163,255,.12));'+
+    'border-color:var(--blue,#4DA3FF);font-weight:600}'+
+    '#qview .lang-toggle .sep{color:var(--line2,#2A3446)}';
   document.head.appendChild(st);
 })();
+
+/* header에 KOR/ENG 토글 삽입 (index.html 미수정) */
+function injectLangToggle(){
+  const chips = document.getElementById('chips');
+  if(!chips || document.getElementById('langToggle')) return;
+  const box = document.createElement('div');
+  box.className = 'lang-toggle'; box.id = 'langToggle';
+  box.innerHTML = '<span data-l="ko" class="on">KOR</span><span class="sep">|</span><span data-l="en">ENG</span>';
+  box.querySelectorAll('span[data-l]').forEach(el=>{
+    el.addEventListener('click', ()=>{
+      const lang = el.dataset.l;
+      if(lang===LANG) return;
+      LANG = lang;
+      box.querySelectorAll('span[data-l]').forEach(x=>x.classList.toggle('on', x.dataset.l===lang));
+      renderStaticLabels();
+      rebuildDynamic();
+    });
+  });
+  chips.parentElement.insertBefore(box, chips.nextSibling);
+}
+
+/* index.html의 원래 부제 뒷부분(데이터 기준일 등)을 캡처해 두 언어로 변환 */
+let SUBTITLE_SUFFIX_KO = '', SUBTITLE_SUFFIX_EN = '';
+function captureSubtitleSuffix(){
+  const small = document.querySelector('#qview header h1 small');
+  if(!small) return;
+  const full = small.textContent;
+  const parenEnd = full.indexOf(')'); // '실스펙·사이즈별' 안의 가운뎃점을 피해 첫 괄호 닫힘 뒤부터 탐색
+  const idx = parenEnd>=0 ? full.indexOf('·', parenEnd) : full.indexOf('·');
+  SUBTITLE_SUFFIX_KO = idx>=0 ? full.slice(idx) : '';
+  SUBTITLE_SUFFIX_EN = SUBTITLE_SUFFIX_KO
+    .replace('데이터 기준일', 'Data as of')
+    .replace('오타 정정 반영', 'typo corrections applied');
+}
+
+/* index.html에 박혀있는 고정 라벨(h1/h2)을 언어에 맞게 갱신 */
+function renderStaticLabels(){
+  const h1 = document.querySelector('#qview header h1');
+  if(h1){
+    h1.innerHTML = t('title') + '<small>' + t('subtitle') + ' ' + (LANG==='en'?SUBTITLE_SUFFIX_EN:SUBTITLE_SUFFIX_KO) + '</small>';
+  }
+  const detH2 = document.querySelector('#p-det h2');
+  if(detH2) detH2.innerHTML = '<span class="dot" style="background:var(--gA)"></span>'+t('detPanel')+'<span style="margin-left:auto;font-weight:400">'+t('detHint')+'</span>';
+  const chartH2 = document.querySelector('#p-chart h2');
+  if(chartH2) chartH2.innerHTML = '<span class="dot"></span>'+t('chartPanel');
+  const dateH2 = document.querySelector('#p-date h2');
+  if(dateH2) dateH2.innerHTML = '<span class="dot" style="background:var(--ok)"></span>'+t('datePanel');
+  const specInfo = document.querySelector('#p-chart .spec-line-info');
+  if(specInfo){
+    const spans = specInfo.querySelectorAll('.k');
+    if(spans[0]) spans[0].innerHTML = '<span class="sw" style="background:var(--gA)"></span>'+t('off');
+    if(spans[1]) spans[1].innerHTML = '<span class="sw" style="background:var(--gB)"></span>'+t('near');
+    if(spans[2]) spans[2].innerHTML = '<span class="sw" style="background:var(--blue)"></span>'+t('worstByLot')+' (126050xxxx=5월 · 126060xxxx=6월)';
+  }
+}
 
 (async function boot(){
   try {
     DATA = await loadCOA();
     if(!DATA.sheets.length) return coaError('COA 파일이 하나도 없습니다.');
+    captureSubtitleSuffix();
     buildQuality();
+    injectLangToggle();
   } catch(e) {
     coaError(String(e.message || e));
   }
 })();
+
+/* 언어 전환 시 동적 패널(좌/중/우)만 비우고 다시 그린다. 헤더/토글은 유지 */
+function rebuildDynamic(){
+  document.getElementById('left').innerHTML = '';
+  document.getElementById('ichips').innerHTML = '';
+  document.getElementById('right').innerHTML = '';
+  buildQuality();
+}
 
 function buildQuality(){
   const lots = [...new Set(DATA.sheets.flatMap(s=>s.sectors.map(x=>x.lot)))].sort();
@@ -105,10 +218,10 @@ function buildQuality(){
   const nS1 = openDets.filter(d=>d.tier==='S1').length;
   const nS2 = openDets.filter(d=>d.tier==='S2').length;
   document.getElementById('chips').innerHTML =
-    '<span class="chip">Lot<b>'+lots.length+'</b></span>'+
-    '<span class="chip">섹터<b>'+DATA.sheets.reduce((a,s)=>a+s.sectors.length,0)+'</b></span>'+
-    '<span class="chip alert">S1 Off-spec<b>'+nS1+'</b></span>'+
-    '<span class="chip">S2 근접<b>'+nS2+'</b></span>';
+    '<span class="chip">'+t('lot')+'<b>'+lots.length+'</b></span>'+
+    '<span class="chip">'+t('sector')+'<b>'+DATA.sheets.reduce((a,s)=>a+s.sectors.length,0)+'</b></span>'+
+    '<span class="chip alert">'+t('s1off')+'<b>'+nS1+'</b></span>'+
+    '<span class="chip">'+t('s2near')+'<b>'+nS2+'</b></span>';
 
   /* ── 좌측 ── */
   const left = document.getElementById('left');
@@ -118,18 +231,18 @@ function buildQuality(){
     const slots = [...new Set(s.sectors.map(x=>x.lot))].join(' · ');
     const btn = document.createElement('button');
     btn.className='sheet-item'; btn.setAttribute('aria-expanded','false');
-    btn.innerHTML = '<span class="nm">'+s.name+'<span class="lots">Lot '+slots+'</span></span>'+
+    btn.innerHTML = '<span class="nm">'+s.name+'<span class="lots">'+t('lot')+' '+slots+'</span></span>'+
                     '<span class="badge '+(openCount?'hit':'zero')+'">'+openCount+'</span>';
     const dl = document.createElement('div');
     dl.className='det-list'; dl.style.display='none';
     dl.innerHTML = dets.length ? dets.map(d=>
       '<div class="det-row'+(d.resolved?' resolved':'')+'" style="border-left-color:var(--g'+d.grade+')">'+
         '<div class="top"><span class="grade '+d.grade+'">'+d.grade+'</span>'+
-        (d.resolved ? '<span class="resolved-tag">해소됨</span>' : '')+
+        (d.resolved ? '<span class="resolved-tag">'+t('resolvedTag')+'</span>' : '')+
         '<span class="item">'+d.size+' / '+d.item+'</span><span class="val">'+d.gv+'</span></div>'+
-        '<div class="note">'+d.note+'</div>'+
-        '<div class="lot">Lot '+d.lot+' · p.'+d.pages+' · 셀 '+d.cell+'</div></div>').join('')
-      : '<div class="empty-note">신 기준(v10.8) 탐지 없음 — 전 항목 스펙 이내</div>';
+        '<div class="note">'+noteOf(d)+'</div>'+
+        '<div class="lot">'+t('lot')+' '+d.lot+' · p.'+d.pages+' · '+t('cell')+' '+d.cell+'</div></div>').join('')
+      : '<div class="empty-note">'+t('noDetect')+'</div>';
     btn.addEventListener('click',()=>{
       const open = dl.style.display!=='none';
       dl.style.display = open?'none':'block';
@@ -143,7 +256,7 @@ function buildQuality(){
   let curItem = ITEMS.find(i=>i.id==='fin');
   ITEMS.forEach(it=>{
     const b=document.createElement('button');
-    b.className='ichip'+(it===curItem?' on':''); b.textContent=it.name;
+    b.className='ichip'+(it===curItem?' on':''); b.textContent=itemName(it);
     b.addEventListener('click',()=>{
       curItem=it;
       document.querySelectorAll('.ichip').forEach(x=>x.classList.remove('on'));
@@ -179,9 +292,9 @@ function buildQuality(){
       data:{labels:lots,datasets:ds},
       options:{responsive:true,maintainAspectRatio:false,
         plugins:{legend:{display:false},tooltip:{backgroundColor:qvar('panel','#12161E'),borderColor:qvar('line2','#2A3446'),borderWidth:1,
-          callbacks:{title:c=>'Lot '+lots[c[0].dataIndex]+' ('+lotMonth(lots[c[0].dataIndex])+' 제조)'}}},
+          callbacks:{title:c=>t('lot')+' '+lots[c[0].dataIndex]+' ('+lotMonth(lots[c[0].dataIndex])+(LANG==='en'?' mfg':' 제조')+')'}}},
         scales:{x:{grid:{color:qvar('line','#1A2130')}},
-                y:{grid:{color:qvar('line','#1A2130')},title:{display:true,text:curItem.name+(curItem.unit?' ('+curItem.unit+')':'')+' — 스펙: '+curItem.specTxt,color:'#7E8AA0',font:{size:11}}}}
+                y:{grid:{color:qvar('line','#1A2130')},title:{display:true,text:itemName(curItem)+(curItem.unit?' ('+curItem.unit+')':'')+(LANG==='en'?' — Spec: ':' — 스펙: ')+itemSpecTxt(curItem),color:'#7E8AA0',font:{size:11}}}}
       }});
     const last = worst[worst.length-1];
     let marginTxt='—', cls='ok';
@@ -193,17 +306,17 @@ function buildQuality(){
     const hist = worst.filter(v=>v!=null);
     const histWorst = hist.length? (curItem.dir==='hi'?Math.max(...hist):Math.min(...hist)) : '—';
     document.getElementById('mstrip').innerHTML =
-      '<div class="mcard"><div class="l">최신 Lot '+lots[lots.length-1]+'</div><div class="v '+cls+'">'+(last==null?'—':last)+'</div></div>'+
-      '<div class="mcard"><div class="l">허용 한계까지 여유</div><div class="v '+cls+'">'+marginTxt+'</div></div>'+
-      '<div class="mcard"><div class="l">전체 기간 최악값</div><div class="v">'+histWorst+'</div></div>'+
-      '<div class="mcard"><div class="l">판정 상태</div><div class="v '+cls+'">'+(cls==='bad'?'OFF-SPEC':cls==='warn'?'근접':'정상')+'</div></div>';
+      '<div class="mcard"><div class="l">'+t('latestLot')+' '+lots[lots.length-1]+'</div><div class="v '+cls+'">'+(last==null?'—':last)+'</div></div>'+
+      '<div class="mcard"><div class="l">'+t('marginToLimit')+'</div><div class="v '+cls+'">'+marginTxt+'</div></div>'+
+      '<div class="mcard"><div class="l">'+t('allTimeWorst')+'</div><div class="v">'+histWorst+'</div></div>'+
+      '<div class="mcard"><div class="l">'+t('status')+'</div><div class="v '+cls+'">'+(cls==='bad'?t('statusOff'):cls==='warn'?t('statusNear'):t('statusOk'))+'</div></div>';
   }
   draw();
 
   /* ── 우측: 제조일자 ── */
   const byDate={};
   DATA.sheets.forEach(s=>s.sectors.forEach(sec=>{
-    const d=sec.mfg||'미상';
+    const d=sec.mfg||t('unmapped');
     byDate[d]=byDate[d]||{};
     byDate[d][s.name]=byDate[d][s.name]||new Set();
     byDate[d][s.name].add(sec.lot);
@@ -211,13 +324,13 @@ function buildQuality(){
   const right=document.getElementById('right');
   Object.keys(byDate).sort().reverse().forEach(d=>{
     const mh=document.createElement('div'); mh.className='month-h';
-    mh.textContent='제조월 '+d.slice(0,7); right.appendChild(mh);
+    mh.textContent=t('mfgMonth')+' '+d.slice(0,7); right.appendChild(mh);
     const db=document.createElement('button'); db.className='date-item'; db.setAttribute('aria-expanded','false');
-    db.innerHTML='<div class="d">'+d+'</div><div class="c">워크시트 '+Object.keys(byDate[d]).length+'개 · 클릭하여 파일 목록</div>';
+    db.innerHTML='<div class="d">'+d+'</div><div class="c">'+t('sheetCount')+' '+Object.keys(byDate[d]).length+t('clickForFiles')+'</div>';
     const fl=document.createElement('div'); fl.className='file-list'; fl.style.display='none';
     Object.entries(byDate[d]).forEach(([nm,ls])=>{
       const fb=document.createElement('button'); fb.className='file-btn';
-      fb.innerHTML=nm+'<span class="lotln">Lot '+[...ls].join(' · ')+' → 백데이터 열기</span>';
+      fb.innerHTML=nm+'<span class="lotln">'+t('lot')+' '+[...ls].join(' · ')+' '+t('openBackdata')+'</span>';
       fb.addEventListener('click',()=>openBackdata(nm));
       fl.appendChild(fb);
     });
@@ -236,12 +349,12 @@ function buildQuality(){
   document.addEventListener('keydown',e=>{if(e.key==='Escape')overlay.classList.remove('show')});
 
   const GROUPS=[
-   ['수량',[['cartons','Cartons'],['qty_max','Qty Max'],['qty_min','Qty Min']]],
-   ['외관 검사',[['leak','Leaking'],['maj','V.Major'],['minr','V.Minor']]],
-   ['Before Aging',[['ba_t_max','Tensile Max'],['ba_t_min','Tensile Min'],['ba_t_avg','Tensile AVRG'],['ba_e_max','Elong Max'],['ba_e_min','Elong Min'],['ba_e_avg','Elong AVRG']]],
-   ['After Aging',[['aa_t_max','Tensile Max'],['aa_t_min','Tensile Min'],['aa_t_avg','Tensile AVRG'],['aa_e_max','Elong Max'],['aa_e_min','Elong Min'],['aa_e_avg','Elong AVRG']]],
-   ['Powder · 치수',[['powder','Powder'],['len_min','Length Min'],['len_med','Length Med'],['w_min','Width Min'],['w_med','Width Med']]],
-   ['Thickness',[['cuff_min','Cuff Min'],['cuff_med','Cuff Med'],['palm_min','Palm Min'],['palm_med','Palm Med'],['fin_min','Finger Min'],['fin_med','Finger Med']]]
+   [{ko:'수량',en:'Quantity'},[['cartons','Cartons'],['qty_max','Qty Max'],['qty_min','Qty Min']]],
+   [{ko:'외관 검사',en:'Visual Inspection'},[['leak','Leaking'],['maj','V.Major'],['minr','V.Minor']]],
+   [{ko:'Before Aging',en:'Before Aging'},[['ba_t_max','Tensile Max'],['ba_t_min','Tensile Min'],['ba_t_avg','Tensile AVRG'],['ba_e_max','Elong Max'],['ba_e_min','Elong Min'],['ba_e_avg','Elong AVRG']]],
+   [{ko:'After Aging',en:'After Aging'},[['aa_t_max','Tensile Max'],['aa_t_min','Tensile Min'],['aa_t_avg','Tensile AVRG'],['aa_e_max','Elong Max'],['aa_e_min','Elong Min'],['aa_e_avg','Elong AVRG']]],
+   [{ko:'Powder · 치수',en:'Powder · Dimensions'},[['powder','Powder'],['len_min','Length Min'],['len_med','Length Med'],['w_min','Width Min'],['w_med','Width Med']]],
+   [{ko:'Thickness',en:'Thickness'},[['cuff_min','Cuff Min'],['cuff_med','Cuff Med'],['palm_min','Palm Min'],['palm_med','Palm Med'],['fin_min','Finger Min'],['fin_med','Finger Med']]]
   ];
   function cellClass(k,v,sz){
     if(v==null) return '';
@@ -262,7 +375,7 @@ function buildQuality(){
   function openBackdata(name){
     const sheet=DATA.sheets.find(s=>s.name===name);
     document.getElementById('mTitle').textContent=name;
-    document.getElementById('mSub').textContent='섹터 '+sheet.sectors.length+'개 · 셀 강조 = v10.8 기준 Off-spec(적) / 근접(황)';
+    document.getElementById('mSub').textContent=t('sectors_')+' '+sheet.sectors.length+' · '+t('cellHighlight');
     const tabs=document.getElementById('mTabs'); tabs.innerHTML='';
     sheet.sectors.forEach((sec,i)=>{
       const b=document.createElement('button'); b.className='stab'+(i===0?' on':'');
@@ -279,10 +392,10 @@ function buildQuality(){
   function renderSector(sheet,idx){
     const sec=sheet.sectors[idx];
     const sizes=Object.keys(sec.rows);
-    let h='<div class="meta-row"><span>Lot <b>'+sec.lot+'</b></span><span>제조일 <b>'+(sec.mfg||'—')+'</b></span><span>Pages <b>'+sec.pages+'</b></span></div>';
-    h+='<table class="bd"><tr><th>항목</th>'+sizes.map(s=>'<th>'+s+'</th>').join('')+'</tr>';
+    let h='<div class="meta-row"><span>'+t('lot')+' <b>'+sec.lot+'</b></span><span>'+t('mfgDate')+' <b>'+(sec.mfg||'—')+'</b></span><span>'+t('pages')+' <b>'+sec.pages+'</b></span></div>';
+    h+='<table class="bd"><tr><th>'+t('itemHeader')+'</th>'+sizes.map(s=>'<th>'+s+'</th>').join('')+'</tr>';
     GROUPS.forEach(g=>{
-      h+='<tr><td class="grp" colspan="'+(sizes.length+1)+'">'+g[0]+'</td></tr>';
+      h+='<tr><td class="grp" colspan="'+(sizes.length+1)+'">'+g[0][LANG]+'</td></tr>';
       g[1].forEach(col=>{
         h+='<tr><td>'+col[1]+'</td>'+sizes.map(sz=>{
           const v=sec.rows[sz][col[0]];
@@ -290,7 +403,7 @@ function buildQuality(){
         }).join('')+'</tr>';
       });
     });
-    h+='</table><div class="legend-bd">강조: <i class="r">적색 = Off-spec(S1)</i> · <i class="y">황색 = 근접 밴드(S2)</i> — 검사 기준 v10.8 (Thickness는 근접 밴드 없음)</div>';
+    h+='</table><div class="legend-bd">'+t('legendPrefix')+' <i class="r">'+t('legendOff')+'</i> · <i class="y">'+t('legendNear')+'</i> — '+t('legendNote')+'</div>';
     document.getElementById('mBody').innerHTML=h;
   }
 
