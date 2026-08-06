@@ -339,10 +339,11 @@ function dtCell(s, field){
   const orig  = origOf(s.booking, field);
   const ot    = tsLoose(orig);
   const moved = ot !== null && ot !== t;
-  const dd    = moved ? Math.round((t - ot) / DAY) : 0;
+  const dd    = moved ? Math.round((t - ot) / DAY * 10) / 10 : 0;
+  const ddStr = dd.toFixed(1);
   return `${fmtDT(cur)}<span class="sest">${done ? "actual" : "scheduled"}</span>`
        + (moved ? `<span class="sorig">(orig ${fmtAny(orig)}${
-           dd ? ` <b class="${dd > 0 ? "warn" : ""}">${dd > 0 ? "+" : ""}${dd}d</b>` : ""})</span>` : "");
+           dd ? ` <b class="${dd > 0 ? "warn" : ""}">${dd > 0 ? "+" : ""}${ddStr}d</b>` : ""})</span>` : "");
 }
 
 function showSide(s,L2){
