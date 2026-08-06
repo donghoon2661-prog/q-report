@@ -365,7 +365,7 @@ function showSide(s,L2){
 
   /* 스케줄 변경 이력 — tsDep(SIN ETD)이 밀리는지 추적하는 용도 */
   const log = (HIST[s.booking]||[]).slice().reverse();
-  const FL = {vessel:"VESSEL", voyage:"VOYAGE", tsDep:"SIN ETD", eta:"LA ETB", destEta:"DEST ETA"};
+  const FL = {vessel:"VESSEL", voyage:"VOYAGE", polDep:"PKG ETD", tsDep:"SIN ETD", eta:"LA ETB", destEta:"DEST ETA"};
   const shortV = v => /^\d{4}-\d\d-\d\dT/.test(v||"") ? fmtDT(v) : v;
   const histHTML = log.length
     ? `<div class="schist"><div class="sh-h">SCHEDULE CHANGES</div>` + log.map(e=>{
