@@ -46,6 +46,7 @@ const I18N = {
     mfgDate:'제조일', pages:'Pages', itemHeader:'항목',
     legendPrefix:'강조:', legendOff:'적색 = Off-spec(S1)', legendNear:'황색 = 근접 밴드(S2)', legendNote:'검사 기준 v10.8 (Thickness는 근접 밴드 없음)',
     unmapped:'미상', cell:'셀',
+    tabDet:'탐지', tabChart:'스펙 차트', tabDate:'제조일자',
   },
   en:{
     title:'Quality Monitoring Dashboard', subtitle:'COA inspection criteria v10.8 (actual spec, per size)',
@@ -63,6 +64,7 @@ const I18N = {
     mfgDate:'Mfg date', pages:'Pages', itemHeader:'Item',
     legendPrefix:'Legend:', legendOff:'Red = Off-spec (S1)', legendNear:'Yellow = Near-limit band (S2)', legendNote:'Criteria v10.8 (Thickness has no near-limit band)',
     unmapped:'Unknown', cell:'Cell',
+    tabDet:'Detect', tabChart:'Spec Chart', tabDate:'Mfg Date',
   }
 };
 function t(key){ return I18N[LANG][key]; }
@@ -170,6 +172,16 @@ function renderStaticLabels(){
     if(spans[1]) spans[1].innerHTML = '<span class="sw" style="background:var(--gB)"></span>'+t('near');
     if(spans[2]) spans[2].innerHTML = '<span class="sw" style="background:var(--blue)"></span>'+t('worstByLot')+' (126050xxxx=5월 · 126060xxxx=6월)';
   }
+  const tabDet = document.querySelector('.tabbar button[data-panel="p-det"]');
+  if(tabDet){
+    const badge = tabDet.querySelector('.tb-badge');
+    const badgeHtml = badge ? badge.outerHTML : '<span class="tb-badge" id="tbBadge"></span>';
+    tabDet.innerHTML = '<span class="ico">!</span>' + t('tabDet') + badgeHtml;
+  }
+  const tabChart = document.querySelector('.tabbar button[data-panel="p-chart"]');
+  if(tabChart) tabChart.innerHTML = '<span class="ico">▥</span>' + t('tabChart');
+  const tabDate = document.querySelector('.tabbar button[data-panel="p-date"]');
+  if(tabDate) tabDate.innerHTML = '<span class="ico">▤</span>' + t('tabDate');
 }
 
 (async function boot(){

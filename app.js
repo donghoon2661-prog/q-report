@@ -1342,10 +1342,10 @@ document.addEventListener("DOMContentLoaded", ()=>{
   if(sw) sw.addEventListener("click", ()=> applyTheme(THEME === "light" ? "dark" : "light"));
 });
 
-function unlock(){
-  if(document.getElementById("pw").value.trim()!=="kossan"){
-    document.getElementById("gate-err").textContent="Incorrect password."; return;
-  }
+const AUTH_KEY = "kossan_auth_ts";
+const AUTH_TTL_MS = 5*60*1000; // 5분
+
+function proceedAfterUnlock(){
   document.getElementById("gate").remove();
   show("menu"); setView('map');
   Promise.all([
@@ -1353,6 +1353,23 @@ function unlock(){
     fetch(source(),{cache:"no-store"}).then(r=>r.ok?r.json():Promise.reject()).catch(()=>FALLBACK)
   ]).then(([,,data])=>render(data));
 }
+
+function unlock(){
+  if(document.getElementById("pw").value.trim()!=="kossan"){
+    document.getElementById("gate-err").textContent="Incorrect password."; return;
+  }
+  try{ localStorage.setItem(AUTH_KEY, String(Date.now())); }catch(_){}
+  proceedAfterUnlock();
+}
 document.getElementById("gate-go").addEventListener("click",unlock);
 document.getElementById("pw").addEventListener("keydown",e=>{if(e.key==="Enter")unlock();});
 document.getElementById("pw").focus();
+
+// 5분 이내 재방문이면 게이트 건너뛰기
+(function tryAutoUnlock(){
+  let ts = null;
+  try{ ts = parseInt(localStorage.getItem(AUTH_KEY)||"0",10); }catch(_){}
+  if(ts && (Date.now()-ts) < AUTH_TTL_MS){
+    proceedAfterUnlock();
+  }
+})();
