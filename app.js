@@ -455,7 +455,7 @@ function buildTable(data){
 function cardHTML(s){
   const L2 = locate(s);
   const pre = s.preShipment ? `<span class="dtag pre">NOT SHIPPED</span>` : "";
-  const stale = s.staleItem ? `<span class="tag t-stale" title="이 건은 최근 조회에 실패해 이전 값이 표시됩니다">STALE</span>` : "";
+  const stale = s.staleItem ? `<span class="tag t-stale" title="This item's last lookup failed; the previous value is shown">STALE</span>` : "";
 
   let railHTML;
   if(!L2){
@@ -732,7 +732,7 @@ const ADD_MAX_TRIES = 3;
 
 /* 재시도해도 소용없는 오류인지 판별 */
 function isFatalLookupError(msg){
-  return /형식 오류|조회 결과 없음|부킹번호를 확인|일정 정보 없음|already/i.test(msg||"");
+  return /invalid booking number format|no lookup result|check the booking number|no schedule info|already/i.test(msg||"");
 }
 
 function addBooking(){
@@ -1544,7 +1544,7 @@ function openHistPopup(rec){
   const legs = rec.legBreakdown;
   const legsEl = document.getElementById("hist-popup-legs");
   if(!legs){
-    legsEl.innerHTML = `<div class="hist-empty">이 부킹은 추적 시작 이전 데이터라 구간별 분해를 제공할 수 없습니다.</div>`;
+    legsEl.innerHTML = `<div class="hist-empty">This booking predates tracking start, so a leg-by-leg breakdown isn't available.</div>`;
   } else {
     legsEl.innerHTML = legs.map(l=>{
       const val = l.days===null ? "N/A" :
