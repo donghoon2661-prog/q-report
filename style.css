@@ -451,8 +451,56 @@ html[data-theme="light"] #qview td.near{background:rgba(154,107,18,.08)}
   letter-spacing:.1em;margin-left:8px}
 #side .sorig{color:var(--fog);font-size:11px;font-family:'IBM Plex Mono';margin-left:8px}
 #side .sorig b{font-weight:600}
-/* 모바일 백데이터 모달: 배경 스크롤 잠금 + 헤더 고정 보강 */
-body.modal-open{overflow:hidden;position:fixed;width:100%}
-#qview .modal-h{position:sticky;top:0;z-index:2;background:var(--panel)}
-#qview .overlay{overscroll-behavior:contain}
-#qview .bd-wrap{overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
+
+/* ---------- HISTORY 탭 ---------- */
+#history{display:none}
+#hist-months{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-top:18px}
+.hist-mcard{background:var(--hull);border:1px solid var(--line);border-radius:6px;padding:14px 16px;cursor:pointer;text-align:left}
+.hist-mcard:disabled,.hist-mcard.empty{opacity:.35;cursor:default}
+.hist-mcard .m{font-family:'Barlow Condensed';font-weight:700;font-size:22px;color:var(--paper)}
+.hist-mcard .y{font-family:'IBM Plex Mono';font-size:11px;color:var(--fog);margin-top:2px}
+
+.hist-detailhead{display:flex;align-items:baseline;gap:10px;margin:18px 0 14px}
+#hist-back{font-family:'IBM Plex Mono';font-size:11px;padding:6px 10px}
+#hist-monthtitle{font-family:'Barlow Condensed';font-weight:700;font-size:20px;letter-spacing:.04em}
+.hist-meta{font-family:'IBM Plex Mono';font-size:11px;color:var(--fog)}
+
+#hist-table{width:100%;border-collapse:collapse;font-family:'IBM Plex Mono';font-size:11.5px}
+#hist-table th{text-align:left;font-family:'IBM Plex Mono';font-size:10px;letter-spacing:.08em;
+  color:var(--fog);padding:6px 6px;border-bottom:1px solid var(--hair);font-weight:400}
+#hist-table td{padding:9px 6px;border-bottom:1px solid var(--hair)}
+#hist-table .vname{font-family:'Barlow Condensed';font-size:14px;color:var(--paper);display:block}
+#hist-table .vbkg{color:var(--fog);font-size:10px;display:block;margin-top:1px}
+#hist-table .route{color:var(--fog)}
+#hist-table .plandate{color:var(--fog)}
+#hist-table .dwell{color:var(--fog)}
+
+.hist-badge{border-radius:3px;padding:3px 9px;font-size:11px;cursor:pointer;display:inline-block;border:1px solid transparent}
+.hist-badge.b-red{background:#4A1313;color:#FF6B6B;border-color:#6B1E1E}
+.hist-badge.b-amber{background:#3A2E12;color:var(--dock);border-color:#5C4A1E}
+.hist-badge.b-plain{background:var(--hull);color:var(--paper);border-color:var(--line)}
+.hist-badge.b-green{background:#132E24;color:var(--sail);border-color:#1E5C48}
+
+.hist-note{margin-top:10px;font-family:'IBM Plex Mono';font-size:9.5px;color:var(--fog)}
+.hist-legend{margin-top:10px;display:flex;gap:16px;font-family:'IBM Plex Mono';font-size:10px;color:var(--fog)}
+.hist-sw{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:5px;vertical-align:-1px}
+
+#hist-popup{position:fixed;inset:0;background:rgba(0,0,0,.55);display:flex;align-items:center;
+  justify-content:center;z-index:200;padding:16px}
+#hist-popup-card{background:var(--hull);border:1px solid var(--line);border-radius:8px;
+  padding:20px 22px;width:100%;max-width:380px}
+.hist-popuphead{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:4px}
+.hist-popuphead>span:first-child{font-family:'Barlow Condensed';font-weight:700;font-size:18px;letter-spacing:.04em}
+#hist-popup-close{cursor:pointer;color:var(--fog);font-size:16px}
+#hist-popup-sub{color:var(--fog);font-family:'IBM Plex Mono';font-size:11px;margin-bottom:16px}
+.hist-leg{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--hair);
+  font-family:'IBM Plex Mono';font-size:12px}
+.hist-leg:last-child{border-bottom:none}
+.hist-leg .lv-red{color:#FF6B6B}
+.hist-leg .lv-plain{color:var(--paper)}
+.hist-leg .note{color:var(--fog);font-weight:400;margin-left:6px}
+.hist-popuptotal{margin-top:14px;padding-top:12px;border-top:1px solid var(--line);
+  display:flex;justify-content:space-between;font-family:'Barlow Condensed';font-size:15px;
+  letter-spacing:.06em}
+.hist-popuptotal span:last-child{color:#FF6B6B}
+.hist-empty{color:var(--fog);font-family:'IBM Plex Mono';font-size:12px;padding:24px 0}
