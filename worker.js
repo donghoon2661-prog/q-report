@@ -1009,6 +1009,51 @@ export default {
       return json({ months: list.keys.map(k => k.name.replace("delayHistory:", "")) });
     }
 
+    /* --- 지연 백데이터 수동 입력 (사이트 추적 이전에 진행됐던 과거 건 소급 등록용) ---
+       POST body: { records: [{ booking, pol, pod, vessel, voyage, planEta, actualEta, rollover, polDep }, ...] }
+       delayDays/planMonth/polDepMonth/completedAt은 서버가 자동 계산. 중복 booking은 skip. */
+    if (url.pathname === "/delayhistory/manual" && req.method === "POST") {
+      if (!auth(req, env)) return json({ error: "인증 실패" }, 401);
+      let body;
+      try { body = await req.json(); } catch (_) { return json({ error: "JSON 파싱 실패" }, 400); }
+      const records = Array.isArray(body.records) ? body.records : [];
+      const results = [];
+      for (const r of records) {
+        const booking = String(r.booking || "").trim().toUpperCase();
+        if (!booking || !r.planEta || !r.actualEta) {
+          results.push({ booking, saved: false, reason: "필수값 누락(booking/planEta/actualEta)" });
+          continue;
+        }
+        const plan = Date.parse(r.planEta + "T00:00:00Z");
+        const real = Date.parse(r.actualEta + "T00:00:00Z");
+        if (!Number.isFinite(plan) || !Number.isFinite(real)) {
+          results.push({ booking, saved: false, reason: "날짜 형식 오류" });
+          continue;
+        }
+        const delayDays = Math.round((real - plan) / dayMs);
+        const planMonth = monthOf(r.planEta);
+        const polDepMonth = monthOf(r.polDep);
+        const key = "delayHistory:" + planMonth;
+        let arr = [];
+        try { arr = JSON.parse((await env.OQC.get(key)) || "[]") || []; } catch (_) { arr = []; }
+        if (arr.some(x => x.booking === booking)) {
+          results.push({ booking, saved: false, reason: "이미 존재" });
+          continue;
+        }
+        arr.push({
+          booking, pol: r.pol || null, pod: r.pod || null,
+          vessel: r.vessel || null, voyage: r.voyage || null,
+          planEta: r.planEta, actualEta: r.actualEta, delayDays,
+          rollover: !!r.rollover, polDep: r.polDep || null,
+          planMonth, polDepMonth,
+          completedAt: r.actualEta + "T00:00", manual: true
+        });
+        await env.OQC.put(key, JSON.stringify(arr));
+        results.push({ booking, saved: true, delayDays, planMonth });
+      }
+      return json({ results });
+    }
+
     /* --- 알림 테스트 / 상태 확인 --- */
     if (url.pathname === "/notify-test") {
       if (!auth(req, env)) return json({ error: "인증 실패" }, 401);
