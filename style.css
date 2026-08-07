@@ -451,3 +451,8 @@ html[data-theme="light"] #qview td.near{background:rgba(154,107,18,.08)}
   letter-spacing:.1em;margin-left:8px}
 #side .sorig{color:var(--fog);font-size:11px;font-family:'IBM Plex Mono';margin-left:8px}
 #side .sorig b{font-weight:600}
+/* 모바일 백데이터 모달: 배경 스크롤 잠금 + 헤더 고정 보강 */
+body.modal-open{overflow:hidden;position:fixed;width:100%}
+#qview .modal-h{position:sticky;top:0;z-index:2;background:var(--panel)}
+#qview .overlay{overscroll-behavior:contain}
+#qview .bd-wrap{overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
