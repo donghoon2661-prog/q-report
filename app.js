@@ -1280,7 +1280,7 @@ function setView(v){
   document.getElementById('cards').style.display  = v==='list'?'block':'none';
   document.getElementById('history').style.display = v==='history'?'block':'none';
   if(v==='map'&&map) setTimeout(()=>map.invalidateSize(),60);
-  if(v==='history') safe(()=>renderHistoryMonths(),"History");
+  if(v==='history') renderHistoryMonths().catch(e=>console.error("History",e));
 }
 function show(v){
   document.getElementById("menu").hidden = v!=="menu";
