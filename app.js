@@ -426,11 +426,17 @@ function buildTable(data){
     const el = document.getElementById(id);
     if(el) el.innerHTML = GAP_REMARK;
   });
-  /* 편차 배지·느낌표 클릭 → ETB 변동 로그 */
-  document.querySelectorAll('.gapbox,.gapbang').forEach(el=>{
+  /* 편차 배지·느낌표 클릭 → ETB 변동 로그 (노란 본선교체 느낌표는 별도 로그) */
+  document.querySelectorAll('.gapbox,.gapbang:not(.vsl-bang)').forEach(el=>{
     el.addEventListener('click', ev=>{
       ev.stopPropagation();
       showGapLog(el.dataset.b);
+    });
+  });
+  document.querySelectorAll('.gapbang.vsl-bang').forEach(el=>{
+    el.addEventListener('click', ev=>{
+      ev.stopPropagation();
+      showVesselLog(el.dataset.b);
     });
   });
   const hook = (sel, jump) => document.querySelectorAll(sel).forEach(tr=>
@@ -624,6 +630,48 @@ function etaChangedRecently(booking){
   return (Date.now() - t) < SIGNAL_DAYS*86400000;
 }
 
+/* ---------- 본선 교체 로그 ----------
+   /history 에서 vessel(본선) 변경 항목만 뽑는다. 항차도 같이 바뀌었으면 같이 표시.
+   T/S 지연 원인 분석용 — ETA 변경과 별개로, 본선 자체가 바뀌었는지를 구분해서 보여준다. */
+function vesselChangeLog(booking){
+  const log = (HIST[booking]||[]).filter(e => Array.isArray(e.changes)
+    && e.changes.some(c => c.field === "vessel"));
+  return log.map(e=>{
+    const v = e.changes.find(x=>x.field==="vessel");
+    const y = e.changes.find(x=>x.field==="voyage");
+    return { at:e.at, vFrom:v.from, vTo:v.to, yFrom:y?y.from:null, yTo:y?y.to:null };
+  }).reverse(); // 최신순
+}
+
+function vesselChangedRecently(booking){
+  const log = vesselChangeLog(booking);
+  if(!log.length) return false;
+  const t = Date.parse(String(log[0].at).replace(" ","T").replace("Z","")+"Z");
+  if(!Number.isFinite(t)) return false;
+  return (Date.now() - t) < SIGNAL_DAYS*86400000;
+}
+
+function showVesselLog(booking){
+  const log = vesselChangeLog(booking);
+  const box = document.getElementById("gaplog");
+  if(!box) return;
+  const rows = log.length
+    ? log.map(e=>`<tr>
+        <td>${toKST(e.at)}</td>
+        <td>${e.vFrom} → <b>${e.vTo}</b>${e.yTo?` (${e.yFrom||"—"} → ${e.yTo})`:""}</td></tr>`).join("")
+    : `<tr><td colspan="2" class="dim">No vessel change recorded for this booking.</td></tr>`;
+  box.innerHTML = `<div class="gl-in">
+      <div class="gl-h"><b>${booking}</b> — Vessel change log
+        <button class="gl-x" aria-label="close">✕</button></div>
+      <table><thead><tr><th>DETECTED</th><th>VESSEL / VOYAGE</th></tr></thead>
+      <tbody>${rows}</tbody></table>
+      <p class="gl-n">Detected at each scheduled collection.</p>
+    </div>`;
+  box.hidden = false;
+  box.querySelector(".gl-x").addEventListener("click",()=>{ box.hidden = true; });
+  box.addEventListener("click",e=>{ if(e.target===box) box.hidden=true; },{once:true});
+}
+
 function showGapLog(booking){
   const log = etaChangeLog(booking);
   const box = document.getElementById("gaplog");
@@ -658,8 +706,10 @@ function gapBox(s){
   const txt = g > 0 ? "+" + g : String(g);
   const bell = etaChangedRecently(s.booking)
     ? `<span class="gapbang" data-b="${s.booking}" title="LA ETB changed within the last ${SIGNAL_DAYS} days — click for the log">!</span>` : "";
+  const vbell = vesselChangedRecently(s.booking)
+    ? `<span class="gapbang vsl-bang" data-b="${s.booking}" title="Vessel changed within the last ${SIGNAL_DAYS} days — click for the log">!</span>` : "";
   return `<span class="gapbox ${cls}" data-b="${s.booking}"
-            title="Original plan ${d.orig} · click for the ETB change log">${txt}</span>${bell}`;
+            title="Original plan ${d.orig} · click for the ETB change log">${txt}</span>${bell}${vbell}`;
 }
 
 /* 표 HTML (MAP 아래 / LIST 상단 공용) */
