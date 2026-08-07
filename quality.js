@@ -383,9 +383,18 @@ function buildQuality(){
 
   /* ── 백데이터 모달 ── */
   const overlay=document.getElementById('overlay');
-  document.getElementById('mClose').addEventListener('click',()=>overlay.classList.remove('show'));
-  overlay.addEventListener('click',e=>{if(e.target===overlay)overlay.classList.remove('show')});
-  document.addEventListener('keydown',e=>{if(e.key==='Escape')overlay.classList.remove('show')});
+  document.getElementById('mClose').addEventListener('click',()=>{
+    overlay.classList.remove('show');
+    document.body.classList.remove('modal-open');
+  });
+  overlay.addEventListener('click',e=>{if(e.target===overlay){
+    overlay.classList.remove('show');
+    document.body.classList.remove('modal-open');
+  }});
+  document.addEventListener('keydown',e=>{if(e.key==='Escape'){
+    overlay.classList.remove('show');
+    document.body.classList.remove('modal-open');
+  }});
 
   const GROUPS=[
    [{ko:'수량',en:'Quantity'},[['cartons','Cartons'],['qty_max','Qty Max'],['qty_min','Qty Min']]],
@@ -427,6 +436,8 @@ function buildQuality(){
     });
     renderSector(sheet,0);
     overlay.classList.add('show');
+    document.body.classList.add('modal-open');
+    document.getElementById('mBody').scrollTop = 0;
   }
   function renderSector(sheet,idx){
     const sec=sheet.sectors[idx];
