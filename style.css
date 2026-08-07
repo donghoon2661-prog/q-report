@@ -455,6 +455,7 @@ html[data-theme="light"] #qview td.near{background:rgba(154,107,18,.08)}
 /* ---------- HISTORY 탭 ---------- */
 #history{display:none}
 #hist-months{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-top:18px}
+#hist-months[hidden]{display:none}
 .hist-mcard{background:var(--hull);border:1px solid var(--line);border-radius:6px;padding:14px 16px;cursor:pointer;text-align:left}
 .hist-mcard:disabled,.hist-mcard.empty{opacity:.35;cursor:default}
 .hist-mcard .m{font-family:'Barlow Condensed';font-weight:700;font-size:22px;color:var(--paper)}
@@ -487,6 +488,7 @@ html[data-theme="light"] #qview td.near{background:rgba(154,107,18,.08)}
 
 #hist-popup{position:fixed;inset:0;background:rgba(0,0,0,.55);display:flex;align-items:center;
   justify-content:center;z-index:200;padding:16px}
+#hist-popup[hidden]{display:none}
 #hist-popup-card{background:var(--hull);border:1px solid var(--line);border-radius:8px;
   padding:20px 22px;width:100%;max-width:380px}
 .hist-popuphead{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:4px}
