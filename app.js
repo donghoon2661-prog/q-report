@@ -1328,6 +1328,7 @@ function refreshData(){
 
 function setView(v){
   document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('on',t.dataset.view===v));
+  document.querySelectorAll('.ship-tabbar button').forEach(t=>t.classList.toggle('on',t.dataset.view===v));
   document.getElementById('mapwrap').style.display = v==='map'?'grid':'none';
   document.getElementById('cards').style.display  = v==='list'?'block':'none';
   document.getElementById('history').style.display = v==='history'?'block':'none';
@@ -1404,6 +1405,7 @@ document.getElementById("poclear").addEventListener("click",clearPO);
 document.getElementById("addbtn").addEventListener("click",addBooking);
 document.getElementById("newbkg").addEventListener("keydown",e=>{if(e.key==="Enter")addBooking();});
 document.querySelectorAll(".tab").forEach(t=>t.addEventListener("click",()=>setView(t.dataset.view)));
+document.querySelectorAll(".ship-tabbar button").forEach(t=>t.addEventListener("click",()=>setView(t.dataset.view)));
 
 /* ================= 테마 =================
    기본은 다크. 게이트의 스위치를 켜면 라이트로 전환되고 선택은 브라우저에 남는다.
