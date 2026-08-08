@@ -263,8 +263,10 @@ function sortByETD(list){
 }
 
 /* 직항(피더 없음) 화물은 tsArr/tsDep가 null이므로 방어한다 */
-const fmtDT = s => !s ? "—" : s.slice(5,10).replace("-","/")+" "+s.slice(11,16);
-const fmtD  = s => !s ? "—" : s.slice(5,10).replace("-","/");
+const MON3 = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+const monAbbr = mm => MON3[parseInt(mm,10)-1] || mm;
+const fmtDT = s => !s ? "—" : monAbbr(s.slice(5,7))+"/"+s.slice(8,10)+" "+s.slice(11,16);
+const fmtD  = s => !s ? "—" : monAbbr(s.slice(5,7))+"/"+s.slice(8,10);
 
 /* ---------- MAP ---------- */
 let map, markers=[];
@@ -328,7 +330,7 @@ function origOf(bkg, field){
 }
 /* 날짜만 있는 값(POETA)도 안전하게 표기 */
 const fmtAny = v => !v ? "\u2014"
-  : /[T ]\d\d:/.test(String(v)) ? fmtDT(v) : String(v).slice(5,10).replace("-","/");
+  : /[T ]\d\d:/.test(String(v)) ? fmtDT(v) : monAbbr(String(v).slice(5,7))+"/"+String(v).slice(8,10);
 const tsLoose = v => { const a = TS(v); return a !== null ? a : (v ? TS(v + "T00:00:00") : null); };
 
 /* 날짜 한 칸 — 지난 시각이면 actual, 원 스케줄이 다르면 오른쪽에 병기 */
@@ -1329,6 +1331,8 @@ function setView(v){
   document.getElementById('mapwrap').style.display = v==='map'?'grid':'none';
   document.getElementById('cards').style.display  = v==='list'?'block':'none';
   document.getElementById('history').style.display = v==='history'?'block':'none';
+  const laneEl = document.querySelector('.lane');
+  if(laneEl) laneEl.style.display = v==='history' ? 'none' : 'flex';
   if(v==='map'&&map) setTimeout(()=>map.invalidateSize(),60);
   if(v==='history') renderHistoryMonths().catch(e=>console.error("History",e));
 }
@@ -1448,7 +1452,7 @@ function histBadgeLabel(d){
   }
   return d===1?"1 DAY DELAY":`${d} DAYS DELAY`;
 }
-function histShortDate(s){ return s?String(s).slice(5,10):"—"; }
+function histShortDate(s){ return s ? monAbbr(String(s).slice(5,7))+"/"+String(s).slice(8,10) : "—"; }
 
 async function loadHistoryData(){
   if(histCache) return histCache;
@@ -1484,7 +1488,13 @@ async function renderHistoryMonths(){
   catch(e){ wrap.innerHTML = `<div class="hist-empty">Failed to load history — ${e.message||e}</div>`; return; }
 
   const keys = Object.keys(data).filter(k=>k!=="unknown").sort().reverse();
-  if(!keys.length){ wrap.innerHTML = `<div class="hist-empty">No completed shipments yet.</div>`; return; }
+  if(!keys.length){
+    wrap.innerHTML = `<div class="hist-empty">No completed shipments yet.</div>`;
+    document.getElementById("hist-summary").style.display = "none";
+    return;
+  }
+  document.getElementById("hist-summary").style.display = "";
+  renderHistorySummary(data, keys);
 
   wrap.innerHTML = keys.map(k=>{
     const {m,y} = histMonthLabel(k);
@@ -1496,6 +1506,88 @@ async function renderHistoryMonths(){
 
   wrap.querySelectorAll(".hist-mcard").forEach(b=>
     b.addEventListener("click",()=>renderHistoryDetail(b.dataset.month)));
+}
+
+/* ---------- HISTORY 월별 요약(표+차트) ----------
+   완료 화물의 delayDays 기준: 월별 vessel 수 / 평균 지연일 / 최대 지연일.
+   표는 시간순(오름차순, 차트와 같은 순서), 카드 그리드(renderHistoryMonths)는 최신순 그대로 유지. */
+let histChartInst = null;
+function monthStats(data, keys){
+  return keys.slice().sort().map(k=>{
+    const recs = data[k]||[];
+    const delays = recs.map(r=>r.delayDays).filter(d=>d!==null&&d!==undefined);
+    const avg = delays.length ? delays.reduce((a,b)=>a+b,0)/delays.length : null;
+    const max = delays.length ? Math.max(...delays) : null;
+    const {m,y} = histMonthLabel(k);
+    return { key:k, label:`${m} ${y}`, vessels:recs.length, avg, max };
+  });
+}
+function renderHistorySummary(data, keys){
+  const stats = monthStats(data, keys);
+
+  const tbody = document.getElementById("hist-stats-tbody");
+  tbody.innerHTML = stats.map((s,i)=>`<tr data-idx="${i}">
+      <td>${s.label}</td><td>${s.vessels}</td>
+      <td>${s.avg===null?"—":s.avg.toFixed(1)+"d"}</td>
+      <td>${s.max===null?"—":s.max+"d"}</td>
+    </tr>`).join("");
+
+  const ctx = document.getElementById("hist-chart");
+  if(histChartInst){ histChartInst.destroy(); histChartInst = null; }
+  const barColor = cssVar('--sail','#3FD0A6');
+  histChartInst = new Chart(ctx, {
+    type: "bar",
+    data: {
+      labels: stats.map(s=>s.label),
+      datasets: [{
+        label: "Avg delay (days)",
+        data: stats.map(s=>s.avg===null?0:s.avg),
+        backgroundColor: barColor,
+        borderRadius: 4,
+        maxBarThickness: 46
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display:false },
+        tooltip: {
+          callbacks: {
+            title: items => stats[items[0].dataIndex].label,
+            label: item => {
+              const s = stats[item.dataIndex];
+              return [
+                `Vessels: ${s.vessels}`,
+                `Avg delay: ${s.avg===null?"—":s.avg.toFixed(1)+"d"}`,
+                `Max delay: ${s.max===null?"—":s.max+"d"}`
+              ];
+            }
+          }
+        }
+      },
+      onHover: (evt, elements) => {
+        tbody.querySelectorAll("tr").forEach(tr=>tr.classList.remove("hi"));
+        if(elements.length){
+          const row = tbody.querySelector(`tr[data-idx="${elements[0].index}"]`);
+          if(row) row.classList.add("hi");
+        }
+      },
+      scales: {
+        x: { ticks:{ color:cssVar('--fog','#8AA4B5') }, grid:{ display:false } },
+        y: { beginAtZero:true, ticks:{ color:cssVar('--fog','#8AA4B5') },
+             grid:{ color:cssVar('--line-soft','#162C3B') } }
+      }
+    }
+  });
+
+  /* 표 행에 마우스 올리면 차트에서도 강조 */
+  tbody.querySelectorAll("tr").forEach(tr=>{
+    tr.addEventListener("mouseenter", ()=>{
+      tbody.querySelectorAll("tr").forEach(t=>t.classList.remove("hi"));
+      tr.classList.add("hi");
+    });
+  });
 }
 
 function renderHistoryDetail(monthKey){

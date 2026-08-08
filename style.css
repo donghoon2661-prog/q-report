@@ -506,3 +506,15 @@ html[data-theme="light"] #qview td.near{background:rgba(154,107,18,.08)}
   letter-spacing:.06em}
 .hist-popuptotal span:last-child{color:#FF6B6B}
 .hist-empty{color:var(--fog);font-family:'IBM Plex Mono';font-size:12px;padding:24px 0}
+
+/* HISTORY 탭: 월별 요약(왼쪽 표 + 오른쪽 차트) */
+#hist-summary{display:grid;grid-template-columns:1fr 1.3fr;gap:16px;margin-top:18px}
+@media(max-width:760px){#hist-summary{grid-template-columns:1fr}}
+#hist-stats-table{width:100%;border-collapse:collapse;border:1px solid var(--line);background:var(--hull);height:fit-content}
+#hist-stats-table th{font-family:'IBM Plex Mono';font-size:10px;letter-spacing:.12em;color:var(--fog);
+  text-align:left;padding:9px 12px;border-bottom:1px solid var(--line);font-weight:400}
+#hist-stats-table td{padding:9px 12px;border-bottom:1px solid var(--line-soft);font-size:12.5px;
+  font-family:'IBM Plex Mono';transition:background .15s}
+#hist-stats-table tr:last-child td{border-bottom:0}
+#hist-stats-table tr.hi td{background:rgba(63,208,166,.10)}
+#hist-chart-wrap{border:1px solid var(--line);background:var(--hull);padding:14px;min-height:220px}
