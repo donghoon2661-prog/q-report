@@ -1355,16 +1355,21 @@ document.querySelectorAll(".tile").forEach(t=>t.addEventListener("click",()=>{
 document.getElementById("back").addEventListener("click",()=>show("menu"));
 document.getElementById("ship-title").addEventListener("click",refreshData);
 
-/* ================= 변경 이력(Changelog) ================= */
+/* ================= 변경 이력(Changelog) — admin 전용 ================= */
 const CHANGELOG = [
+  { v:"1.1", date:"2026-08-08", notes:[
+    "admin 계정 추가 — 업데이트 로그(변경 이력)는 이제 admin 계정에서만 볼 수 있음 (kossan 포함 다른 계정에서는 안 보임)",
+    "eta / qc 계정으로 로그인하면 메뉴(01/02 선택 화면) 없이 바로 해당 화면으로 진입",
+    "로그아웃 버튼 추가 — 화면 우측 상단에서 언제든 로그아웃하고 다른 계정으로 재접속 가능"
+  ]},
   { v:"1.0", date:"2026-08-08", notes:[
-    "Role-based login — kossan (full access), eta (Shipment Status only), qc (Quality Analysis only)",
-    "Login now stays valid for 5 minutes, so refreshing the page doesn't ask for the password again",
-    "HISTORY tab: added a monthly summary (vessel count / avg delay / max delay) as a table and chart, in addition to the existing month-by-month detail view",
-    "Delay badges: added a yellow \"!\" for vessel changes, alongside the existing red \"!\" for ETB changes, so schedule slips caused by a vessel swap can be told apart from other delays",
-    "Mobile: the quality backdata modal now closes properly and locks background scrolling while open",
-    "All dates on the site now show as \"Mon/DD\" (e.g. Aug/08) instead of numeric month/day",
-    "Full English pass on Shipment Status — worker error messages, schedule-change labels, and a few leftover Korean strings are now in English"
+    "역할별 로그인 — kossan(전체 접근), eta(SHIPMENT STATUS만), qc(QUALITY ANALYSIS만)",
+    "로그인이 5분간 유지돼 새로고침해도 비밀번호를 다시 묻지 않음",
+    "HISTORY 탭: 기존 월별 상세 보기에 더해 월별 요약(선박 수 / 평균 지연일 / 최대 지연일)을 표와 차트로 추가",
+    "지연 배지: 기존 빨간 \"!\"(ETB 변경)에 더해 노란 \"!\"(본선 변경)을 추가해 본선 교체로 인한 지연을 구분 가능",
+    "모바일: 품질 백데이터 모달이 정상적으로 닫히고, 열려 있는 동안 배경 스크롤이 잠김",
+    "사이트 전체 날짜 표기를 숫자(월/일) 대신 \"Mon/DD\"(예: Aug/08) 형식으로 변경",
+    "SHIPMENT STATUS 전반 영문화 — 워커 오류 메시지, 스케줄 변경 라벨 등 남아있던 한글 문구 정리"
   ]}
 ];
 function renderChangelog(){
@@ -1374,9 +1379,10 @@ function renderChangelog(){
     </div>`).join("");
 }
 function showChangelog(){
+  if(ACCESS_ROLE !== "admin") return; // admin 전용
   const box = document.getElementById("changelog");
   box.innerHTML = `<div class="gl-in" style="max-width:520px">
-      <div class="gl-h"><b>Update history</b><button class="gl-x" id="changelog-x">✕</button></div>
+      <div class="gl-h"><b>업데이트 로그</b><button class="gl-x" id="changelog-x">✕</button></div>
       ${renderChangelog()}
     </div>`;
   box.hidden = false;
@@ -1436,18 +1442,23 @@ const AUTH_TTL_MS = 5*60*1000; // 5분
 let ACCESS_ROLE = "kossan";
 
 /* 접속 비밀번호별 권한
-   kossan → 전체 / eta → SHIPMENT STATUS만 / qc → QUALITY ANALYSIS만
-   접근 안 되는 타일은 숨기고, show()에서도 한 번 더 막는다(콘솔로 직접 호출해도 막히도록). */
-const ROLE_PW = { kossan:"kossan", eta:"eta", qc:"qc" };
+   kossan → 전체 / admin → 전체 + 업데이트 로그 열람 / eta → SHIPMENT STATUS만 / qc → QUALITY ANALYSIS만
+   eta·qc는 메뉴(01/02) 없이 바로 해당 화면으로 들어간다. */
+const ROLE_PW = { kossan:"kossan", admin:"admin", eta:"eta", qc:"qc" };
 
 function applyRoleRestrictions(){
-  const shipTile = document.querySelector('.tile[data-go="ship"]');
-  const qualTile = document.querySelector('.tile[data-go="quality"]');
-  if(ACCESS_ROLE === "eta"){
-    if(qualTile) qualTile.style.display = "none";
-  } else if(ACCESS_ROLE === "qc"){
-    if(shipTile) shipTile.style.display = "none";
-  }
+  const shipTile  = document.querySelector('.tile[data-go="ship"]');
+  const qualTile  = document.querySelector('.tile[data-go="quality"]');
+  const updateBtn = document.getElementById('update-btn');
+  const backBtn   = document.getElementById('back');
+  const qbackBtn  = document.getElementById('qback');
+  const restricted = (ACCESS_ROLE === 'eta' || ACCESS_ROLE === 'qc');
+
+  if(ACCESS_ROLE === 'eta' && qualTile) qualTile.style.display = 'none';
+  if(ACCESS_ROLE === 'qc'  && shipTile) shipTile.style.display = 'none';
+  if(updateBtn) updateBtn.style.display = (ACCESS_ROLE === 'admin') ? '' : 'none';
+  if(backBtn)   backBtn.style.display   = restricted ? 'none' : '';
+  if(qbackBtn)  qbackBtn.style.display  = restricted ? 'none' : '';
 }
 
 function proceedAfterUnlock(){
@@ -1457,10 +1468,24 @@ function proceedAfterUnlock(){
 
   document.getElementById("gate").remove();
   applyRoleRestrictions();
-  show("menu"); setView('map');
+  const lo = document.getElementById("logout-btn");
+  if(lo) lo.hidden = false;
 
-  /* qc 전용 접속은 SHIPMENT STATUS 데이터 자체를 받아오지 않는다 */
-  if(ACCESS_ROLE === "qc") return;
+  /* qc 전용 접속 — 메뉴를 거치지 않고 바로 QUALITY ANALYSIS로, SHIPMENT 데이터는 받지 않는다 */
+  if(ACCESS_ROLE === "qc"){
+    show("quality");
+    setTimeout(()=>document.getElementById("qbar").scrollIntoView({block:"start"}),60);
+    return;
+  }
+
+  /* eta 전용 접속 — 메뉴를 거치지 않고 바로 SHIPMENT STATUS로 */
+  if(ACCESS_ROLE === "eta"){
+    show("ship");
+    setTimeout(()=>{ map&&map.invalidateSize(); document.getElementById('ship').scrollIntoView({block:'start'}); },80);
+  } else {
+    show("menu");
+  }
+  setView('map');
 
   Promise.all([
     loadPO(), loadHistory(),
@@ -1483,6 +1508,15 @@ function unlock(){
 document.getElementById("gate-go").addEventListener("click",unlock);
 document.getElementById("pw").addEventListener("keydown",e=>{if(e.key==="Enter")unlock();});
 document.getElementById("pw").focus();
+
+/* 로그아웃 — 인증 정보를 지우고 게이트로 되돌아간다(다른 계정으로 재접속 가능) */
+document.getElementById("logout-btn").addEventListener("click",()=>{
+  try{
+    localStorage.removeItem(AUTH_KEY);
+    localStorage.removeItem(ROLE_KEY);
+  }catch(_){}
+  location.reload();
+});
 
 // 5분 이내 재방문이면 게이트 건너뛰기
 (function tryAutoUnlock(){
