@@ -539,7 +539,7 @@ html[data-theme="light"] #qview td.near{background:rgba(154,107,18,.08)}
 .cl-v li{font-size:12px;line-height:1.7;color:var(--paper)}
 
 /* 로그아웃 버튼 — 로그인 후 항상 우측 상단 고정 */
-#logout-btn{position:fixed;top:12px;right:14px;z-index:970;
+#logout-btn{position:fixed;top:12px;right:14px;z-index:10000;
   background:var(--ink);border:1px solid var(--line);color:var(--fog);
   font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.14em;
   padding:6px 12px;cursor:pointer}
