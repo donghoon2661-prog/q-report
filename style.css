@@ -330,6 +330,7 @@ dd .dim{opacity:.65}
 #menu[hidden]{display:none!important}
 
 /* ---------- 모바일 ---------- */
+.ship-tabbar{display:none}
 @media(max-width:760px){
   #ship{padding:16px 12px 86px}
   .topbar{gap:10px}
@@ -376,7 +377,6 @@ dd .dim{opacity:.65}
   .ship-tabbar button.on{color:var(--sail);background:rgba(63,208,166,.10)}
   .ship-tabbar .ico{font-family:'IBM Plex Mono',monospace;font-size:15px;font-weight:600;line-height:1}
 }
-.ship-tabbar{display:none}
 @media(max-width:900px){
   #qbar .brand{display:none}
 }
