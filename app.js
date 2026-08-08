@@ -1337,6 +1337,8 @@ function setView(v){
   if(v==='history') renderHistoryMonths().catch(e=>console.error("History",e));
 }
 function show(v){
+  if(v==="ship" && ACCESS_ROLE==="qc") return;
+  if(v==="quality" && ACCESS_ROLE==="eta") return;
   document.getElementById("menu").hidden = v!=="menu";
   document.getElementById("ship").style.display = v==="ship"?"block":"none";
   document.getElementById("ftr").style.display  = v==="ship"?"block":"none";
@@ -1352,6 +1354,36 @@ document.querySelectorAll(".tile").forEach(t=>t.addEventListener("click",()=>{
 }));
 document.getElementById("back").addEventListener("click",()=>show("menu"));
 document.getElementById("ship-title").addEventListener("click",refreshData);
+
+/* ================= 변경 이력(Changelog) ================= */
+const CHANGELOG = [
+  { v:"1.0", date:"2026-08-08", notes:[
+    "Role-based login — kossan (full access), eta (Shipment Status only), qc (Quality Analysis only)",
+    "Login now stays valid for 5 minutes, so refreshing the page doesn't ask for the password again",
+    "HISTORY tab: added a monthly summary (vessel count / avg delay / max delay) as a table and chart, in addition to the existing month-by-month detail view",
+    "Delay badges: added a yellow \"!\" for vessel changes, alongside the existing red \"!\" for ETB changes, so schedule slips caused by a vessel swap can be told apart from other delays",
+    "Mobile: the quality backdata modal now closes properly and locks background scrolling while open",
+    "All dates on the site now show as \"Mon/DD\" (e.g. Aug/08) instead of numeric month/day",
+    "Full English pass on Shipment Status — worker error messages, schedule-change labels, and a few leftover Korean strings are now in English"
+  ]}
+];
+function renderChangelog(){
+  return CHANGELOG.map(v=>`<div class="cl-v">
+      <div class="vh">v${v.v}<span class="d">${v.date}</span></div>
+      <ul>${v.notes.map(n=>`<li>${n}</li>`).join("")}</ul>
+    </div>`).join("");
+}
+function showChangelog(){
+  const box = document.getElementById("changelog");
+  box.innerHTML = `<div class="gl-in" style="max-width:520px">
+      <div class="gl-h"><b>Update history</b><button class="gl-x" id="changelog-x">✕</button></div>
+      ${renderChangelog()}
+    </div>`;
+  box.hidden = false;
+  document.getElementById("changelog-x").addEventListener("click",()=>{ box.hidden = true; });
+  box.addEventListener("click",e=>{ if(e.target===box) box.hidden = true; },{once:true});
+}
+document.getElementById("update-btn").addEventListener("click",showChangelog);
 document.addEventListener("DOMContentLoaded",()=>{
   const qb=document.getElementById("qback");
   if(qb) qb.addEventListener("click",()=>show("menu"));
@@ -1399,11 +1431,37 @@ document.addEventListener("DOMContentLoaded", ()=>{
 });
 
 const AUTH_KEY = "kossan_auth_ts";
+const ROLE_KEY = "kossan_role";
 const AUTH_TTL_MS = 5*60*1000; // 5분
+let ACCESS_ROLE = "kossan";
+
+/* 접속 비밀번호별 권한
+   kossan → 전체 / eta → SHIPMENT STATUS만 / qc → QUALITY ANALYSIS만
+   접근 안 되는 타일은 숨기고, show()에서도 한 번 더 막는다(콘솔로 직접 호출해도 막히도록). */
+const ROLE_PW = { kossan:"kossan", eta:"eta", qc:"qc" };
+
+function applyRoleRestrictions(){
+  const shipTile = document.querySelector('.tile[data-go="ship"]');
+  const qualTile = document.querySelector('.tile[data-go="quality"]');
+  if(ACCESS_ROLE === "eta"){
+    if(qualTile) qualTile.style.display = "none";
+  } else if(ACCESS_ROLE === "qc"){
+    if(shipTile) shipTile.style.display = "none";
+  }
+}
 
 function proceedAfterUnlock(){
+  let role = "kossan";
+  try{ role = localStorage.getItem(ROLE_KEY) || "kossan"; }catch(_){}
+  ACCESS_ROLE = role;
+
   document.getElementById("gate").remove();
+  applyRoleRestrictions();
   show("menu"); setView('map');
+
+  /* qc 전용 접속은 SHIPMENT STATUS 데이터 자체를 받아오지 않는다 */
+  if(ACCESS_ROLE === "qc") return;
+
   Promise.all([
     loadPO(), loadHistory(),
     fetch(source(),{cache:"no-store"}).then(r=>r.ok?r.json():Promise.reject()).catch(()=>FALLBACK)
@@ -1411,10 +1469,15 @@ function proceedAfterUnlock(){
 }
 
 function unlock(){
-  if(document.getElementById("pw").value.trim()!=="kossan"){
+  const val = document.getElementById("pw").value.trim();
+  const role = Object.keys(ROLE_PW).find(k => ROLE_PW[k] === val);
+  if(!role){
     document.getElementById("gate-err").textContent="Incorrect password."; return;
   }
-  try{ localStorage.setItem(AUTH_KEY, String(Date.now())); }catch(_){}
+  try{
+    localStorage.setItem(AUTH_KEY, String(Date.now()));
+    localStorage.setItem(ROLE_KEY, role);
+  }catch(_){}
   proceedAfterUnlock();
 }
 document.getElementById("gate-go").addEventListener("click",unlock);
