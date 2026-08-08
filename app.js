@@ -1459,6 +1459,13 @@ function applyRoleRestrictions(){
   if(updateBtn) updateBtn.style.display = (ACCESS_ROLE === 'admin') ? '' : 'none';
   if(backBtn)   backBtn.style.display   = restricted ? 'none' : '';
   if(qbackBtn)  qbackBtn.style.display  = restricted ? 'none' : '';
+
+  /* Add booking / MAPPING — admin 전용. kossan·eta는 조회만 가능 */
+  const addbar = document.querySelector('.addbar');
+  const pobox  = document.getElementById('pobox');
+  const showOps = (ACCESS_ROLE === 'admin');
+  if(addbar) addbar.style.display = showOps ? '' : 'none';
+  if(pobox)  pobox.style.display  = showOps ? '' : 'none';
 }
 
 function proceedAfterUnlock(){
