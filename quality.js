@@ -185,6 +185,16 @@ function renderStaticLabels(){
 }
 
 (async function boot(){
+  /* eta 권한(SHIPMENT STATUS 전용)으로 접속한 경우 품질 데이터를 아예 받아오지 않는다.
+     로그인 게이트가 사라진 뒤(app.js가 role을 localStorage에 이미 저장한 뒤)에 확인한다. */
+  await new Promise(res=>{
+    const check = ()=>{ document.getElementById('gate') ? setTimeout(check,150) : res(); };
+    check();
+  });
+  let role = 'kossan';
+  try{ role = localStorage.getItem('kossan_role') || 'kossan'; }catch(_){}
+  if(role === 'eta') return;
+
   try {
     DATA = await loadCOA();
     if(!DATA.sheets.length) return coaError('COA 파일이 하나도 없습니다.');
