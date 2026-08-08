@@ -331,10 +331,12 @@ dd .dim{opacity:.65}
 
 /* ---------- 모바일 ---------- */
 @media(max-width:760px){
-  #ship{padding:16px 12px 70px}
+  #ship{padding:16px 12px 86px}
   .topbar{gap:10px}
   .topbar h1{font-size:20px;width:100%;order:3}
   .stamp{font-size:10px;width:100%;order:4;line-height:1.5}
+  .topbar .brand{display:none}     /* 모바일에서는 로그아웃 버튼과 겹쳐서 숨긴다 */
+  .topbar .spacer{display:none}
   .lane{gap:14px}
   .lane b{font-size:18px}
   .lane div{font-size:11px}
@@ -345,7 +347,7 @@ dd .dim{opacity:.65}
   #side{padding:14px;order:-1}          /* 정보 패널을 지도 위로 */
   #side:empty{display:none}
   .addbar input{width:100%}
-  .tab{padding:9px 14px;font-size:13px}
+  .tabs{display:none}                   /* 상단 탭 대신 하단 탭바 사용 */
   /* 표는 가로 스크롤 대신 2열로 접기 */
   #vtable thead,#otable thead{display:none}
   #vtable tr,#otable tr{display:block;border-bottom:1px solid var(--line)}
@@ -363,6 +365,20 @@ dd .dim{opacity:.65}
   #overview{padding:16px 14px 14px}
   #overview h2{font-size:16px}
   footer{padding:0 12px 30px}
+
+  /* 하단 탭바 — QUALITY ANALYSIS 탭바와 같은 룩으로, MAP/LIST/HISTORY 전환 */
+  .ship-tabbar{display:flex;position:fixed;bottom:0;left:0;right:0;z-index:30;
+    background:var(--hull);border-top:1px solid var(--line);
+    padding:6px 8px calc(6px + env(safe-area-inset-bottom))}
+  .ship-tabbar button{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;
+    padding:8px 4px;border-radius:8px;color:var(--fog);font-size:10.5px;
+    font-family:'Barlow Condensed',sans-serif;letter-spacing:.06em;min-height:52px;justify-content:center}
+  .ship-tabbar button.on{color:var(--sail);background:rgba(63,208,166,.10)}
+  .ship-tabbar .ico{font-family:'IBM Plex Mono',monospace;font-size:15px;font-weight:600;line-height:1}
+}
+.ship-tabbar{display:none}
+@media(max-width:900px){
+  #qbar .brand{display:none}
 }
 /* 품질 대시보드 모바일: 가로 넘침·차트 깨짐 방지 */
 #qview{max-width:100%;overflow-x:hidden;background:var(--bg);color:var(--text)}
