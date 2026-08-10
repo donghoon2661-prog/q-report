@@ -1391,6 +1391,101 @@ function showChangelog(){
   box.addEventListener("click",e=>{ if(e.target===box) box.hidden = true; },{once:true});
 }
 document.getElementById("update-btn").addEventListener("click",showChangelog);
+
+/* ================= RESTORE (admin 전용) ================= */
+const BACKUP_API = "https://api.github.com/repos/donghoon2661-prog/q-report/contents/backups";
+
+async function showRestoreModal(){
+  if(ACCESS_ROLE !== "admin") return;
+  const modal = document.getElementById("restore-modal");
+  modal.innerHTML = `<div class="rm-in">
+    <div class="rm-h"><b>⚠ RESTORE</b> — 백업에서 KV 복원<button class="gl-x" id="rm-x">✕</button></div>
+    <div class="rm-note">백업 날짜를 선택하고 RESTORE를 누르면 <b>bookings · pomap · poeta · pophoto · history</b>가 해당 시점으로 복원됩니다.<br>shipments는 복원 후 /collect로 재수집됩니다. 이 작업은 되돌릴 수 없습니다.</div>
+    <div class="rm-list" id="rm-list"><div style="padding:14px;font-size:11px;color:var(--fog)">백업 목록 불러오는 중…</div></div>
+    <div class="rm-actions">
+      <button class="btn" id="rm-cancel">취소</button>
+      <button class="btn danger" id="rm-confirm" disabled>RESTORE</button>
+    </div>
+  </div>`;
+  modal.hidden = false;
+  document.getElementById("rm-x").addEventListener("click",()=>{ modal.hidden=true; });
+  document.getElementById("rm-cancel").addEventListener("click",()=>{ modal.hidden=true; });
+  modal.addEventListener("click",e=>{ if(e.target===modal) modal.hidden=true; });
+
+  /* GitHub API로 backups/ 목록 fetch */
+  let files;
+  try{
+    const r = await fetch(BACKUP_API);
+    if(!r.ok) throw new Error("GitHub API " + r.status);
+    files = await r.json();
+  } catch(e){
+    document.getElementById("rm-list").innerHTML =
+      `<div style="padding:14px;font-size:11px;color:var(--buoy)">목록 불러오기 실패: ${e.message}</div>`;
+    return;
+  }
+
+  /* backup-YYYY-MM-DD.json 파일만 필터, 최신순 정렬 */
+  const backups = files
+    .filter(f => /^backup-\d{4}-\d{2}-\d{2}\.json$/.test(f.name))
+    .sort((a,b) => b.name.localeCompare(a.name));
+
+  if(!backups.length){
+    document.getElementById("rm-list").innerHTML =
+      `<div style="padding:14px;font-size:11px;color:var(--fog)">백업 파일 없음</div>`;
+    return;
+  }
+
+  let selectedDate = null;
+  document.getElementById("rm-list").innerHTML = backups.map(f=>{
+    const date = f.name.replace("backup-","").replace(".json","");
+    return `<button class="rm-item" data-date="${date}">${date}</button>`;
+  }).join("");
+
+  document.querySelectorAll(".rm-item").forEach(btn=>{
+    btn.addEventListener("click",()=>{
+      document.querySelectorAll(".rm-item").forEach(b=>b.classList.remove("sel"));
+      btn.classList.add("sel");
+      selectedDate = btn.dataset.date;
+      document.getElementById("rm-confirm").disabled = false;
+    });
+  });
+
+  document.getElementById("rm-confirm").addEventListener("click", async ()=>{
+    if(!selectedDate) return;
+    const confirmBtn = document.getElementById("rm-confirm");
+    confirmBtn.disabled = true;
+    confirmBtn.textContent = "복원 중…";
+    const key = await getKey();
+    if(!key){ confirmBtn.disabled=false; confirmBtn.textContent="RESTORE"; return; }
+    try{
+      const r = await fetch(`${API.replace("/data","/restore")}`, {
+        method:"POST",
+        headers:{"Content-Type":"application/json","X-Refresh-Key":key},
+        body: JSON.stringify({ date: selectedDate })
+      });
+      const res = await r.json();
+      if(!r.ok) throw new Error(res.error || r.status);
+      modal.hidden = true;
+      /* 완료 알림 */
+      const box = document.getElementById("gaplog");
+      box.innerHTML = `<div class="gl-in">
+        <div class="gl-h"><b>${selectedDate} 복원 완료</b><button class="gl-x" id="rl-x">✕</button></div>
+        <p style="font-size:12px;color:var(--paper);margin-bottom:8px">복원된 키: ${res.restored.join(", ")}</p>
+        <p style="font-size:11px;color:var(--fog)">${res.note}</p>
+      </div>`;
+      box.hidden = false;
+      document.getElementById("rl-x").addEventListener("click",()=>{ box.hidden=true; });
+      /* 화면 데이터 갱신 */
+      fetch(source(),{cache:"no-store"}).then(r=>r.ok?r.json():FALLBACK).then(d=>render(d));
+    } catch(e){
+      confirmBtn.disabled = false;
+      confirmBtn.textContent = "RESTORE";
+      document.getElementById("rm-list").insertAdjacentHTML("afterend",
+        `<p style="font-size:11px;color:var(--buoy);margin-bottom:8px">오류: ${e.message}</p>`);
+    }
+  });
+}
+document.getElementById("restore-btn").addEventListener("click", showRestoreModal);
 document.addEventListener("DOMContentLoaded",()=>{
   const qb=document.getElementById("qback");
   if(qb) qb.addEventListener("click",()=>show("menu"));
@@ -1451,16 +1546,19 @@ const ROLE_PW = { kossan:"kossan", admin:"admin", eta:"eta", qc:"qc" };
 function applyRoleRestrictions(){
   const shipTile  = document.querySelector('.tile[data-go="ship"]');
   const qualTile  = document.querySelector('.tile[data-go="quality"]');
-  const updateBtn = document.getElementById('update-btn');
-  const backBtn   = document.getElementById('back');
-  const qbackBtn  = document.getElementById('qback');
+  const updateBtn  = document.getElementById('update-btn');
+  const restoreBtn = document.getElementById('restore-btn');
+  const backBtn    = document.getElementById('back');
+  const qbackBtn   = document.getElementById('qback');
   const restricted = (ACCESS_ROLE === 'eta' || ACCESS_ROLE === 'qc');
+  const isAdmin    = (ACCESS_ROLE === 'admin');
 
   if(ACCESS_ROLE === 'eta' && qualTile) qualTile.style.display = 'none';
   if(ACCESS_ROLE === 'qc'  && shipTile) shipTile.style.display = 'none';
-  if(updateBtn) updateBtn.style.display = (ACCESS_ROLE === 'admin') ? '' : 'none';
-  if(backBtn)   backBtn.style.display   = restricted ? 'none' : '';
-  if(qbackBtn)  qbackBtn.style.display  = restricted ? 'none' : '';
+  if(updateBtn)  updateBtn.style.display  = isAdmin ? '' : 'none';
+  if(restoreBtn) restoreBtn.style.display = isAdmin ? '' : 'none';
+  if(backBtn)    backBtn.style.display    = restricted ? 'none' : '';
+  if(qbackBtn)   qbackBtn.style.display   = restricted ? 'none' : '';
 
   /* Add booking / MAPPING — admin 전용. kossan·eta는 조회만 가능 */
   const addbar = document.querySelector('.addbar');
