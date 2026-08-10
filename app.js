@@ -354,21 +354,10 @@ const tsLoose = v => { const a = TS(v); return a !== null ? a : (v ? TS(v + "T00
    그걸 신뢰하고, 구버전 데이터(플래그 없음)일 때만 시간 경과로 판단한다. */
 const ACTUAL_FLAG = { polDep:"polDepActual", tsArr:"tsArrActual", tsDep:"tsDepActual", eta:"etaActual" };
 function dtCell(s, field){
-  /* polDep 필드는 spDep(Shipment Schedule 빨간색 actual)이 있으면 그걸 표시 */
-  if(field === "polDep" && s.spDep){
-    const orig = origOf(s.booking, field);
-    const ot = tsLoose(orig);
-    const t = TS(s.spDep);
-    const moved = ot !== null && ot !== t;
-    const dd = moved ? Math.round((t - ot) / DAY * 10) / 10 : 0;
-    return `${fmtDT(s.spDep)}<span class="sest">actual</span>`
-      + `<span class="sorig">(plan ${fmtDT(s.polDep)}${
-          dd ? ` <b class="${dd > 0 ? "warn" : ""}">${dd > 0 ? "+" : ""}${dd.toFixed(1)}d</b>` : ""})</span>`;
-  }
   const cur = s[field], t = TS(cur);
   if(t === null) return fmtDT(cur);
   const flagKey = ACTUAL_FLAG[field];
-  const done = flagKey ? !!s[flagKey] : false;  // 이벤트 기반만 신뢰, 시간 경과 fallback 제거
+  const done = flagKey ? !!s[flagKey] : false;
   const orig  = origOf(s.booking, field);
   const ot    = tsLoose(orig);
   const moved = ot !== null && ot !== t;
@@ -429,6 +418,7 @@ function showSide(s,L2){
       ${geo}
       <dt>ROUTE</dt><dd>${dedupeLabels(nm).filter(Boolean).join(" → ")}</dd>
       <dt>PKG ETD</dt><dd>${dtCell(s,"polDep")}</dd>
+      ${s.spDep ? `<dt>GATE IN</dt><dd><span class="dt">${fmtDT(s.spDep)}</span><span class="sest">actual</span></dd>` : ""}
       <dt>SIN ETA</dt><dd>${dtCell(s,"tsArr")}</dd>
       <dt>SIN ETD</dt><dd>${dtCell(s,"tsDep")}</dd>
       ${(()=>{const t=tsDwell(s);return t?`<dt>T/S DWELL</dt><dd>${t.plan!==null?`plan ${t.plan}d → `:""}<b>${t.cur}d</b> <span class="dim">(${t.actual?"actual":"scheduled"})</span>${t.diff!==null&&t.diff!==0?` <span class="${t.diff>0?"warn":""}">${t.diff>0?"+":""}${t.diff}d</span>`:""}</dd>`:"";})()}
@@ -755,13 +745,7 @@ function rowsHTML(list){
     <tr data-i="${i}">
       <td><span class="nm">${s.vessel}</span><span class="vy">${s.voyage}</span>
           <span class="bk">${s.booking} · ${s.cntrQty||"—"} CNTR${s.staleItem?" · STALE":""}</span></td>
-      <td data-l="PKG ETD">
-        ${s.spDep
-          ? `<span class="dt">${fmtDT(s.spDep)}</span><span class="est">actual</span>
-             <div style="margin-top:2px;font-size:10px;color:var(--fog)">(plan ${fmtDT(s.polDep)})</div>`
-          : `<span class="dt">${fmtDT(s.polDep)}</span><span class="est">${actTag(!!s.polDepActual)}</span>`
-        }
-      </td>
+      <td data-l="PKG ETD"><span class="dt">${fmtDT(s.polDep)}</span><span class="est">${actTag(!!s.polDepActual)}</span></td>
       <td data-l="SIN ETD"><span class="dt">${fmtDT(s.tsDep)}</span><span class="est">${actTag(!!s.tsDepActual)}</span></td>
       <td data-l="LA ETB / DEST ETA">
         <div><span class="eta-lbl">ETB</span><span class="dt">${fmtDT(s.eta)}</span>${gapBox(s)}<span class="est">${etaActTag}</span></div>
