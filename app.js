@@ -333,11 +333,17 @@ const fmtAny = v => !v ? "\u2014"
   : /[T ]\d\d:/.test(String(v)) ? fmtDT(v) : monAbbr(String(v).slice(5,7))+"/"+String(v).slice(8,10);
 const tsLoose = v => { const a = TS(v); return a !== null ? a : (v ? TS(v + "T00:00:00") : null); };
 
-/* 날짜 한 칸 — 지난 시각이면 actual, 원 스케줄이 다르면 오른쪽에 병기 */
+/* 날짜 한 칸 — 이벤트 기반 actual 플래그 우선, 없으면 시간 경과로 fallback.
+   worker.js가 computeActualFlags()로 polDepActual/tsArrActual/tsDepActual/etaActual을 붙여주면
+   그걸 신뢰하고, 구버전 데이터(플래그 없음)일 때만 시간 경과로 판단한다. */
+const ACTUAL_FLAG = { polDep:"polDepActual", tsArr:"tsArrActual", tsDep:"tsDepActual", eta:"etaActual" };
 function dtCell(s, field){
   const cur = s[field], t = TS(cur);
   if(t === null) return fmtDT(cur);
-  const done  = t <= Date.now();
+  const flagKey = ACTUAL_FLAG[field];
+  const done = flagKey && s[flagKey] !== undefined
+    ? !!s[flagKey]            // 이벤트 기반 (신뢰)
+    : t <= Date.now();        // fallback: 시간 경과 (구버전 데이터)
   const orig  = origOf(s.booking, field);
   const ot    = tsLoose(orig);
   const moved = ot !== null && ot !== t;
@@ -721,8 +727,8 @@ function rowsHTML(list){
     <tr data-i="${i}">
       <td><span class="nm">${s.vessel}</span><span class="vy">${s.voyage}</span>
           <span class="bk">${s.booking} · ${s.cntrQty||"—"} CNTR${s.staleItem?" · STALE":""}</span></td>
-      <td data-l="PKG ETD"><span class="dt">${fmtDT(s.polDep)}</span><span class="est">${TS(s.polDep)!==null && TS(s.polDep)<=now?"actual":"scheduled"}</span></td>
-      <td data-l="SIN ETD"><span class="dt">${fmtDT(s.tsDep)}</span><span class="est">${TS(s.tsDep)!==null && TS(s.tsDep)<=now?"actual":"scheduled"}</span></td>
+      <td data-l="PKG ETD"><span class="dt">${fmtDT(s.polDep)}</span><span class="est">${s.polDepActual!==undefined?s.polDepActual?"actual":"scheduled":TS(s.polDep)!==null&&TS(s.polDep)<=now?"actual":"scheduled"}</span></td>
+      <td data-l="SIN ETD"><span class="dt">${fmtDT(s.tsDep)}</span><span class="est">${s.tsDepActual!==undefined?s.tsDepActual?"actual":"scheduled":TS(s.tsDep)!==null&&TS(s.tsDep)<=now?"actual":"scheduled"}</span></td>
       <td data-l="LA ETB"><span class="dt">${fmtDT(s.eta)}</span>${gapBox(s)}<span class="est">ETB</span></td>
     </tr>`).join("");
 }
