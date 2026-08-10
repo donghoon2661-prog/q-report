@@ -723,14 +723,29 @@ function gapBox(s){
 /* 표 HTML (MAP 아래 / LIST 상단 공용) */
 function rowsHTML(list){
   const now=Date.now();
-  return list.map((s,i)=>`
+  const actTag = (actual, fallbackT) => {
+    const isActual = actual !== undefined ? !!actual : (fallbackT !== null && fallbackT <= now);
+    return isActual ? "actual" : "scheduled";
+  };
+  return list.map((s,i)=>{
+    const etaActTag = s.etaActual !== undefined ? (s.etaActual?"actual":"scheduled")
+      : (TS(s.eta)!==null && TS(s.eta)<=now ? "actual" : "scheduled");
+    const destActTag = s.destEta
+      ? (s.etaActual !== undefined ? (s.etaActual?"actual":"scheduled")
+          : (TS(s.destEta)!==null && TS(s.destEta)<=now ? "actual" : "scheduled"))
+      : "";
+    return `
     <tr data-i="${i}">
       <td><span class="nm">${s.vessel}</span><span class="vy">${s.voyage}</span>
           <span class="bk">${s.booking} · ${s.cntrQty||"—"} CNTR${s.staleItem?" · STALE":""}</span></td>
-      <td data-l="PKG ETD"><span class="dt">${fmtDT(s.polDep)}</span><span class="est">${s.polDepActual!==undefined?s.polDepActual?"actual":"scheduled":TS(s.polDep)!==null&&TS(s.polDep)<=now?"actual":"scheduled"}</span></td>
-      <td data-l="SIN ETD"><span class="dt">${fmtDT(s.tsDep)}</span><span class="est">${s.tsDepActual!==undefined?s.tsDepActual?"actual":"scheduled":TS(s.tsDep)!==null&&TS(s.tsDep)<=now?"actual":"scheduled"}</span></td>
-      <td data-l="LA ETB"><span class="dt">${fmtDT(s.eta)}</span>${gapBox(s)}<span class="est">ETB</span></td>
-    </tr>`).join("");
+      <td data-l="PKG ETD"><span class="dt">${fmtDT(s.polDep)}</span><span class="est">${actTag(s.polDepActual,TS(s.polDep))}</span></td>
+      <td data-l="SIN ETD"><span class="dt">${fmtDT(s.tsDep)}</span><span class="est">${actTag(s.tsDepActual,TS(s.tsDep))}</span></td>
+      <td data-l="LA ETB / DEST ETA">
+        <div><span class="eta-lbl">ETB</span><span class="dt">${fmtDT(s.eta)}</span>${gapBox(s)}<span class="est">${etaActTag}</span></div>
+        ${s.destEta?`<div style="margin-top:3px"><span class="eta-lbl">ETA</span><span class="dt">${fmtDT(s.destEta)}</span><span class="est">${destActTag}</span></div>`:""}
+      </td>
+    </tr>`;
+  }).join("");
 }
 
 /* ---------- 부킹 추가 ---------- */
