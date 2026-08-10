@@ -590,3 +590,7 @@ html[data-theme="light"] #qview td.near{background:rgba(154,107,18,.08)}
 .rm-note{font-size:11px;color:var(--fog);margin-bottom:12px;line-height:1.6}
 .rm-note b{color:var(--warn)}
 .rm-actions{display:flex;gap:8px;justify-content:flex-end}
+
+/* ETB/ETA 두 줄 표시 — 테이블 라벨 */
+.eta-lbl{font-family:'IBM Plex Mono',monospace;font-size:9.5px;color:var(--fog);
+  min-width:28px;display:inline-block;letter-spacing:.06em}
