@@ -86,6 +86,7 @@
     <button class="tab on" data-view="map">MAP</button>
     <button class="tab" data-view="list">LIST</button>
     <button class="tab" data-view="history">HISTORY</button>
+    <button class="tab tab-admin" data-view="system" id="tab-system" style="display:none">SYSTEM</button>
   </div>
   <nav class="ship-tabbar" aria-label="Section switch">
     <button data-view="map" class="on"><span class="ico">▥</span>Map</button>
@@ -155,7 +156,9 @@
     </div>
   </div>
 
-  <div id="hist-popup" hidden>
+  <div id="system" style="display:none">
+    <div id="sys-content"></div>
+  </div>
     <div id="hist-popup-card">
       <div class="hist-popuphead">
         <span id="hist-popup-title"></span>
