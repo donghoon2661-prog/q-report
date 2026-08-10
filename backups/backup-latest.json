@@ -1,0 +1,1639 @@
+{
+ "backupAt": "2026-08-10T01:33:22.148Z",
+ "kv": {
+  "shipments": {
+   "updated": "2026-08-09 23:14Z",
+   "source": "hmm21.com Track & Trace",
+   "tracked": 8,
+   "requested": 8,
+   "ok": 7,
+   "carried": 1,
+   "missing": [],
+   "mapOk": 7,
+   "rollovers": 0,
+   "alerts": 3,
+   "changed": [
+    "KULM74959200"
+   ],
+   "sessionsUsed": 4,
+   "budgetUsed": 34,
+   "partial": false,
+   "cursor": 0,
+   "stale": true,
+   "shipments": [
+    {
+     "booking": "KULM68088700",
+     "vessel": "CONTI CONQUEST",
+     "voyage": "0036E",
+     "svc": "PS3",
+     "feeder": "HMM MONGLA 0033N",
+     "feederSvc": "KCB",
+     "origin": "PORT KLANG,MALAYSIA",
+     "pol": "PORT KLANG,MALAYSIA",
+     "ts": "SINGAPORE",
+     "pod": "LOS ANGELES, CA",
+     "dest": "LOS ANGELES, CA",
+     "polDep": "2026-07-06T00:56",
+     "tsArr": "2026-07-07T23:13",
+     "tsDep": "2026-07-14T11:28",
+     "eta": "2026-08-08T07:00",
+     "destEta": "2026-08-09T05:02",
+     "status": "Vessel Departure from T/S Port",
+     "statusLoc": "SINGAPORE",
+     "stamp": "2026-07-14T11:28",
+     "eventStamp": "2026-07-14T11:28",
+     "lastEvent": "Vessel Departure from T/S Port @ SINGAPORE",
+     "last": "Vessel Departure from T/S Port @ SINGAPORE (2026-07-14 11:28)",
+     "legs": [
+      {
+       "vessel": "HMM MONGLA",
+       "voyage": "0033N",
+       "svc": "KCB",
+       "pol": "PORT KLANG,MALAYSIA",
+       "etd": "2026-07-06T00:56",
+       "pod": "SINGAPORE",
+       "eta": "2026-07-07T23:13"
+      },
+      {
+       "vessel": "CONTI CONQUEST",
+       "voyage": "0036E",
+       "svc": "PS3",
+       "pol": "SINGAPORE",
+       "etd": "2026-07-14T11:28",
+       "pod": "LOS ANGELES, CA",
+       "eta": "2026-08-08T07:00"
+      }
+     ],
+     "events": [
+      {
+       "at": "2026-07-14T11:28",
+       "loc": "SINGAPORE",
+       "status": "Vessel Departure from T/S Port",
+       "mode": "CONTI CONQUEST 0036E"
+      },
+      {
+       "at": "2026-07-13T23:16",
+       "loc": "SINGAPORE",
+       "status": "Vessel Loading at T/S Port",
+       "mode": "CONTI CONQUEST 0036E"
+      },
+      {
+       "at": "2026-07-08T10:04",
+       "loc": "SINGAPORE",
+       "status": "Vessel Discharged at T/S Port",
+       "mode": "HMM MONGLA 0033N"
+      },
+      {
+       "at": "2026-07-07T23:13",
+       "loc": "SINGAPORE",
+       "status": "Vessel Berthing at T/S Port",
+       "mode": "HMM MONGLA 0033N"
+      },
+      {
+       "at": "2026-07-07T22:13",
+       "loc": "SINGAPORE",
+       "status": "Vessel Arrival at T/S Port",
+       "mode": "HMM MONGLA 0033N"
+      },
+      {
+       "at": "2026-07-06T00:56",
+       "loc": "PORT KLANG,MALAYSIA",
+       "status": "Vessel Departure from POL",
+       "mode": "HMM MONGLA 0033N"
+      },
+      {
+       "at": "2026-07-05T19:46",
+       "loc": "PORT KLANG,MALAYSIA",
+       "status": "Vessel Loading at POL",
+       "mode": "HMM MONGLA 0033N"
+      },
+      {
+       "at": "2026-07-03T18:32",
+       "loc": "PORT KLANG,MALAYSIA",
+       "status": "Export Truck Gate In to Terminal",
+       "mode": "Truck"
+      },
+      {
+       "at": "2026-06-30T00:51",
+       "loc": "PORT KLANG,MALAYSIA",
+       "status": "Export Empty Container Released",
+       "mode": "Truck"
+      }
+     ],
+     "containers": [
+      "TXGU8756348",
+      "HMMU4085198",
+      "CAIU7387383",
+      "HMMU4907303",
+      "HMMU4185406",
+      "HMMU6078310",
+      "HMMU4448375",
+      "KOCU4003473",
+      "KOCU4388396",
+      "HMMU4482472",
+      "HMMU4109134",
+      "HMMU4497560",
+      "HMMU4688761",
+      "HMMU4676014"
+     ],
+     "cntrQty": 14,
+     "container": "TXGU8756348",
+     "checkedAt": "2026-08-08 23:13Z",
+     "rollover": false,
+     "planEta": "2026-08-09",
+     "delayDays": -1,
+     "alert": "ok",
+     "firstSeenEta": "2026-08-08T07:00",
+     "staleItem": true,
+     "staleSince": "2026-08-08 23:13Z",
+     "route": [
+      [
+       2.9372384,
+       101.3007552
+      ],
+      [
+       1.2511247,
+       103.7272898
+      ],
+      [
+       10.5372748,
+       107.0315867
+      ],
+      [
+       22.5703753,
+       114.2596394
+      ],
+      [
+       33.76478926,
+       -118.2680205
+      ]
+     ],
+     "names": [
+      "PORT KLANG,MALAYSIA",
+      "SINGAPORE",
+      "BA RIA VUNG TAU, VIETNAM",
+      "YANTIAN, SHENZHEN, CHINA",
+      "LOS ANGELES, CA"
+     ],
+     "namedPorts": true,
+     "idx": 4,
+     "ratio": 0,
+     "mapAt": "2026-08-09 05:43Z"
+    },
+    {
+     "booking": "KULM75953600",
+     "vessel": "HYUNDAI PLUTO",
+     "voyage": "0047E",
+     "svc": "PS3",
+     "feeder": "HR RHEA 0110N",
+     "feederSvc": "FDR",
+     "origin": "PORT KLANG,MALAYSIA",
+     "pol": "PORT KLANG,MALAYSIA",
+     "ts": "SINGAPORE",
+     "pod": "LOS ANGELES, CA",
+     "dest": "LOS ANGELES, CA",
+     "polDep": "2026-07-22T20:30",
+     "tsArr": "2026-07-25T08:45",
+     "tsDep": "2026-07-29T06:59",
+     "eta": "2026-08-24T07:00",
+     "destEta": "2026-08-25T05:02",
+     "status": "Vessel Departure from T/S Port",
+     "statusLoc": "SINGAPORE",
+     "stamp": "2026-07-29T06:59",
+     "eventStamp": "2026-07-29T06:59",
+     "lastEvent": "Vessel Departure from T/S Port @ SINGAPORE",
+     "last": "Vessel Departure from T/S Port @ SINGAPORE (2026-07-29 06:59)",
+     "legs": [
+      {
+       "vessel": "HR RHEA",
+       "voyage": "0110N",
+       "svc": "FDR",
+       "pol": "PORT KLANG,MALAYSIA",
+       "etd": "2026-07-22T20:30",
+       "pod": "SINGAPORE",
+       "eta": "2026-07-25T08:45"
+      },
+      {
+       "vessel": "HYUNDAI PLUTO",
+       "voyage": "0047E",
+       "svc": "PS3",
+       "pol": "SINGAPORE",
+       "etd": "2026-07-29T06:59",
+       "pod": "LOS ANGELES, CA",
+       "eta": "2026-08-24T07:00"
+      }
+     ],
+     "events": [
+      {
+       "at": "2026-07-29T06:59",
+       "loc": "SINGAPORE",
+       "status": "Vessel Departure from T/S Port",
+       "mode": "HYUNDAI PLUTO 0047E"
+      },
+      {
+       "at": "2026-07-28T17:16",
+       "loc": "SINGAPORE",
+       "status": "Vessel Loading at T/S Port",
+       "mode": "HYUNDAI PLUTO 0047E"
+      },
+      {
+       "at": "2026-07-26T02:53",
+       "loc": "SINGAPORE",
+       "status": "Feeder Discharged at T/S Port",
+       "mode": "Feeder"
+      },
+      {
+       "at": "2026-07-25T06:45",
+       "loc": "SINGAPORE",
+       "status": "Feeder Arrival at T/S Port",
+       "mode": "Feeder"
+      },
+      {
+       "at": "2026-07-22T15:08",
+       "loc": "PORT KLANG,MALAYSIA",
+       "status": "Feeder Loading at POL",
+       "mode": "Feeder"
+      },
+      {
+       "at": "2026-07-17T20:23",
+       "loc": "PORT KLANG,MALAYSIA",
+       "status": "Export Truck Gate In to Terminal",
+       "mode": "Truck"
+      },
+      {
+       "at": "2026-07-16T00:12",
+       "loc": "PORT KLANG,MALAYSIA",
+       "status": "Export Empty Container Released",
+       "mode": "Truck"
+      }
+     ],
+     "containers": [
+      "KOCU4252054",
+      "HMMU6852426",
+      "HMMU4609952",
+      "HMMU4919177",
+      "KOCU4515947",
+      "TIIU5024376",
+      "HMMU6981104",
+      "HMMU4741151",
+      "HMMU7139261",
+      "KOCU4986649",
+      "HMMU6624107",
+      "KOCU5231415",
+      "TIIU5958125",
+      "HMMU7101800"
+     ],
+     "cntrQty": 14,
+     "container": "KOCU4252054",
+     "checkedAt": "2026-08-09 23:14Z",
+     "rollover": false,
+     "planEta": "2026-08-16",
+     "delayDays": 8,
+     "alert": "alert",
+     "firstSeenEta": "2026-08-24T07:00",
+     "route": [
+      [
+       2.9372384,
+       101.3007552
+      ],
+      [
+       1.2511247,
+       103.7272898
+      ],
+      [
+       10.5372748,
+       107.0315867
+      ],
+      [
+       22.5703753,
+       114.2596394
+      ],
+      [
+       33.76478926,
+       -118.2680205
+      ]
+     ],
+     "names": [
+      "PORT KLANG,MALAYSIA",
+      "SINGAPORE",
+      "BA RIA VUNG TAU, VIETNAM",
+      "YANTIAN, SHENZHEN, CHINA",
+      "LOS ANGELES, CA"
+     ],
+     "namedPorts": true,
+     "idx": 3,
+     "ratio": 0,
+     "mapAt": "2026-08-09 23:41Z"
+    },
+    {
+     "booking": "KULM40326600",
+     "vessel": "HANS SCHULTE",
+     "voyage": "0001E",
+     "svc": "PS5",
+     "feeder": "HR HERA 0110N",
+     "feederSvc": "FDR",
+     "origin": "PORT KLANG,MALAYSIA",
+     "pol": "PORT KLANG,MALAYSIA",
+     "ts": "SINGAPORE",
+     "pod": "LOS ANGELES, CA",
+     "dest": "LOS ANGELES, CA",
+     "polDep": "2026-07-29T12:00",
+     "tsArr": "2026-07-31T05:25",
+     "tsDep": "2026-08-07T02:59",
+     "eta": "2026-08-27T17:00",
+     "destEta": "2026-08-29T00:03",
+     "status": "Vessel Departure from T/S Port",
+     "statusLoc": "SINGAPORE",
+     "stamp": "2026-08-07T02:59",
+     "eventStamp": "2026-08-07T02:59",
+     "lastEvent": "Vessel Departure from T/S Port @ SINGAPORE",
+     "last": "Vessel Departure from T/S Port @ SINGAPORE (2026-08-07 02:59)",
+     "legs": [
+      {
+       "vessel": "HR HERA",
+       "voyage": "0110N",
+       "svc": "FDR",
+       "pol": "PORT KLANG,MALAYSIA",
+       "etd": "2026-07-29T12:00",
+       "pod": "SINGAPORE",
+       "eta": "2026-07-31T05:25"
+      },
+      {
+       "vessel": "HANS SCHULTE",
+       "voyage": "0001E",
+       "svc": "PS5",
+       "pol": "SINGAPORE",
+       "etd": "2026-08-07T02:59",
+       "pod": "LOS ANGELES, CA",
+       "eta": "2026-08-27T17:00"
+      }
+     ],
+     "events": [
+      {
+       "at": "2026-08-07T02:59",
+       "loc": "SINGAPORE",
+       "status": "Vessel Departure from T/S Port",
+       "mode": "HANS SCHULTE 0001E"
+      },
+      {
+       "at": "2026-08-06T08:38",
+       "loc": "SINGAPORE",
+       "status": "Vessel Loading at T/S Port",
+       "mode": "HANS SCHULTE 0001E"
+      },
+      {
+       "at": "2026-07-31T11:03",
+       "loc": "SINGAPORE",
+       "status": "Feeder Discharged at T/S Port",
+       "mode": "Feeder"
+      },
+      {
+       "at": "2026-07-31T03:25",
+       "loc": "SINGAPORE",
+       "status": "Feeder Arrival at T/S Port",
+       "mode": "Feeder"
+      },
+      {
+       "at": "2026-07-29T15:12",
+       "loc": "PORT KLANG,MALAYSIA",
+       "status": "Feeder Loading at POL",
+       "mode": "Feeder"
+      },
+      {
+       "at": "2026-07-27T21:36",
+       "loc": "PORT KLANG,MALAYSIA",
+       "status": "Export Truck Gate In to Terminal",
+       "mode": "Truck"
+      },
+      {
+       "at": "2026-07-22T13:23",
+       "loc": "PORT KLANG,MALAYSIA",
+       "status": "Export Empty Container Released",
+       "mode": "Truck"
+      }
+     ],
+     "containers": [
+      "HMMU4497132",
+      "HMMU4098472",
+      "HMMU4403961",
+      "HMMU4511755",
+      "HMMU7047545",
+      "HMMU6667536",
+      "KOCU5081510",
+      "HMMU4735842",
+      "HMMU4154724",
+      "KOCU4601393",
+      "HMMU4579061",
+      "HMMU4972700",
+      "HMMU7115022",
+      "TXGU8035660"
+     ],
+     "cntrQty": 14,
+     "container": "HMMU4497132",
+     "checkedAt": "2026-08-09 23:14Z",
+     "rollover": false,
+     "planEta": "2026-08-23",
+     "delayDays": 4,
+     "alert": "watch",
+     "firstSeenEta": "2026-08-26T17:00",
+     "route": [
+      [
+       2.9372384,
+       101.3007552
+      ],
+      [
+       1.2511247,
+       103.7272898
+      ],
+      [
+       10.5372748,
+       107.0315867
+      ],
+      [
+       33.7533146,
+       -118.2607302
+      ]
+     ],
+     "names": [
+      "PORT KLANG,MALAYSIA",
+      "SINGAPORE",
+      "BA RIA VUNG TAU, VIETNAM",
+      "LOS ANGELES, CA"
+     ],
+     "namedPorts": true,
+     "idx": 1,
+     "ratio": 1,
+     "mapAt": "2026-08-09 23:41Z"
+    },
+    {
+     "booking": "KULM85176300",
+     "vessel": "HMM JAKARTA",
+     "voyage": "0145E",
+     "svc": "PS5",
+     "feeder": "HR HERA 0110N",
+     "feederSvc": "FDR",
+     "origin": "PORT KLANG,MALAYSIA",
+     "pol": "PORT KLANG,MALAYSIA",
+     "ts": "SINGAPORE",
+     "pod": "LOS ANGELES, CA",
+     "dest": "LOS ANGELES, CA",
+     "polDep": "2026-07-29T12:00",
+     "tsArr": "2026-07-31T05:25",
+     "tsDep": "2026-08-08T14:28",
+     "eta": "2026-09-01T17:00",
+     "destEta": "2026-09-02T15:30",
+     "status": "Vessel Departure from T/S Port",
+     "statusLoc": "SINGAPORE",
+     "stamp": "2026-08-08T14:28",
+     "eventStamp": "2026-08-08T14:28",
+     "lastEvent": "Vessel Departure from T/S Port @ SINGAPORE",
+     "last": "Vessel Departure from T/S Port @ SINGAPORE (2026-08-08 14:28)",
+     "legs": [
+      {
+       "vessel": "HR HERA",
+       "voyage": "0110N",
+       "svc": "FDR",
+       "pol": "PORT KLANG,MALAYSIA",
+       "etd": "2026-07-29T12:00",
+       "pod": "SINGAPORE",
+       "eta": "2026-07-31T05:25"
+      },
+      {
+       "vessel": "HMM JAKARTA",
+       "voyage": "0145E",
+       "svc": "PS5",
+       "pol": "SINGAPORE",
+       "etd": "2026-08-08T14:28",
+       "pod": "LOS ANGELES, CA",
+       "eta": "2026-09-01T17:00"
+      }
+     ],
+     "events": [
+      {
+       "at": "2026-08-08T14:28",
+       "loc": "SINGAPORE",
+       "status": "Vessel Departure from T/S Port",
+       "mode": "HMM JAKARTA 0145E"
+      },
+      {
+       "at": "2026-08-08T06:42",
+       "loc": "SINGAPORE",
+       "status": "Vessel Loading at T/S Port",
+       "mode": "HMM JAKARTA 0145E"
+      },
+      {
+       "at": "2026-07-31T11:11",
+       "loc": "SINGAPORE",
+       "status": "Feeder Discharged at T/S Port",
+       "mode": "Feeder"
+      },
+      {
+       "at": "2026-07-31T03:25",
+       "loc": "SINGAPORE",
+       "status": "Feeder Arrival at T/S Port",
+       "mode": "Feeder"
+      },
+      {
+       "at": "2026-07-29T15:10",
+       "loc": "PORT KLANG,MALAYSIA",
+       "status": "Feeder Loading at POL",
+       "mode": "Feeder"
+      },
+      {
+       "at": "2026-07-25T14:41",
+       "loc": "PORT KLANG,MALAYSIA",
+       "status": "Export Truck Gate In to Terminal",
+       "mode": "Truck"
+      },
+      {
+       "at": "2026-07-23T23:47",
+       "loc": "PORT KLANG,MALAYSIA",
+       "status": "Export Empty Container Released",
+       "mode": "Truck"
+      }
+     ],
+     "containers": [
+      "HMMU6747668",
+      "HMMU7130367",
+      "KOCU4065496",
+      "HMMU6856735",
+      "HMMU6705066",
+      "HMMU6903708",
+      "HMMU6976746",
+      "HMMU6875587",
+      "HMMU4509629",
+      "HMMU4042370",
+      "HMMU4173880",
+      "HMMU4676101",
+      "HMMU4363848",
+      "HMMU4590543"
+     ],
+     "cntrQty": 14,
+     "container": "HMMU6747668",
+     "route": [
+      [
+       2.9372384,
+       101.3007552
+      ],
+      [
+       1.2511247,
+       103.7272898
+      ],
+      [
+       10.5372748,
+       107.0315867
+      ],
+      [
+       20.796246,
+       106.9065732
+      ],
+      [
+       33.76478926,
+       -118.2680205
+      ]
+     ],
+     "names": [
+      "PORT KLANG,MALAYSIA",
+      "SINGAPORE",
+      "BA RIA VUNG TAU, VIETNAM",
+      "HAI PHONG, VIETNAM",
+      "LOS ANGELES, CA"
+     ],
+     "namedPorts": true,
+     "idx": 1,
+     "ratio": 0.42748238308776426,
+     "mapAt": "2026-08-09 05:42Z",
+     "checkedAt": "2026-08-09 23:14Z",
+     "rollover": false,
+     "planEta": "2026-09-03",
+     "delayDays": -2,
+     "alert": "ok",
+     "firstSeenEta": "2026-09-01T04:30"
+    },
+    {
+     "booking": "KULM72444200",
+     "vessel": "YM MODERATION",
+     "voyage": "0084E",
+     "svc": "PS5",
+     "feeder": "NZ SUZHOU 0015N",
+     "feederSvc": "FDR",
+     "origin": "PORT KLANG,MALAYSIA",
+     "pol": "PORT KLANG,MALAYSIA",
+     "ts": "SINGAPORE",
+     "pod": "LOS ANGELES, CA",
+     "dest": "LOS ANGELES, CA",
+     "polDep": "2026-08-02T20:50",
+     "tsArr": "2026-08-03T02:00",
+     "tsDep": "2026-08-19T15:30",
+     "eta": "2026-09-13T17:00",
+     "destEta": "2026-09-14T23:02",
+     "status": "Export Truck Gate In to Terminal",
+     "statusLoc": "PORT KLANG,MALAYSIA",
+     "stamp": "2026-07-31T21:54",
+     "eventStamp": "2026-08-05T09:18",
+     "lastEvent": "Feeder Discharged at T/S Port @ SINGAPORE",
+     "last": "Feeder Discharged at T/S Port @ SINGAPORE (2026-08-05 09:18)",
+     "legs": [
+      {
+       "vessel": "NZ SUZHOU",
+       "voyage": "0015N",
+       "svc": "FDR",
+       "pol": "PORT KLANG,MALAYSIA",
+       "etd": "2026-08-02T20:50",
+       "pod": "SINGAPORE",
+       "eta": "2026-08-03T02:00"
+      },
+      {
+       "vessel": "YM MODERATION",
+       "voyage": "0084E",
+       "svc": "PS5",
+       "pol": "SINGAPORE",
+       "etd": "2026-08-19T15:30",
+       "pod": "LOS ANGELES, CA",
+       "eta": "2026-09-13T17:00"
+      }
+     ],
+     "events": [
+      {
+       "at": "2026-08-05T09:18",
+       "loc": "SINGAPORE",
+       "status": "Feeder Discharged at T/S Port",
+       "mode": "Feeder"
+      },
+      {
+       "at": "2026-08-02T11:38",
+       "loc": "PORT KLANG,MALAYSIA",
+       "status": "Feeder Loading at POL",
+       "mode": "Feeder"
+      },
+      {
+       "at": "2026-07-31T21:54",
+       "loc": "PORT KLANG,MALAYSIA",
+       "status": "Export Truck Gate In to Terminal",
+       "mode": "Truck"
+      },
+      {
+       "at": "2026-07-28T00:58",
+       "loc": "PORT KLANG,MALAYSIA",
+       "status": "Export Empty Container Released",
+       "mode": "Truck"
+      }
+     ],
+     "containers": [
+      "HMMU4111682",
+      "HMMU4090321",
+      "HMMU4923109",
+      "TXGU8040008",
+      "HMMU6859307",
+      "HMMU6799569",
+      "HMMU4097178",
+      "KOCU4278254",
+      "HMMU6532886",
+      "HMMU6459260",
+      "TCKU6096320",
+      "KOCU4318742",
+      "HMMU6193458",
+      "HMMU6228019"
+     ],
+     "cntrQty": 14,
+     "container": "HMMU4111682",
+     "route": [
+      [
+       2.9372384,
+       101.3007552
+      ],
+      [
+       1.2511247,
+       103.7272898
+      ],
+      [
+       10.5372748,
+       107.0315867
+      ],
+      [
+       20.796246,
+       106.9065732
+      ],
+      [
+       33.76478926,
+       -118.2680205
+      ]
+     ],
+     "names": [
+      "PORT KLANG,MALAYSIA",
+      "SINGAPORE",
+      "BA RIA VUNG TAU, VIETNAM",
+      "HAI PHONG, VIETNAM",
+      "LOS ANGELES, CA"
+     ],
+     "namedPorts": true,
+     "idx": 1,
+     "ratio": 0,
+     "mapAt": "2026-08-09 05:42Z",
+     "checkedAt": "2026-08-09 23:14Z",
+     "rollover": false,
+     "planEta": "2026-09-06",
+     "delayDays": 7,
+     "alert": "alert",
+     "firstSeenEta": "2026-09-13T17:00"
+    },
+    {
+     "booking": "KULM92606700",
+     "vessel": "HYUNDAI TOKYO",
+     "voyage": "0164E",
+     "svc": "PS5",
+     "feeder": "HR RHEA 0109N",
+     "feederSvc": "FDR",
+     "origin": "PORT KLANG,MALAYSIA",
+     "pol": "PORT KLANG,MALAYSIA",
+     "ts": "SINGAPORE",
+     "pod": "LOS ANGELES, CA",
+     "dest": "LOS ANGELES, CA",
+     "polDep": "2026-07-03T12:00",
+     "tsArr": "2026-07-05T08:10",
+     "tsDep": "2026-07-18T21:45",
+     "eta": "2026-08-13T04:00",
+     "destEta": "2026-08-14T09:57",
+     "status": "Vessel Departure from T/S Port",
+     "statusLoc": "SINGAPORE",
+     "stamp": "2026-07-18T21:45",
+     "eventStamp": "2026-07-18T21:45",
+     "lastEvent": "Vessel Departure from T/S Port @ SINGAPORE",
+     "last": "Vessel Departure from T/S Port @ SINGAPORE (2026-07-18 21:45)",
+     "legs": [
+      {
+       "vessel": "HR RHEA",
+       "voyage": "0109N",
+       "svc": "FDR",
+       "pol": "PORT KLANG,MALAYSIA",
+       "etd": "2026-07-03T12:00",
+       "pod": "SINGAPORE",
+       "eta": "2026-07-05T08:10"
+      },
+      {
+       "vessel": "HYUNDAI TOKYO",
+       "voyage": "0164E",
+       "svc": "PS5",
+       "pol": "SINGAPORE",
+       "etd": "2026-07-18T21:45",
+       "pod": "LOS ANGELES, CA",
+       "eta": "2026-08-13T04:00"
+      }
+     ],
+     "events": [
+      {
+       "at": "2026-07-18T21:45",
+       "loc": "SINGAPORE",
+       "status": "Vessel Departure from T/S Port",
+       "mode": "HYUNDAI TOKYO 0164E"
+      },
+      {
+       "at": "2026-07-18T16:20",
+       "loc": "SINGAPORE",
+       "status": "Vessel Loading at T/S Port",
+       "mode": "HYUNDAI TOKYO 0164E"
+      },
+      {
+       "at": "2026-07-05T18:36",
+       "loc": "SINGAPORE",
+       "status": "Feeder Discharged at T/S Port",
+       "mode": "Feeder"
+      },
+      {
+       "at": "2026-07-05T06:10",
+       "loc": "SINGAPORE",
+       "status": "Feeder Arrival at T/S Port",
+       "mode": "Feeder"
+      },
+      {
+       "at": "2026-07-02T18:58",
+       "loc": "PORT KLANG,MALAYSIA",
+       "status": "Feeder Loading at POL",
+       "mode": "Feeder"
+      },
+      {
+       "at": "2026-06-29T14:05",
+       "loc": "PORT KLANG,MALAYSIA",
+       "status": "Export Truck Gate In to Terminal",
+       "mode": "Truck"
+      },
+      {
+       "at": "2026-06-23T01:34",
+       "loc": "PORT KLANG,MALAYSIA",
+       "status": "Export Empty Container Released",
+       "mode": "Truck"
+      }
+     ],
+     "containers": [
+      "HMMU6796702",
+      "KOCU4955268",
+      "HMMU7029053",
+      "HMMU7028519",
+      "KOCU5095068",
+      "KOCU5026940",
+      "KOCU4006765",
+      "KOCU4440088",
+      "HMMU4130830",
+      "KOCU4731289",
+      "KOCU5039188",
+      "KOCU4592476",
+      "HMMU6726285",
+      "KOCU4613748"
+     ],
+     "cntrQty": 14,
+     "container": "HMMU6796702",
+     "route": [
+      [
+       2.9372384,
+       101.3007552
+      ],
+      [
+       1.2511247,
+       103.7272898
+      ],
+      [
+       1.3115724,
+       103.7188794
+      ],
+      [
+       10.5372748,
+       107.0315867
+      ],
+      [
+       20.796246,
+       106.9065732
+      ],
+      [
+       33.76478926,
+       -118.2680205
+      ]
+     ],
+     "names": [
+      "PORT KLANG,MALAYSIA",
+      "SINGAPORE",
+      "SINGAPORE",
+      "BA RIA VUNG TAU, VIETNAM",
+      "HAI PHONG, VIETNAM",
+      "LOS ANGELES, CA"
+     ],
+     "namedPorts": true,
+     "idx": 4,
+     "ratio": 0.759422011084719,
+     "mapAt": "2026-08-09 05:43Z",
+     "checkedAt": "2026-08-09 23:14Z",
+     "rollover": false,
+     "planEta": "2026-08-02",
+     "delayDays": 11,
+     "alert": "alert",
+     "firstSeenEta": "2026-08-13T04:00"
+    },
+    {
+     "booking": "KULM74959200",
+     "vessel": "NYK VESTA",
+     "voyage": "0095E",
+     "svc": "PS3",
+     "feeder": "HR RHEA 0111N",
+     "feederSvc": "FDR",
+     "origin": "PORT KLANG,MALAYSIA",
+     "pol": "PORT KLANG,MALAYSIA",
+     "ts": "SINGAPORE",
+     "pod": "LOS ANGELES, CA",
+     "dest": "LOS ANGELES, CA",
+     "polDep": "2026-08-10T12:00",
+     "tsArr": "2026-08-13T10:00",
+     "tsDep": "2026-08-26T19:00",
+     "eta": "2026-09-17T07:00",
+     "destEta": "2026-09-18T05:02",
+     "status": "Export Truck Gate In to Terminal",
+     "statusLoc": "PORT KLANG,MALAYSIA",
+     "stamp": "2026-08-07T16:42",
+     "eventStamp": "2026-08-07T16:42",
+     "lastEvent": "Export Truck Gate In to Terminal @ PORT KLANG,MALAYSIA",
+     "last": "Export Truck Gate In to Terminal @ PORT KLANG,MALAYSIA (2026-08-07 16:42)",
+     "legs": [
+      {
+       "vessel": "HR RHEA",
+       "voyage": "0111N",
+       "svc": "FDR",
+       "pol": "PORT KLANG,MALAYSIA",
+       "etd": "2026-08-10T12:00",
+       "pod": "SINGAPORE",
+       "eta": "2026-08-13T10:00"
+      },
+      {
+       "vessel": "NYK VESTA",
+       "voyage": "0095E",
+       "svc": "PS3",
+       "pol": "SINGAPORE",
+       "etd": "2026-08-26T19:00",
+       "pod": "LOS ANGELES, CA",
+       "eta": "2026-09-17T07:00"
+      }
+     ],
+     "events": [
+      {
+       "at": "2026-08-07T16:42",
+       "loc": "PORT KLANG,MALAYSIA",
+       "status": "Export Truck Gate In to Terminal",
+       "mode": "Truck"
+      },
+      {
+       "at": "2026-08-04T23:17",
+       "loc": "PORT KLANG,MALAYSIA",
+       "status": "Export Empty Container Released",
+       "mode": "Truck"
+      }
+     ],
+     "containers": [
+      "HMMU4465855",
+      "FFAU6092563",
+      "HMMU4175666",
+      "HMMU4111770",
+      "HMMU4935666",
+      "HMMU7121133",
+      "GAOU6344998",
+      "TXGU8541988",
+      "HMMU4912207",
+      "HMMU7126290",
+      "HMMU4421944",
+      "HMMU4453371",
+      "HMMU4922859",
+      "HMMU4931212"
+     ],
+     "cntrQty": 14,
+     "container": "HMMU4465855",
+     "checkedAt": "2026-08-09 23:14Z",
+     "rollover": false,
+     "planEta": "2026-09-15",
+     "delayDays": 2,
+     "alert": "ok",
+     "justChanged": [
+      {
+       "field": "tsArr",
+       "label": "T/S ETA",
+       "from": "2026-08-11T02:00",
+       "to": "2026-08-13T10:00"
+      },
+      {
+       "field": "tsDep",
+       "label": "T/S ETD",
+       "from": "2026-08-29T17:00",
+       "to": "2026-08-26T19:00"
+      },
+      {
+       "field": "eta",
+       "label": "POD ETB",
+       "from": "2026-09-22T07:00",
+       "to": "2026-09-17T07:00"
+      },
+      {
+       "field": "destEta",
+       "label": "DEST ETA",
+       "from": "2026-09-23T05:02",
+       "to": "2026-09-18T05:02"
+      }
+     ],
+     "firstSeenEta": "2026-09-22T07:00",
+     "route": [
+      [
+       2.9372384,
+       101.3007552
+      ],
+      [
+       1.2511247,
+       103.7272898
+      ],
+      [
+       10.5372748,
+       107.0315867
+      ],
+      [
+       22.5703753,
+       114.2596394
+      ],
+      [
+       33.76478926,
+       -118.2680205
+      ]
+     ],
+     "names": [
+      "PORT KLANG,MALAYSIA",
+      "SINGAPORE",
+      "BA RIA VUNG TAU, VIETNAM",
+      "YANTIAN, SHENZHEN, CHINA",
+      "LOS ANGELES, CA"
+     ],
+     "namedPorts": true,
+     "idx": 0,
+     "ratio": 0,
+     "mapAt": "2026-08-09 23:43Z"
+    },
+    {
+     "booking": "KULM94487200",
+     "preShipment": true,
+     "vessel": "ONE HANNOVER",
+     "voyage": "0102E",
+     "svc": null,
+     "feeder": "NZ SUZHOU 0016N",
+     "feederSvc": null,
+     "origin": "PORT KLANG,MALAYSIA",
+     "pol": "PORT KLANG,MALAYSIA",
+     "ts": "SINGAPORE",
+     "pod": "LOS ANGELES, CA",
+     "dest": "LOS ANGELES, CA",
+     "polDep": "2026-08-16T12:00",
+     "tsArr": "2026-08-17T02:00",
+     "tsDep": "2026-09-02T06:00",
+     "eta": "2026-09-23T20:00",
+     "destEta": null,
+     "status": "Booked — not yet shipped",
+     "statusLoc": "PORT KLANG,MALAYSIA",
+     "stamp": null,
+     "eventStamp": null,
+     "lastEvent": null,
+     "last": "Booked — no movement yet",
+     "legs": [
+      {
+       "vessel": "NZ SUZHOU",
+       "voyage": "0016N",
+       "svc": null,
+       "pol": "PORT KLANG,MALAYSIA",
+       "etd": "2026-08-16T12:00",
+       "pod": "SINGAPORE",
+       "eta": "2026-08-17T02:00"
+      },
+      {
+       "vessel": "ONE HANNOVER",
+       "voyage": "0102E",
+       "svc": null,
+       "pol": "SINGAPORE",
+       "etd": "2026-09-02T06:00",
+       "pod": "LOS ANGELES, CA",
+       "eta": "2026-09-23T20:00"
+      }
+     ],
+     "events": [],
+     "containers": [],
+     "cntrQty": 14,
+     "container": null,
+     "cntrType": "DC4H",
+     "checkedAt": "2026-08-09 23:14Z",
+     "planEta": "2026-09-22",
+     "delayDays": 1,
+     "alert": "ok",
+     "firstSeenEta": "2026-09-19T07:00"
+    }
+   ],
+   "errors": [
+    "Session 1 failed: 세션 페이지 response 520 (cf-ray a28a70461fed472b-BOM, attempt 4)",
+    "KULM68088700 response 520 (cf-ray a28a74af4a09472b-BOM, attempt 2)",
+    "Unresolved: KULM68088700"
+   ],
+   "mapUpdated": "2026-08-09 23:43Z",
+   "mapErrors": [
+    "Session 3 failed: 세션 페이지 response 520 (cf-ray a28a9dcceac5472b-BOM, attempt 4)"
+   ],
+   "sessionsUsedMaps": 4,
+   "budgetUsedMaps": 24
+  },
+  "bookings": [
+   "KULM68088700",
+   "KULM75953600",
+   "KULM40326600",
+   "KULM85176300",
+   "KULM72444200",
+   "KULM92606700",
+   "KULM74959200",
+   "KULM94487200"
+  ],
+  "pomap": {
+   "KULM72444200": [
+    "FNG031009 (Container 7 of 15)",
+    "FNG031009 (Container 8 of 15)",
+    "FNG031009 (Container 9 of 15)",
+    "FNG031009 (Container 10 of 15)",
+    "FNG031009 (Container 11 of 15)",
+    "FNG031009 (Container 12 of 15)",
+    "FNG031009 (Container 13 of 15)",
+    "FNG031009 (Container 14 of 15)",
+    "FNG031009 (Container 15 of 15)",
+    "FNG031010 (Container 1 of 15)",
+    "FNG031010 (Container 2 of 15)",
+    "FNG031010 (Container 3 of 15)",
+    "FNG031010 (Container 4 of 15)",
+    "FNG031010 (Container 5 of 15)"
+   ],
+   "KULM85176300": [
+    "FNG031008 (Container 8 of 15)",
+    "FNG031008 (Container 9 of 15)",
+    "FNG031008 (Container 10 of 15)",
+    "FNG031008 (Container 11 of 15)",
+    "FNG031008 (Container 12 of 15)",
+    "FNG031008 (Container 13 of 15)",
+    "FNG031008 (Container 14 of 15)",
+    "FNG031008 (Container 15 of 15)",
+    "FNG031009 (Container 1 of 15)",
+    "FNG031009 (Container 2 of 15)",
+    "FNG031009 (Container 3 of 15)",
+    "FNG031009 (Container 4 of 15)",
+    "FNG031009 (Container 5 of 15)",
+    "FNG031009 (Container 6 of 15)"
+   ],
+   "KULM40326600": [
+    "FNG031007 (Container 12 of 18)",
+    "FNG031007 (Container 13 of 18)",
+    "FNG031007 (Container 14 of 18)",
+    "FNG031007 (Container 15 of 18)",
+    "FNG031007 (Container 16 of 18)",
+    "FNG031007 (Container 17 of 18)",
+    "FNG031007 (Container 18 of 18)",
+    "FNG031008 (Container 1 of 15)",
+    "FNG031008 (Container 2 of 15)",
+    "FNG031008 (Container 3 of 15)",
+    "FNG031008 (Container 4 of 15)",
+    "FNG031008 (Container 5 of 15)",
+    "FNG031008 (Container 6 of 15)",
+    "FNG031008 (Container 7 of 15)"
+   ],
+   "KULM75953600": [
+    "FNG031006 (Container 16 of 18)",
+    "FNG031006 (Container 17 of 18)",
+    "FNG031006 (Container 18 of 18)",
+    "FNG031007 (Container 1 of 18)",
+    "FNG031007 (Container 2 of 18)",
+    "FNG031007 (Container 3 of 18)",
+    "FNG031007 (Container 4 of 18)",
+    "FNG031007 (Container 5 of 18)",
+    "FNG031007 (Container 6 of 18)",
+    "FNG031007 (Container 7 of 18)",
+    "FNG031007 (Container 8 of 18)",
+    "FNG031007 (Container 9 of 18)",
+    "FNG031007 (Container 10 of 18)",
+    "FNG031007 (Container 11 of 18)"
+   ],
+   "KULM68088700": [
+    "FNG031006 (Container 2 of 18)",
+    "FNG031006 (Container 3 of 18)",
+    "FNG031006 (Container 4 of 18)",
+    "FNG031006 (Container 5 of 18)",
+    "FNG031006 (Container 6 of 18)",
+    "FNG031006 (Container 7 of 18)",
+    "FNG031006 (Container 8 of 18)",
+    "FNG031006 (Container 9 of 18)",
+    "FNG031006 (Container 10 of 18)",
+    "FNG031006 (Container 11 of 18)",
+    "FNG031006 (Container 12 of 18)",
+    "FNG031006 (Container 13 of 18)",
+    "FNG031006 (Container 14 of 18)",
+    "FNG031006 (Container 15 of 18)"
+   ],
+   "KULM92606700": [
+    "FNG031005 (Container 6 of 18)",
+    "FNG031005 (Container 7 of 18)",
+    "FNG031005 (Container 8 of 18)",
+    "FNG031005 (Container 9 of 18)",
+    "FNG031005 (Container 10 of 18)",
+    "FNG031005 (Container 11of 18)",
+    "FNG031005 (Container 12 of 18)",
+    "FNG031005 (Container 13 of 18)",
+    "FNG031005 (Container 14 of 18)",
+    "FNG031005 (Container 15 of 18)",
+    "FNG031005 (Container 16 of 18)",
+    "FNG031005 (Container 17 of 18)",
+    "FNG031005 (Container 18 of 18)",
+    "FNG031006 (Container 1 of 18)"
+   ],
+   "KULM94487200": [
+    "FNG031011 (Container 5 of 15)",
+    "FNG031011 (Container 6 of 15)",
+    "FNG031011 (Container 7 of 15)",
+    "FNG031011 (Container 8 of 15)",
+    "FNG031011 (Container 9 of 15)",
+    "FNG031011 (Container 10 of 15)",
+    "FNG031011 (Container 11 of 15)",
+    "FNG031011 (Container 12 of 15)",
+    "FNG031011 (Container 13 of 15)",
+    "FNG031011 (Container 14 of 15)",
+    "FNG031011 (Container 15 of 15)",
+    "FNG031012 (Container 1 of 15)",
+    "FNG031012 (Container 2 of 15)",
+    "FNG031012 (Container 3 of 15)"
+   ],
+   "KULM74959200": [
+    "FNG031010 (Container 6 of 15)",
+    "FNG031010 (Container 7 of 15)",
+    "FNG031010 (Container 8 of 15)",
+    "FNG031010 (Container 9 of 15)",
+    "FNG031010 (Container 10 of 15)",
+    "FNG031010 (Container 11 of 15)",
+    "FNG031010 (Container 12 of 15)",
+    "FNG031010 (Container 13 of 15)",
+    "FNG031010 (Container 14 of 15)",
+    "FNG031010 (Container 15 of 15)",
+    "FNG031011 (Container 1 of 15)",
+    "FNG031011 (Container 2 of 15)",
+    "FNG031011 (Container 3 of 15)",
+    "FNG031011 (Container 4 of 15)"
+   ]
+  },
+  "poeta": {
+   "KULM92606700": "2026-08-02",
+   "KULM68088700": "2026-08-09",
+   "KULM75953600": "2026-08-16",
+   "KULM40326600": "2026-08-23",
+   "KULM85176300": "2026-09-03",
+   "KULM72444200": "2026-09-06",
+   "KULM94487200": "2026-09-22",
+   "KULM74959200": "2026-09-15"
+  },
+  "pophoto": {
+   "FNG031008": "kZpm1o5ZJJFAAlMNyLSaGUk2aXlIlXLsnYQX",
+   "KULM85176300": "kZdY1o5Z9L4ijtdcNdumrKtffiTEtSK6L7ak",
+   "KULM92606700": "kZxJJ35ZyB4LjSw8ChmmxPyH9A0vvkgakjrk",
+   "KULM68088700": "kZLY1o5ZLMMHh1WK3zkv4e9VLkCvPFi43DJy",
+   "KULM75953600": "kZ8Y1o5ZYagut4dpYRjthjOBLgvO2Q8boywV",
+   "KULM40326600": "kZwY1o5Z9RqECdXiKGLhM970Ma2zUzErVETX",
+   "KULM72444200": "kZv3kyJZCOxDlI3so3Huh6apJy3ugSCOjMOy"
+  },
+  "history": {
+   "KULM68088700": [
+    {
+     "at": "2026-08-04 05:13Z",
+     "first": true,
+     "vessel": "CONTI CONQUEST",
+     "voyage": "0036E",
+     "tsArr": "2026-07-07T23:13",
+     "tsDep": "2026-07-14T11:28",
+     "eta": "2026-08-08T07:00"
+    }
+   ],
+   "KULM75953600": [
+    {
+     "at": "2026-08-04 05:13Z",
+     "first": true,
+     "vessel": "HYUNDAI PLUTO",
+     "voyage": "0047E",
+     "tsArr": "2026-07-25T08:45",
+     "tsDep": "2026-07-29T06:59",
+     "eta": "2026-08-24T07:00"
+    }
+   ],
+   "KULM85176300": [
+    {
+     "at": "2026-08-04 05:13Z",
+     "first": true,
+     "vessel": "HMM JAKARTA",
+     "voyage": "0145E",
+     "tsArr": "2026-07-31T05:25",
+     "tsDep": "2026-08-08T03:00",
+     "eta": "2026-09-01T04:30"
+    },
+    {
+     "at": "2026-08-05 23:13Z",
+     "changes": [
+      {
+       "field": "tsDep",
+       "label": "T/S 출항",
+       "from": "2026-08-08T03:00",
+       "to": "2026-08-08T15:00"
+      },
+      {
+       "field": "eta",
+       "label": "양하항 ETB",
+       "from": "2026-09-01T04:30",
+       "to": "2026-09-01T16:30"
+      },
+      {
+       "field": "destEta",
+       "label": "목적지 ETA",
+       "from": "2026-09-02T10:32",
+       "to": "2026-09-02T22:32"
+      }
+     ]
+    },
+    {
+     "at": "2026-08-07 05:14Z",
+     "changes": [
+      {
+       "field": "tsDep",
+       "label": "T/S 출항",
+       "from": "2026-08-08T15:00",
+       "to": "2026-08-08T22:00"
+      },
+      {
+       "field": "eta",
+       "label": "양하항 ETB",
+       "from": "2026-09-01T16:30",
+       "to": "2026-09-02T11:30"
+      },
+      {
+       "field": "destEta",
+       "label": "목적지 ETA",
+       "from": "2026-09-02T22:32",
+       "to": "2026-09-03T17:32"
+      }
+     ]
+    },
+    {
+     "at": "2026-08-07 11:14Z",
+     "changes": [
+      {
+       "field": "eta",
+       "label": "양하항 ETB",
+       "from": "2026-09-02T11:30",
+       "to": "2026-09-01T17:00"
+      },
+      {
+       "field": "destEta",
+       "label": "목적지 ETA",
+       "from": "2026-09-03T17:32",
+       "to": "2026-09-02T23:02"
+      }
+     ]
+    },
+    {
+     "at": "2026-08-08 11:13Z",
+     "changes": [
+      {
+       "field": "tsDep",
+       "label": "T/S ETD",
+       "from": "2026-08-08T22:00",
+       "to": "2026-08-08T14:28"
+      },
+      {
+       "field": "destEta",
+       "label": "DEST ETA",
+       "from": "2026-09-02T23:02",
+       "to": "2026-09-02T15:30"
+      }
+     ]
+    }
+   ],
+   "KULM74959200": [
+    {
+     "at": "2026-08-04 05:13Z",
+     "first": true,
+     "vessel": "NYK VESTA",
+     "voyage": "0095E",
+     "tsArr": "2026-08-10T02:00",
+     "tsDep": "2026-08-29T08:00",
+     "eta": "2026-09-22T07:00"
+    },
+    {
+     "at": "2026-08-06 05:13Z",
+     "changes": [
+      {
+       "field": "tsArr",
+       "label": "T/S 도착",
+       "from": "2026-08-10T02:00",
+       "to": "2026-08-11T02:00"
+      },
+      {
+       "field": "tsDep",
+       "label": "T/S 출항",
+       "from": "2026-08-29T08:00",
+       "to": "2026-08-29T17:00"
+      }
+     ]
+    },
+    {
+     "at": "2026-08-09 23:14Z",
+     "changes": [
+      {
+       "field": "tsArr",
+       "label": "T/S ETA",
+       "from": "2026-08-11T02:00",
+       "to": "2026-08-13T10:00"
+      },
+      {
+       "field": "tsDep",
+       "label": "T/S ETD",
+       "from": "2026-08-29T17:00",
+       "to": "2026-08-26T19:00"
+      },
+      {
+       "field": "eta",
+       "label": "POD ETB",
+       "from": "2026-09-22T07:00",
+       "to": "2026-09-17T07:00"
+      },
+      {
+       "field": "destEta",
+       "label": "DEST ETA",
+       "from": "2026-09-23T05:02",
+       "to": "2026-09-18T05:02"
+      }
+     ]
+    }
+   ],
+   "KULM94487200": [
+    {
+     "at": "2026-08-04 05:17Z",
+     "first": true,
+     "vessel": "ONE HANNOVER",
+     "voyage": "0102E",
+     "tsArr": "2026-08-15T02:00",
+     "tsDep": "2026-08-28T17:00",
+     "eta": "2026-09-19T07:00"
+    },
+    {
+     "at": "2026-08-05 05:14Z",
+     "changes": [
+      {
+       "field": "tsArr",
+       "label": "T/S 도착",
+       "from": "2026-08-15T02:00",
+       "to": "2026-08-17T02:00"
+      }
+     ]
+    },
+    {
+     "at": "2026-08-06 05:13Z",
+     "changes": [
+      {
+       "field": "tsDep",
+       "label": "T/S 출항",
+       "from": "2026-08-28T17:00",
+       "to": "2026-09-02T06:00"
+      },
+      {
+       "field": "eta",
+       "label": "양하항 ETB",
+       "from": "2026-09-19T07:00",
+       "to": "2026-09-23T20:00"
+      }
+     ]
+    }
+   ],
+   "KULM40326600": [
+    {
+     "at": "2026-08-04 08:53Z",
+     "first": true,
+     "vessel": "HANS SCHULTE",
+     "voyage": "0001E",
+     "tsArr": "2026-07-31T05:25",
+     "tsDep": "2026-08-07T09:30",
+     "eta": "2026-08-26T17:00"
+    },
+    {
+     "at": "2026-08-07 05:14Z",
+     "changes": [
+      {
+       "field": "tsDep",
+       "label": "T/S 출항",
+       "from": "2026-08-07T09:30",
+       "to": "2026-08-07T02:59"
+      },
+      {
+       "field": "eta",
+       "label": "양하항 ETB",
+       "from": "2026-08-26T17:00",
+       "to": "2026-08-27T17:00"
+      },
+      {
+       "field": "destEta",
+       "label": "목적지 ETA",
+       "from": "2026-08-27T23:04",
+       "to": "2026-08-29T00:03"
+      }
+     ]
+    }
+   ],
+   "KULM72444200": [
+    {
+     "at": "2026-08-04 08:53Z",
+     "first": true,
+     "vessel": "YM MODERATION",
+     "voyage": "0084E",
+     "tsArr": "2026-08-03T02:00",
+     "tsDep": "2026-08-19T15:30",
+     "eta": "2026-09-13T17:00"
+    }
+   ],
+   "KULM92606700": [
+    {
+     "at": "2026-08-04 08:53Z",
+     "first": true,
+     "vessel": "HYUNDAI TOKYO",
+     "voyage": "0164E",
+     "tsArr": "2026-07-05T08:10",
+     "tsDep": "2026-07-18T21:45",
+     "eta": "2026-08-13T04:00"
+    }
+   ]
+  },
+  "lastrun": {
+   "at": "2026-08-09T23:43:27.397Z",
+   "trigger": "cron-maps",
+   "cron": "40 23 * * *",
+   "ok": true,
+   "count": 7,
+   "mapOk": 7,
+   "carried": 1,
+   "budgetUsed": 24,
+   "errors": [
+    "Session 3 failed: 세션 페이지 response 520 (cf-ray a28a9dcceac5472b-BOM, attempt 4)"
+   ]
+  },
+  "delayHistory:2026-06": [
+   {
+    "booking": "KULM20914600",
+    "pol": "PORT KLANG,MALAYSIA",
+    "pod": "LOS ANGELES, CA",
+    "vessel": "HYUNDAI JUPITER",
+    "voyage": "0049E",
+    "planEta": "2026-06-09",
+    "actualEta": "2026-06-16",
+    "delayDays": 7,
+    "rollover": false,
+    "polDep": "2026-05-06",
+    "planMonth": "2026-06",
+    "polDepMonth": "2026-05",
+    "completedAt": "2026-06-16T00:00",
+    "manual": true
+   },
+   {
+    "booking": "KULM55467800",
+    "pol": "PORT KLANG,MALAYSIA",
+    "pod": "LOS ANGELES, CA",
+    "vessel": "NYK VESTA",
+    "voyage": "0094E",
+    "planEta": "2026-06-23",
+    "actualEta": "2026-06-28",
+    "delayDays": 5,
+    "rollover": false,
+    "polDep": "2026-05-19",
+    "planMonth": "2026-06",
+    "polDepMonth": "2026-05",
+    "completedAt": "2026-06-28T00:00",
+    "manual": true
+   },
+   {
+    "booking": "KULM63616300",
+    "pol": "PORT KLANG,MALAYSIA",
+    "pod": "LOS ANGELES, CA",
+    "vessel": "YM MATURITY",
+    "voyage": "0107E",
+    "planEta": "2026-06-28",
+    "actualEta": "2026-07-07",
+    "delayDays": 9,
+    "rollover": false,
+    "polDep": "2026-05-25",
+    "planMonth": "2026-06",
+    "polDepMonth": "2026-05",
+    "completedAt": "2026-07-07T00:00",
+    "manual": true
+   }
+  ],
+  "delayHistory:2026-07": [
+   {
+    "booking": "KULM30285400",
+    "pol": "PORT KLANG,MALAYSIA",
+    "pod": "LOS ANGELES, CA",
+    "vessel": "ONE CONTRIBUTION",
+    "voyage": "0066E",
+    "planEta": "2026-07-07",
+    "actualEta": "2026-07-22",
+    "delayDays": 15,
+    "rollover": false,
+    "polDep": "2026-06-01",
+    "planMonth": "2026-07",
+    "polDepMonth": "2026-06",
+    "completedAt": "2026-07-22T00:00",
+    "manual": true
+   },
+   {
+    "booking": "KULM77562600",
+    "pol": "PORT KLANG,MALAYSIA",
+    "pod": "LOS ANGELES, CA",
+    "vessel": "ONE COMMITMENT",
+    "voyage": "0075E",
+    "planEta": "2026-07-19",
+    "actualEta": "2026-07-30",
+    "delayDays": 11,
+    "rollover": false,
+    "polDep": "2026-06-13",
+    "planMonth": "2026-07",
+    "polDepMonth": "2026-06",
+    "completedAt": "2026-07-30T00:00",
+    "manual": true
+   },
+   {
+    "booking": "KULM63504800",
+    "pol": "PORT KLANG,MALAYSIA",
+    "pod": "LOS ANGELES, CA",
+    "vessel": "CONTI CONTESSA",
+    "voyage": "0025E",
+    "planEta": "2026-07-26",
+    "actualEta": "2026-08-04",
+    "delayDays": 9,
+    "rollover": false,
+    "polDep": "2026-06-18",
+    "planMonth": "2026-07",
+    "polDepMonth": "2026-06",
+    "completedAt": "2026-08-04T00:00",
+    "manual": true
+   }
+  ]
+ }
+}
