@@ -1,14 +1,10 @@
 name: Weekly KV Backup
-
 on:
   schedule:
-    # 매주 월요일 00:10 UTC = 09:10 KST
     - cron: '10 0 * * 1'
-  workflow_dispatch: {}   # 필요하면 Actions 탭에서 수동 실행도 가능
-
+  workflow_dispatch: {}
 permissions:
   contents: write
-
 jobs:
   backup:
     runs-on: ubuntu-latest
@@ -24,14 +20,14 @@ jobs:
           DATE=$(date -u +'%Y-%m-%d')
           curl -sf -H "X-Refresh-Key: ${REFRESH_KEY}" \
             "https://kossan-oqc.dhoqc.workers.dev/backup" \
-            -o "backups/backup_${DATE}.json"
-          # 최신본을 가리키는 고정 파일명도 같이 갱신
-          cp "backups/backup_${DATE}.json" backups/backup_latest.json
+            -o "backups/backup-${DATE}.json"
+          cp "backups/backup-${DATE}.json" backups/backup-latest.json
 
       - name: Commit backup
         run: |
           git config user.name "backup-bot"
           git config user.email "backup-bot@users.noreply.github.com"
           git add backups/
-          git diff --cached --quiet && echo "No changes" || git commit -m "chore: weekly KV backup $(date -u +'%Y-%m-%d')"
+          git diff --cached --quiet && echo "No changes" || \
+            git commit -m "chore: weekly KV backup $(date -u +'%Y-%m-%d')"
           git push
