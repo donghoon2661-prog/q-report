@@ -566,3 +566,27 @@ html[data-theme="light"] #qview td.near{background:rgba(154,107,18,.08)}
   padding:6px 12px;cursor:pointer}
 #logout-btn:hover{color:var(--buoy);border-color:var(--buoy)}
 #logout-btn[hidden]{display:none}
+
+/* RESTORE 버튼 — UPDATE 버튼 왼쪽에 나란히 */
+#restore-btn{position:fixed;right:100px;bottom:16px;z-index:5;
+  background:none;border:1px solid var(--buoy);color:var(--buoy);
+  font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.14em;
+  padding:6px 12px;cursor:pointer}
+#restore-btn:hover{background:var(--buoy);color:var(--ink)}
+#restore-modal{position:fixed;inset:0;background:rgba(4,12,18,.72);z-index:60;
+  display:flex;align-items:center;justify-content:center;padding:20px}
+#restore-modal[hidden]{display:none}
+.rm-in{background:var(--hull);border:1px solid var(--buoy);max-width:460px;width:100%;padding:18px}
+.rm-h{font-family:'Barlow Condensed',sans-serif;letter-spacing:.1em;font-size:14px;
+  color:var(--fog);display:flex;align-items:center;gap:10px;margin-bottom:14px}
+.rm-h b{color:var(--buoy);font-family:'IBM Plex Mono',monospace;font-size:13px}
+.rm-list{max-height:260px;overflow-y:auto;border:1px solid var(--line);margin-bottom:12px}
+.rm-item{width:100%;text-align:left;padding:10px 14px;border-bottom:1px solid var(--hair);
+  font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--paper);
+  background:none;border-left:none;border-right:none;border-top:none;cursor:pointer}
+.rm-item:last-child{border-bottom:0}
+.rm-item:hover{background:rgba(255,107,53,.08);color:var(--buoy)}
+.rm-item.sel{background:rgba(255,107,53,.14);color:var(--buoy);border-left:3px solid var(--buoy)}
+.rm-note{font-size:11px;color:var(--fog);margin-bottom:12px;line-height:1.6}
+.rm-note b{color:var(--warn)}
+.rm-actions{display:flex;gap:8px;justify-content:flex-end}
