@@ -222,6 +222,22 @@ function locate(s){
   const r = s.route.map(wrap);
   /* HMM은 위치를 못 잡으면 currentRouteIndex 를 -1 로 주기도 한다.
      범위를 벗어난 값이 들어오면 좌표 참조에서 터지므로 반드시 보정한다. */
+  /* etaActual=true면 이미 도착 확인 — 좌표 수집 상태와 무관하게 100%로 고정 */
+  if(s.etaActual){
+    const last = r[r.length - 1];
+    return {
+      pos: last,
+      i: r.length - 2,
+      f: 1,
+      names: nm,
+      from: nm[nm.length - 2] || nm[0],
+      to: nm[nm.length - 1],
+      phase: `${nm[nm.length - 1]} — berthed`,
+      atPort: true,
+      pct: 1
+    };
+  }
+
   const idx = Number.isFinite(s.idx) ? s.idx : 0;
   const i = Math.max(0, Math.min(idx, r.length - 2));
   const f = Number.isFinite(s.ratio) ? Math.max(0, Math.min(1, s.ratio)) : 0;
