@@ -354,12 +354,21 @@ const tsLoose = v => { const a = TS(v); return a !== null ? a : (v ? TS(v + "T00
    그걸 신뢰하고, 구버전 데이터(플래그 없음)일 때만 시간 경과로 판단한다. */
 const ACTUAL_FLAG = { polDep:"polDepActual", tsArr:"tsArrActual", tsDep:"tsDepActual", eta:"etaActual" };
 function dtCell(s, field){
+  /* polDep 필드는 spDep(Shipment Schedule 빨간색 actual)이 있으면 그걸 표시 */
+  if(field === "polDep" && s.spDep){
+    const orig = origOf(s.booking, field);
+    const ot = tsLoose(orig);
+    const t = TS(s.spDep);
+    const moved = ot !== null && ot !== t;
+    const dd = moved ? Math.round((t - ot) / DAY * 10) / 10 : 0;
+    return `${fmtDT(s.spDep)}<span class="sest">actual</span>`
+      + `<span class="sorig">(plan ${fmtDT(s.polDep)}${
+          dd ? ` <b class="${dd > 0 ? "warn" : ""}">${dd > 0 ? "+" : ""}${dd.toFixed(1)}d</b>` : ""})</span>`;
+  }
   const cur = s[field], t = TS(cur);
   if(t === null) return fmtDT(cur);
   const flagKey = ACTUAL_FLAG[field];
-  const done = flagKey && s[flagKey] !== undefined
-    ? !!s[flagKey]            // 이벤트 기반 (신뢰)
-    : t <= Date.now();        // fallback: 시간 경과 (구버전 데이터)
+  const done = flagKey ? !!s[flagKey] : false;  // 이벤트 기반만 신뢰, 시간 경과 fallback 제거
   const orig  = origOf(s.booking, field);
   const ot    = tsLoose(orig);
   const moved = ot !== null && ot !== t;
@@ -738,24 +747,22 @@ function gapBox(s){
 
 /* 표 HTML (MAP 아래 / LIST 상단 공용) */
 function rowsHTML(list){
-  const now=Date.now();
-  const actTag = (actual, fallbackT) => {
-    const isActual = actual !== undefined ? !!actual : (fallbackT !== null && fallbackT <= now);
-    return isActual ? "actual" : "scheduled";
-  };
+  const actTag = (actual) => (actual ? "actual" : "scheduled");
   return list.map((s,i)=>{
-    const etaActTag = s.etaActual !== undefined ? (s.etaActual?"actual":"scheduled")
-      : (TS(s.eta)!==null && TS(s.eta)<=now ? "actual" : "scheduled");
-    const destActTag = s.destEta
-      ? (s.etaActual !== undefined ? (s.etaActual?"actual":"scheduled")
-          : (TS(s.destEta)!==null && TS(s.destEta)<=now ? "actual" : "scheduled"))
-      : "";
+    const etaActTag   = actTag(!!s.etaActual);
+    const destActTag  = s.destEta ? actTag(!!s.etaActual) : "";
     return `
     <tr data-i="${i}">
       <td><span class="nm">${s.vessel}</span><span class="vy">${s.voyage}</span>
           <span class="bk">${s.booking} · ${s.cntrQty||"—"} CNTR${s.staleItem?" · STALE":""}</span></td>
-      <td data-l="PKG ETD"><span class="dt">${fmtDT(s.polDep)}</span><span class="est">${actTag(s.polDepActual,TS(s.polDep))}</span></td>
-      <td data-l="SIN ETD"><span class="dt">${fmtDT(s.tsDep)}</span><span class="est">${actTag(s.tsDepActual,TS(s.tsDep))}</span></td>
+      <td data-l="PKG ETD">
+        ${s.spDep
+          ? `<span class="dt">${fmtDT(s.spDep)}</span><span class="est">actual</span>
+             <div style="margin-top:2px;font-size:10px;color:var(--fog)">(plan ${fmtDT(s.polDep)})</div>`
+          : `<span class="dt">${fmtDT(s.polDep)}</span><span class="est">${actTag(!!s.polDepActual)}</span>`
+        }
+      </td>
+      <td data-l="SIN ETD"><span class="dt">${fmtDT(s.tsDep)}</span><span class="est">${actTag(!!s.tsDepActual)}</span></td>
       <td data-l="LA ETB / DEST ETA">
         <div><span class="eta-lbl">ETB</span><span class="dt">${fmtDT(s.eta)}</span>${gapBox(s)}<span class="est">${etaActTag}</span></div>
         ${s.destEta?`<div style="margin-top:3px"><span class="eta-lbl">ETA</span><span class="dt">${fmtDT(s.destEta)}</span><span class="est">${destActTag}</span></div>`:""}
