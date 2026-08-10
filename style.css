@@ -594,3 +594,32 @@ html[data-theme="light"] #qview td.near{background:rgba(154,107,18,.08)}
 /* ETB/ETA 두 줄 표시 — 테이블 라벨 */
 .eta-lbl{font-family:'IBM Plex Mono',monospace;font-size:9.5px;color:var(--fog);
   min-width:28px;display:inline-block;letter-spacing:.06em}
+
+/* SYSTEM 탭 */
+.tab-admin{color:var(--dock)!important}
+.tab-admin.on{border-color:var(--dock)!important;color:var(--dock)!important}
+#system{padding:4px 0 40px}
+.sys-card{border:1px solid var(--line);background:var(--hull);padding:14px 16px;margin-bottom:12px}
+.sys-row{display:flex;justify-content:space-between;align-items:baseline;
+  padding:6px 0;border-bottom:1px solid var(--hair);font-size:12px}
+.sys-row:last-child{border-bottom:0}
+.sys-lbl{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.1em;color:var(--fog)}
+.sys-val{font-family:'IBM Plex Mono',monospace;font-size:11.5px}
+.sys-sec{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.12em;
+  color:var(--fog);margin:14px 0 6px;display:flex;align-items:center;justify-content:space-between}
+.sys-bkg{display:grid;grid-template-columns:140px 1fr 1fr auto;gap:8px;padding:7px 0;
+  border-bottom:1px solid var(--hair);font-size:11px;align-items:center;font-family:'IBM Plex Mono',monospace}
+.sys-bkg:last-child{border-bottom:0}
+.sys-stale{display:inline-block;padding:1px 6px;border-radius:3px;font-size:10px;
+  background:var(--warn-bg);color:var(--warn)}
+.sys-err{background:rgba(229,72,77,.08);border:1px solid rgba(229,72,77,.3);
+  padding:10px 12px;margin-top:8px;font-size:11px;color:#E5484D;
+  font-family:'IBM Plex Mono',monospace;line-height:1.7}
+.sys-retry{background:none;border:1px solid var(--warn-line);color:var(--warn);
+  font-family:'IBM Plex Mono',monospace;font-size:10px;padding:3px 8px;cursor:pointer;white-space:nowrap}
+.sys-retry:hover{background:var(--warn-bg)}
+.sys-retry:disabled{opacity:.4;cursor:default}
+.sys-retry-all{background:none;border:1px solid var(--warn-line);color:var(--warn);
+  font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:.1em;padding:4px 10px;cursor:pointer}
+.sys-retry-all:hover{background:var(--warn-bg)}
+.sys-ok{color:var(--sail)} .sys-warn{color:var(--dock)} .sys-bad{color:var(--buoy)} .sys-dim{color:var(--fog)}

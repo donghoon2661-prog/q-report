@@ -1366,13 +1366,15 @@ function refreshData(){
 function setView(v){
   document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('on',t.dataset.view===v));
   document.querySelectorAll('.ship-tabbar button').forEach(t=>t.classList.toggle('on',t.dataset.view===v));
-  document.getElementById('mapwrap').style.display = v==='map'?'grid':'none';
-  document.getElementById('cards').style.display  = v==='list'?'block':'none';
-  document.getElementById('history').style.display = v==='history'?'block':'none';
+  document.getElementById('mapwrap').style.display  = v==='map'?'grid':'none';
+  document.getElementById('cards').style.display    = v==='list'?'block':'none';
+  document.getElementById('history').style.display  = v==='history'?'block':'none';
+  document.getElementById('system').style.display   = v==='system'?'block':'none';
   const laneEl = document.querySelector('.lane');
-  if(laneEl) laneEl.style.display = v==='history' ? 'none' : 'flex';
+  if(laneEl) laneEl.style.display = (v==='history'||v==='system') ? 'none' : 'flex';
   if(v==='map'&&map) setTimeout(()=>map.invalidateSize(),60);
   if(v==='history') renderHistoryMonths().catch(e=>console.error("History",e));
+  if(v==='system') renderSystemTab();
 }
 function show(v){
   if(v==="ship" && ACCESS_ROLE==="qc") return;
@@ -1393,7 +1395,118 @@ document.querySelectorAll(".tile").forEach(t=>t.addEventListener("click",()=>{
 document.getElementById("back").addEventListener("click",()=>show("menu"));
 document.getElementById("ship-title").addEventListener("click",refreshData);
 
-/* ================= 변경 이력(Changelog) — admin 전용 ================= */
+/* ================= SYSTEM 탭 (admin 전용) ================= */
+function renderSystemTab(){
+  const el = document.getElementById('sys-content');
+  if(!el) return;
+  const d = CUR;
+  if(!d || !d.shipments){ el.innerHTML = `<div class="sys-err">No data loaded yet.</div>`; return; }
+
+  /* 다음 수집까지 남은 시간 */
+  function nextCron(){
+    const now = new Date();
+    const kst = new Date(now.getTime() + 9*3600000);
+    const hh = kst.getUTCHours(), mm = kst.getUTCMinutes();
+    const times = [[8,10],[14,10],[20,10]];
+    for(const [h,m] of times){
+      const diffM = (h*60+m) - (hh*60+mm);
+      if(diffM > 0) return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')} KST · in ${Math.floor(diffM/60)}h ${diffM%60}m`;
+    }
+    const diffM = (8*60+10) + (24*60 - hh*60 - mm);
+    return `08:10 KST (tomorrow) · in ${Math.floor(diffM/60)}h ${diffM%60}m`;
+  }
+
+  const staleList = d.shipments.filter(s=>s.staleItem);
+  const okCount = d.shipments.filter(s=>!s.staleItem).length;
+
+  let html = `
+  <div class="sys-card">
+    <div class="sys-row"><span class="sys-lbl">LAST COLLECTION</span>
+      <span class="sys-val sys-ok">${fmtDT(d.updated)} UTC</span></div>
+    <div class="sys-row"><span class="sys-lbl">SOURCE</span>
+      <span class="sys-val">${d.source||'—'}</span></div>
+    <div class="sys-row"><span class="sys-lbl">RESULT</span>
+      <span class="sys-val"><span class="sys-ok">${okCount} ok</span>${staleList.length?` · <span class="sys-warn">${staleList.length} stale</span>`:''}</span></div>
+    <div class="sys-row"><span class="sys-lbl">SESSIONS USED</span>
+      <span class="sys-val">${d.sessionsUsed||'—'} / 5</span></div>
+    <div class="sys-row"><span class="sys-lbl">BUDGET USED</span>
+      <span class="sys-val">${d.budgetUsed||'—'} / 50 req</span></div>
+    <div class="sys-row"><span class="sys-lbl">NEXT COLLECTION</span>
+      <span class="sys-val sys-dim">${nextCron()}</span></div>
+  </div>
+
+  <div class="sys-sec">
+    <span>BOOKING STATUS</span>
+    ${staleList.length ? `<button class="sys-retry-all" id="sys-retry-all">RETRY ALL STALE</button>` : ''}
+  </div>
+  <div class="sys-card" style="padding:10px 14px">
+    <div class="sys-bkg" style="font-size:10px;color:var(--fog)">
+      <span>BOOKING</span><span>LAST CHECKED</span><span>STATUS</span><span></span>
+    </div>
+    ${d.shipments.map(s=>`
+    <div class="sys-bkg" id="sysr-${s.booking}">
+      <span>${s.booking}</span>
+      <span class="sys-dim">${s.checkedAt ? fmtDT(s.checkedAt.replace(' ','T').replace('Z','')) : '—'}</span>
+      <span>${s.staleItem
+        ? `<span class="sys-stale">STALE</span> <span class="sys-warn" style="font-size:10px">since ${s.staleSince?fmtDT(s.staleSince.replace(' ','T').replace('Z','')):'—'}</span>`
+        : `<span class="sys-ok">ok</span>`}</span>
+      <span>${s.staleItem ? `<button class="sys-retry" data-bkg="${s.booking}">RETRY</button>` : ''}</span>
+    </div>`).join('')}
+  </div>`;
+
+  if(d.errors && d.errors.length){
+    html += `<div class="sys-sec">LAST RUN ERRORS</div>
+    <div class="sys-err">${d.errors.map(e=>e.replace(/</g,'&lt;')).join('<br>')}</div>`;
+  }
+
+  el.innerHTML = html;
+
+  /* 개별 RETRY */
+  el.querySelectorAll('.sys-retry').forEach(btn=>{
+    btn.addEventListener('click', ()=>sysRetry(btn.dataset.bkg, btn));
+  });
+  /* RETRY ALL STALE */
+  const retryAllBtn = document.getElementById('sys-retry-all');
+  if(retryAllBtn) retryAllBtn.addEventListener('click', async ()=>{
+    retryAllBtn.disabled = true;
+    retryAllBtn.textContent = '조회중…';
+    for(const s of staleList){
+      const row = document.getElementById(`sysr-${s.booking}`);
+      const btn = row ? row.querySelector('.sys-retry') : null;
+      await sysRetry(s.booking, btn);
+    }
+    retryAllBtn.textContent = '완료';
+  });
+}
+
+async function sysRetry(bkg, btn){
+  if(btn){ btn.disabled=true; btn.textContent='↻…'; }
+  const row = document.getElementById(`sysr-${bkg}`);
+  try{
+    const key = await getKey();
+    if(!key){ if(btn){btn.disabled=false;btn.textContent='RETRY';} return; }
+    const r = await fetch(`${API.replace('/data','/lookup')}?bkg=${bkg}`,
+      { headers:{'X-Refresh-Key':key} });
+    const res = await r.json();
+    if(!r.ok) throw new Error(res.error||r.status);
+    /* 성공 — 행 갱신 */
+    if(row){
+      const cells = row.querySelectorAll('span');
+      const now = new Date();
+      cells[1].textContent = fmtDT(now.toISOString().slice(0,16));
+      cells[2].innerHTML = `<span class="sys-ok">ok</span>`;
+      cells[3].innerHTML = '';
+    }
+    /* CUR 갱신 */
+    fetch(source(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(d=>{ if(d){ render(d); } });
+  } catch(e){
+    if(btn){ btn.disabled=false; btn.textContent='RETRY'; }
+    if(row){
+      const cells = row.querySelectorAll('span');
+      cells[3].innerHTML = `<span class="sys-bad" style="font-size:10px">${e.message||'failed'}</span>`;
+    }
+  }
+}
 const CHANGELOG = [
   { v:"1.1", date:"2026-08-08", notes:[
     "admin 계정 추가 — 업데이트 로그(변경 이력)는 이제 admin 계정에서만 볼 수 있음 (kossan 포함 다른 계정에서는 안 보임)",
@@ -1594,6 +1707,8 @@ function applyRoleRestrictions(){
   if(ACCESS_ROLE === 'qc'  && shipTile) shipTile.style.display = 'none';
   if(updateBtn)  updateBtn.style.display  = isAdmin ? '' : 'none';
   if(restoreBtn) restoreBtn.style.display = isAdmin ? '' : 'none';
+  const sysTab = document.getElementById('tab-system');
+  if(sysTab) sysTab.style.display = isAdmin ? '' : 'none';
   if(backBtn)    backBtn.style.display    = restricted ? 'none' : '';
   if(qbackBtn)   qbackBtn.style.display   = restricted ? 'none' : '';
 
