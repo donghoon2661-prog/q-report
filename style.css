@@ -74,12 +74,11 @@ html[data-theme="light"] .tile:hover{background:#F0F5F8;border-color:#0F2430}
   font-size:13px;letter-spacing:.16em;color:var(--fog)}
 .btn:hover{color:var(--paper);border-color:var(--fog)}
 .topbar h1{font-family:'Barlow Condensed';font-weight:700;font-size:26px;letter-spacing:.06em;margin:0}
-.topbar .spacer{flex:1}
-.topbar .brand{font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.14em;
+.stamp{font-family:'IBM Plex Mono';font-size:11px;color:var(--fog);line-height:1.7;flex:1}
+.topbar .spacer{flex:1}.topbar .brand{font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.14em;
   color:var(--sail);text-align:right;line-height:1.5;white-space:nowrap}
 .topbar .brand .l1{display:block;opacity:.6}
 .topbar .brand .l2{display:block;font-weight:600}
-.stamp{font-family:'IBM Plex Mono';font-size:11px;color:var(--fog);line-height:1.7}
 .stamp .dim2{color:var(--fog);opacity:.62}
 #overview{border:1px solid var(--line);background:var(--hull);padding:22px 24px 18px;margin-bottom:16px}
 #overview h2{font-family:'Barlow Condensed';font-size:19px;letter-spacing:.06em;margin:0 0 4px}
