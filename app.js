@@ -1699,7 +1699,9 @@ function applyRoleRestrictions(){
   if(updateBtn)  updateBtn.style.display  = isAdmin ? '' : 'none';
   if(restoreBtn) restoreBtn.style.display = isAdmin ? '' : 'none';
   const sysTab = document.getElementById('tab-system');
+  const mobileSysBtn = document.getElementById('mobile-system-btn');
   if(sysTab) sysTab.style.display = isAdmin ? '' : 'none';
+  if(mobileSysBtn) mobileSysBtn.hidden = !isAdmin;
   if(backBtn)    backBtn.style.display    = restricted ? 'none' : '';
   if(qbackBtn)   qbackBtn.style.display   = restricted ? 'none' : '';
 
@@ -1767,6 +1769,7 @@ document.getElementById("logout-btn").addEventListener("click",()=>{
   }catch(_){}
   location.reload();
 });
+document.getElementById("mobile-system-btn").addEventListener("click",()=>setView('system'));
 
 // 5분 이내 재방문이면 게이트 건너뛰기
 (function tryAutoUnlock(){

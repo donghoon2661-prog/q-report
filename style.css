@@ -623,3 +623,14 @@ html[data-theme="light"] #qview td.near{background:rgba(154,107,18,.08)}
   font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:.1em;padding:4px 10px;cursor:pointer}
 .sys-retry-all:hover{background:var(--warn-bg)}
 .sys-ok{color:var(--sail)} .sys-warn{color:var(--dock)} .sys-bad{color:var(--buoy)} .sys-dim{color:var(--fog)}
+
+/* 모바일 SYSTEM 버튼 — 로그아웃 왼쪽에 나란히, 모바일에서만 표시 */
+#mobile-system-btn{position:fixed;top:12px;right:90px;z-index:10000;
+  background:none;border:1px solid var(--dock);color:var(--dock);
+  font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.14em;
+  padding:6px 12px;cursor:pointer;display:none}
+#mobile-system-btn:hover{background:var(--warn-bg)}
+#mobile-system-btn[hidden]{display:none!important}
+@media(max-width:760px){
+  #mobile-system-btn:not([hidden]){display:block}
+}
