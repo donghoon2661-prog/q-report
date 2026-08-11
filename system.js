@@ -178,7 +178,8 @@ async function sysMapRefreshOne(bkg, btn){
   try{
     const key = await getKey();
     if(!key){ btn.disabled=false; btn.textContent=orig; return; }
-    const r = await fetch(`${API.replace('/data','/collect')}?maps=1`,
+    /* bkg= 파라미터로 특정 부킹만 강제 재조회 (mapFresh 무시) */
+    const r = await fetch(`${API.replace('/data','/collect')}?maps=1&bkg=${encodeURIComponent(bkg)}`,
       { method:'POST', headers:{'X-Refresh-Key':key} });
     const res = await r.json();
     if(!r.ok) throw new Error(res.error||r.status);
