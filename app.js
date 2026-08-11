@@ -558,6 +558,17 @@ function toKST(ts){
   const p = n => String(n).padStart(2,"0");
   return `${p(k.getUTCMonth()+1)}-${p(k.getUTCDate())} ${p(k.getUTCHours())}:${p(k.getUTCMinutes())} KST`;
 }
+/* SYSTEM 탭 시간 표시: "Aug/11 09:01 (08:01)" — KST 기준, 괄호 안은 MYT */
+function fmtSysTime(ts){
+  if(!ts) return "—";
+  const t = String(ts).trim().replace(" ","T");
+  const d = new Date(/Z$/i.test(t) ? t : t+"Z");
+  if(isNaN(d)) return ts;
+  const kst = new Date(d.getTime() + 9*3600000);
+  const myt = new Date(d.getTime() + 8*3600000);
+  const p = n => String(n).padStart(2,"0");
+  return `${monAbbr(p(kst.getUTCMonth()+1))}/${p(kst.getUTCDate())} ${p(kst.getUTCHours())}:${p(kst.getUTCMinutes())} (${p(myt.getUTCHours())}:${p(myt.getUTCMinutes())})`;
+}
 
 function alertBanner(d){
   const el = document.getElementById("alertbar");
@@ -1413,7 +1424,7 @@ function renderSystemTab(){
   let html = `
   <div class="sys-card">
     <div class="sys-row"><span class="sys-lbl">LAST COLLECTION</span>
-      <span class="sys-val sys-ok">${fmtDT(d.updated)} UTC</span></div>
+      <span class="sys-val sys-ok">${fmtSysTime(d.updated)}</span></div>
     <div class="sys-row"><span class="sys-lbl">SOURCE</span>
       <span class="sys-val">${d.source||'—'}</span></div>
     <div class="sys-row"><span class="sys-lbl">RESULT</span>
@@ -1424,6 +1435,8 @@ function renderSystemTab(){
       <span class="sys-val">${d.budgetUsed||'—'} / 50 req</span></div>
     <div class="sys-row"><span class="sys-lbl">NEXT COLLECTION</span>
       <span class="sys-val sys-dim">${nextCron()}</span></div>
+    <div class="sys-row"><span class="sys-lbl">MAP REFRESH</span>
+      <span class="sys-val"><button class="sys-retry" id="sys-force-map" style="border-color:var(--sail);color:var(--sail)">FORCE MAP REFRESH</button></span></div>
   </div>
 
   <div class="sys-sec">
@@ -1437,9 +1450,9 @@ function renderSystemTab(){
     ${d.shipments.map(s=>`
     <div class="sys-bkg" id="sysr-${s.booking}">
       <span>${s.booking}</span>
-      <span class="sys-dim">${s.checkedAt ? fmtDT(s.checkedAt.replace(' ','T').replace('Z','')) : '—'}</span>
+      <span class="sys-dim">${s.checkedAt ? fmtSysTime(s.checkedAt) : '—'}</span>
       <span>${s.staleItem
-        ? `<span class="sys-stale">STALE</span> <span class="sys-warn" style="font-size:10px">since ${s.staleSince?fmtDT(s.staleSince.replace(' ','T').replace('Z','')):'—'}</span>`
+        ? `<span class="sys-stale">STALE</span> <span class="sys-warn" style="font-size:10px">since ${s.staleSince?fmtSysTime(s.staleSince):'—'}</span>`
         : `<span class="sys-ok">ok</span>`}</span>
       <span>${s.staleItem ? `<button class="sys-retry" data-bkg="${s.booking}">RETRY</button>` : ''}</span>
     </div>`).join('')}
@@ -1468,6 +1481,8 @@ function renderSystemTab(){
     }
     retryAllBtn.textContent = '완료';
   });
+  const forceMapBtn = document.getElementById('sys-force-map');
+  if(forceMapBtn) forceMapBtn.addEventListener('click', ()=>sysForceMap(forceMapBtn));
 }
 
 async function sysRetry(bkg, btn){
@@ -1496,6 +1511,28 @@ async function sysRetry(bkg, btn){
       const cells = row.querySelectorAll('span');
       cells[3].innerHTML = `<span class="sys-bad" style="font-size:10px">${e.message||'failed'}</span>`;
     }
+  }
+}
+async function sysForceMap(btn){
+  btn.disabled = true;
+  const orig = btn.textContent;
+  btn.textContent = '수집 중…';
+  try{
+    const key = await getKey();
+    if(!key){ btn.disabled=false; btn.textContent=orig; return; }
+    const r = await fetch(`${API.replace('/data','/collect')}?maps=1`,
+      { method:'POST', headers:{'X-Refresh-Key':key} });
+    const res = await r.json();
+    if(!r.ok) throw new Error(res.error||r.status);
+    btn.textContent = `완료 — ${res.mapOk||0}건 갱신`;
+    setTimeout(()=>{ btn.disabled=false; btn.textContent=orig; }, 4000);
+    fetch(source(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(d=>{ if(d) render(d); });
+  } catch(e){
+    btn.disabled=false;
+    btn.textContent=orig;
+    const el=document.getElementById('sys-content');
+    if(el) el.insertAdjacentHTML('afterbegin',
+      `<div class="sys-err" style="margin-bottom:8px">Map refresh failed — ${e.message||'no response'}</div>`);
   }
 }
 const CHANGELOG = [
