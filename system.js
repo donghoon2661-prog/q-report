@@ -31,13 +31,11 @@ function renderSystemTab(){
     <div class="sys-row"><span class="sys-lbl">RESULT</span>
       <span class="sys-val"><span class="sys-ok">${okCount} ok</span>${staleList.length?` · <span class="sys-warn">${staleList.length} stale</span>`:''}</span></div>
     <div class="sys-row"><span class="sys-lbl">SESSIONS USED</span>
-      <span class="sys-val">${d.sessionsUsed||'—'} / 5</span></div>
+      <span class="sys-val">${d.sessionsUsed||'—'} / 8</span></div>
     <div class="sys-row"><span class="sys-lbl">BUDGET USED</span>
       <span class="sys-val">${d.budgetUsed||'—'} / 50 req</span></div>
     <div class="sys-row"><span class="sys-lbl">NEXT COLLECTION</span>
       <span class="sys-val sys-dim">${nextCron()}</span></div>
-    <div class="sys-row"><span class="sys-lbl">MAP REFRESH</span>
-      <span class="sys-val"><button class="sys-retry" id="sys-force-map" style="border-color:var(--sail);color:var(--sail)">FORCE MAP REFRESH</button></span></div>
   </div>
 
   <div class="sys-sec">
@@ -45,34 +43,54 @@ function renderSystemTab(){
     ${staleList.length ? `<button class="sys-retry-all" id="sys-retry-all">RETRY ALL STALE</button>` : ''}
   </div>
   <div class="sys-legend">
-    <span><span class="sys-ok">ok</span> HMM 일정 조회 성공 (마지막 lookup 정상)</span>
-    <span style="margin-left:14px"><span class="sys-stale">STALE</span> HMM 조회 실패 (데이터 오래됨, RETRY 권장)</span>
-    <span style="margin-left:14px"><span style="color:var(--sail);font-size:10px">MAP ok</span> 항로 좌표 정상</span>
-    <span style="margin-left:14px"><span style="color:var(--buoy);font-size:10px">MAP —</span> 항로 데이터 없음</span>
+    <span><span class="sys-ok">ok</span> 스케줄 조회 성공</span>
+    <span style="margin-left:14px"><span class="sys-stale">STALE</span> 조회 실패 — 직전 값 표시 중</span>
+    <span style="margin-left:14px">REFRESH: 즉시 재조회 (ok 포함 강제 가능)</span>
+    <span style="margin-left:14px">MAP: 항로 좌표만 재조회</span>
   </div>
   <div class="sys-card" style="padding:10px 14px">
-    <div class="sys-bkg5" style="font-size:10px;color:var(--fog)">
-      <span>BOOKING</span><span>LAST CHECKED</span><span>SCHEDULE STATUS</span><span>MAP STATUS</span><span></span>
+    <div class="sys-bkg3" style="font-size:10px;color:var(--fog);margin-bottom:6px">
+      <span>BOOKING</span>
+      <span>SCHEDULE</span>
+      <span>MAP</span>
     </div>
     ${d.shipments.map(s=>{
       const hasRoute = !!(s.route && s.route.length);
       const mapOk = hasRoute && !s.mapError;
-      const mapLabel = mapOk
-        ? `<span style="color:var(--sail);font-size:10px">ok${s.mapAt?' · '+fmtSysTime(s.mapAt):''}</span>`
+      const schedAt = s.scheduleCheckedAt || s.checkedAt;
+      const mapAt   = s.mapAt;
+
+      const schedStatus = s.staleItem
+        ? `<span class="sys-stale">STALE</span><span class="sys-warn" style="font-size:10px;margin-left:4px">since ${s.staleSince?fmtSysTime(s.staleSince):'—'}</span>`
+        : `<span class="sys-ok">ok</span>`;
+      const mapStatus = mapOk
+        ? `<span style="color:var(--sail)">ok</span>`
         : (s.mapError
-          ? `<span style="color:var(--buoy);font-size:10px" title="${s.mapError}">ERR</span>`
-          : `<span style="color:var(--fog);font-size:10px">—</span>`);
+          ? `<span style="color:var(--buoy)" title="${s.mapError}">ERR</span>`
+          : `<span style="color:var(--fog)">—</span>`);
+
       return `
-    <div class="sys-bkg5" id="sysr-${s.booking}">
-      <span>${s.booking}</span>
-      <span class="sys-dim">${s.checkedAt ? fmtSysTime(s.checkedAt) : '—'}</span>
-      <span>${s.staleItem
-        ? `<span class="sys-stale">STALE</span> <span class="sys-warn" style="font-size:10px">since ${s.staleSince?fmtSysTime(s.staleSince):'—'}</span>`
-        : `<span class="sys-ok">ok</span>`}</span>
-      <span>${mapLabel}</span>
-      <span style="display:flex;gap:4px">
-        ${s.staleItem ? `<button class="sys-retry" data-bkg="${s.booking}">RETRY</button>` : ''}
-        <button class="sys-map-refresh" data-bkg="${s.booking}" style="border-color:var(--sail);color:var(--sail)">MAP</button>
+    <div class="sys-bkg3" id="sysr-${s.booking}">
+      <span style="font-size:11px;font-weight:600">${s.booking}<br>
+        <span style="font-size:10px;font-weight:400;color:var(--fog)">${(s.vessel||'').slice(0,16)} ${s.voyage||''}</span>
+      </span>
+      <span>
+        <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
+          ${schedStatus}
+          <span class="sys-dim" style="font-size:10px">${schedAt?fmtSysTime(schedAt):'—'}</span>
+        </div>
+        <div style="margin-top:4px">
+          <button class="sys-retry" data-bkg="${s.booking}" style="font-size:10px;padding:2px 7px">REFRESH</button>
+        </div>
+      </span>
+      <span>
+        <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
+          ${mapStatus}
+          <span class="sys-dim" style="font-size:10px">${mapAt?fmtSysTime(mapAt):'—'}</span>
+        </div>
+        <div style="margin-top:4px">
+          <button class="sys-map-refresh" data-bkg="${s.booking}" style="font-size:10px;padding:2px 7px;border-color:var(--sail);color:var(--sail)">MAP</button>
+        </div>
       </span>
     </div>`;}).join('')}
   </div>`;
@@ -98,9 +116,6 @@ function renderSystemTab(){
     }
     retryAllBtn.textContent = '완료';
   });
-  const forceMapBtn = document.getElementById('sys-force-map');
-  if(forceMapBtn) forceMapBtn.addEventListener('click', ()=>sysForceMap(forceMapBtn));
-
   el.querySelectorAll('.sys-map-refresh').forEach(btn=>{
     btn.addEventListener('click', ()=>sysMapRefreshOne(btn.dataset.bkg, btn));
   });
