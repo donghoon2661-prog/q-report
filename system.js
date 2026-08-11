@@ -44,19 +44,37 @@ function renderSystemTab(){
     <span>BOOKING STATUS</span>
     ${staleList.length ? `<button class="sys-retry-all" id="sys-retry-all">RETRY ALL STALE</button>` : ''}
   </div>
+  <div class="sys-legend">
+    <span><span class="sys-ok">ok</span> HMM 일정 조회 성공 (마지막 lookup 정상)</span>
+    <span style="margin-left:14px"><span class="sys-stale">STALE</span> HMM 조회 실패 (데이터 오래됨, RETRY 권장)</span>
+    <span style="margin-left:14px"><span style="color:var(--sail);font-size:10px">MAP ok</span> 항로 좌표 정상</span>
+    <span style="margin-left:14px"><span style="color:var(--buoy);font-size:10px">MAP —</span> 항로 데이터 없음</span>
+  </div>
   <div class="sys-card" style="padding:10px 14px">
-    <div class="sys-bkg" style="font-size:10px;color:var(--fog)">
-      <span>BOOKING</span><span>LAST CHECKED</span><span>STATUS</span><span></span>
+    <div class="sys-bkg5" style="font-size:10px;color:var(--fog)">
+      <span>BOOKING</span><span>LAST CHECKED</span><span>SCHEDULE STATUS</span><span>MAP STATUS</span><span></span>
     </div>
-    ${d.shipments.map(s=>`
-    <div class="sys-bkg" id="sysr-${s.booking}">
+    ${d.shipments.map(s=>{
+      const hasRoute = !!(s.route && s.route.length);
+      const mapOk = hasRoute && !s.mapError;
+      const mapLabel = mapOk
+        ? `<span style="color:var(--sail);font-size:10px">ok${s.mapAt?' · '+fmtSysTime(s.mapAt):''}</span>`
+        : (s.mapError
+          ? `<span style="color:var(--buoy);font-size:10px" title="${s.mapError}">ERR</span>`
+          : `<span style="color:var(--fog);font-size:10px">—</span>`);
+      return `
+    <div class="sys-bkg5" id="sysr-${s.booking}">
       <span>${s.booking}</span>
       <span class="sys-dim">${s.checkedAt ? fmtSysTime(s.checkedAt) : '—'}</span>
       <span>${s.staleItem
         ? `<span class="sys-stale">STALE</span> <span class="sys-warn" style="font-size:10px">since ${s.staleSince?fmtSysTime(s.staleSince):'—'}</span>`
         : `<span class="sys-ok">ok</span>`}</span>
-      <span>${s.staleItem ? `<button class="sys-retry" data-bkg="${s.booking}">RETRY</button>` : ''}</span>
-    </div>`).join('')}
+      <span>${mapLabel}</span>
+      <span style="display:flex;gap:4px">
+        ${s.staleItem ? `<button class="sys-retry" data-bkg="${s.booking}">RETRY</button>` : ''}
+        <button class="sys-map-refresh" data-bkg="${s.booking}" style="border-color:var(--sail);color:var(--sail)">MAP</button>
+      </span>
+    </div>`;}).join('')}
   </div>`;
 
   if(d.errors && d.errors.length){
@@ -82,6 +100,10 @@ function renderSystemTab(){
   });
   const forceMapBtn = document.getElementById('sys-force-map');
   if(forceMapBtn) forceMapBtn.addEventListener('click', ()=>sysForceMap(forceMapBtn));
+
+  el.querySelectorAll('.sys-map-refresh').forEach(btn=>{
+    btn.addEventListener('click', ()=>sysMapRefreshOne(btn.dataset.bkg, btn));
+  });
 }
 
 async function sysRetry(bkg, btn){
@@ -131,6 +153,33 @@ async function sysForceMap(btn){
     const el=document.getElementById('sys-content');
     if(el) el.insertAdjacentHTML('afterbegin',
       `<div class="sys-err" style="margin-bottom:8px">Map refresh failed — ${e.message||'no response'}</div>`);
+  }
+}
+
+async function sysMapRefreshOne(bkg, btn){
+  btn.disabled = true;
+  const orig = btn.textContent;
+  btn.textContent = '…';
+  try{
+    const key = await getKey();
+    if(!key){ btn.disabled=false; btn.textContent=orig; return; }
+    const r = await fetch(`${API.replace('/data','/collect')}?maps=1`,
+      { method:'POST', headers:{'X-Refresh-Key':key} });
+    const res = await r.json();
+    if(!r.ok) throw new Error(res.error||r.status);
+    btn.textContent = '✓';
+    setTimeout(()=>{ btn.disabled=false; btn.textContent=orig; }, 3000);
+    fetch(source(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(d=>{ if(d){ render(d); } });
+  } catch(e){
+    btn.disabled=false;
+    btn.textContent=orig;
+    const row = document.getElementById(`sysr-${bkg}`);
+    if(row){
+      const spans = row.querySelectorAll('span');
+      const last = spans[spans.length-1];
+      if(last) last.insertAdjacentHTML('afterend',
+        `<span class="sys-bad" style="font-size:10px">${e.message||'failed'}</span>`);
+    }
   }
 }
 
