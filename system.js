@@ -175,6 +175,7 @@ async function sysMapRefreshOne(bkg, btn){
   btn.disabled = true;
   const orig = btn.textContent;
   btn.textContent = '…';
+  const row = document.getElementById(`sysr-${bkg}`);
   try{
     const key = await getKey();
     if(!key){ btn.disabled=false; btn.textContent=orig; return; }
@@ -183,18 +184,59 @@ async function sysMapRefreshOne(bkg, btn){
       { method:'POST', headers:{'X-Refresh-Key':key} });
     const res = await r.json();
     if(!r.ok) throw new Error(res.error||r.status);
-    btn.textContent = '✓';
-    setTimeout(()=>{ btn.disabled=false; btn.textContent=orig; }, 3000);
-    fetch(source(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(d=>{ if(d){ render(d); } });
+
+    /* 응답에서 해당 부킹의 실제 결과 확인 */
+    const item = (res.shipments||[]).find(s=>s.booking===bkg);
+    const mapOk = item && item.route && !item.mapError;
+    const mapAt  = item && item.mapAt ? fmtSysTime(item.mapAt) : '—';
+    const errMsg = item && item.mapError ? item.mapError : (res.mapErrors||[]).find(e=>e.includes(bkg))||'';
+
+    /* MAP 셀(3번째 컬럼) 직접 업데이트 */
+    if(row){
+      const cols = row.querySelectorAll(':scope > span');
+      const mapCol = cols[2];
+      if(mapCol){
+        if(mapOk){
+          mapCol.innerHTML = `
+            <div style="display:flex;align-items:center;gap:6px">
+              <span style="color:var(--sail)">ok</span>
+              <span class="sys-dim" style="font-size:10px">${mapAt}</span>
+            </div>
+            <div style="margin-top:4px">
+              <button class="sys-map-refresh" data-bkg="${bkg}" style="font-size:10px;padding:2px 7px;border-color:var(--sail);color:var(--sail)">MAP</button>
+            </div>`;
+        } else {
+          mapCol.innerHTML = `
+            <div style="display:flex;align-items:center;gap:6px">
+              <span style="color:var(--buoy)">ERR</span>
+              <span class="sys-dim" style="font-size:10px">${mapAt}</span>
+            </div>
+            <div style="font-size:10px;color:var(--buoy);margin-top:2px" title="${errMsg}">520 — 재시도 가능</div>
+            <div style="margin-top:4px">
+              <button class="sys-map-refresh" data-bkg="${bkg}" style="font-size:10px;padding:2px 7px;border-color:var(--sail);color:var(--sail)">MAP</button>
+            </div>`;
+        }
+        /* 새로 생성된 버튼에 이벤트 재등록 */
+        mapCol.querySelector('.sys-map-refresh')
+          ?.addEventListener('click', e=>{ e.stopPropagation(); sysMapRefreshOne(bkg, e.currentTarget); });
+      }
+    }
+
+    /* 전체 데이터 갱신 */
+    fetch(source(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(d=>{ if(d) render(d); });
   } catch(e){
     btn.disabled=false;
     btn.textContent=orig;
-    const row = document.getElementById(`sysr-${bkg}`);
     if(row){
-      const spans = row.querySelectorAll('span');
-      const last = spans[spans.length-1];
-      if(last) last.insertAdjacentHTML('afterend',
-        `<span class="sys-bad" style="font-size:10px">${e.message||'failed'}</span>`);
+      const cols = row.querySelectorAll(':scope > span');
+      const mapCol = cols[2];
+      if(mapCol){
+        const errDiv = mapCol.querySelector('.map-err') || document.createElement('div');
+        errDiv.className='map-err';
+        errDiv.style.cssText='font-size:10px;color:var(--buoy);margin-top:2px';
+        errDiv.textContent = e.message||'failed';
+        if(!mapCol.contains(errDiv)) mapCol.appendChild(errDiv);
+      }
     }
   }
 }
