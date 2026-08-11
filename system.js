@@ -60,13 +60,18 @@ function renderSystemTab(){
       const schedAt = s.scheduleCheckedAt || s.checkedAt;
       const mapAt   = s.mapAt;
 
+      /* cf-ray에서 지역 코드 추출: "a292ac7dfd4eb501-LAX" → "LAX" */
+      const mapRegion = s.mapError
+        ? (s.mapError.match(/cf-ray\s+[\w]+-([A-Z]{2,4})[,)]/i)||[])[1] || ''
+        : '';
+
       const schedStatus = s.staleItem
         ? `<span class="sys-stale">STALE</span><span class="sys-warn" style="font-size:10px;margin-left:4px">since ${s.staleSince?fmtSysTime(s.staleSince):'—'}</span>`
         : `<span class="sys-ok">ok</span>`;
       const mapStatus = mapOk
         ? `<span style="color:var(--sail)">ok</span>`
         : (s.mapError
-          ? `<span style="color:var(--buoy)" title="${s.mapError}">ERR</span>`
+          ? `<span style="color:var(--buoy)">ERR${mapRegion?' · '+mapRegion:''}</span>`
           : `<span style="color:var(--fog)">—</span>`);
 
       return `
@@ -89,7 +94,7 @@ function renderSystemTab(){
           <span class="sys-dim" style="font-size:10px">${mapAt?fmtSysTime(mapAt):'—'}</span>
         </div>
         <div style="margin-top:4px">
-          <button class="sys-map-refresh" data-bkg="${s.booking}" style="font-size:10px;padding:2px 7px;border-color:var(--sail);color:var(--sail)">MAP</button>
+          <button class="sys-map-refresh" data-bkg="${s.booking}" style="font-size:10px;padding:2px 7px;border-color:var(--sail);color:var(--sail)">REFRESH</button>
         </div>
       </span>
     </div>`;}).join('')}
@@ -203,17 +208,18 @@ async function sysMapRefreshOne(bkg, btn){
               <span class="sys-dim" style="font-size:10px">${mapAt}</span>
             </div>
             <div style="margin-top:4px">
-              <button class="sys-map-refresh" data-bkg="${bkg}" style="font-size:10px;padding:2px 7px;border-color:var(--sail);color:var(--sail)">MAP</button>
+              <button class="sys-map-refresh" data-bkg="${bkg}" style="font-size:10px;padding:2px 7px;border-color:var(--sail);color:var(--sail)">REFRESH</button>
             </div>`;
         } else {
+          const region = (errMsg.match(/cf-ray\s+[\w]+-([A-Z]{2,4})[,)]/i)||[])[1] || '';
           mapCol.innerHTML = `
             <div style="display:flex;align-items:center;gap:6px">
-              <span style="color:var(--buoy)">ERR</span>
+              <span style="color:var(--buoy)">ERR${region?' · '+region:''}</span>
               <span class="sys-dim" style="font-size:10px">${mapAt}</span>
             </div>
-            <div style="font-size:10px;color:var(--buoy);margin-top:2px" title="${errMsg}">520 — 재시도 가능</div>
+            <div style="font-size:10px;color:var(--buoy);margin-top:2px">520 — 재시도 가능</div>
             <div style="margin-top:4px">
-              <button class="sys-map-refresh" data-bkg="${bkg}" style="font-size:10px;padding:2px 7px;border-color:var(--sail);color:var(--sail)">MAP</button>
+              <button class="sys-map-refresh" data-bkg="${bkg}" style="font-size:10px;padding:2px 7px;border-color:var(--sail);color:var(--sail)">REFRESH</button>
             </div>`;
         }
         /* 새로 생성된 버튼에 이벤트 재등록 */
