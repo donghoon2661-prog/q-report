@@ -144,7 +144,7 @@ function renderHistoryDetail(monthKey){
 
   const tbody = document.getElementById("hist-tbody");
   tbody.innerHTML = recs.map((r,i)=>{
-    const dwell = (r.legBreakdown||[]).find(l=>l.label==="T/S 출항 ETD");
+    const dwell = (r.legBreakdown||[]).find(l=>l.label==="T/S Departure ETD");
     const dwellTxt = dwell && dwell.note ? dwell.note.split("d vs")[0]+"d" : "—";
     return `<tr>
       <td><span class="vname">${r.vessel||"—"}</span><span class="vbkg">${r.booking}</span></td>
