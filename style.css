@@ -610,6 +610,11 @@ html[data-theme="light"] #qview td.near{background:rgba(154,107,18,.08)}
 .sys-bkg{display:grid;grid-template-columns:140px 1fr 1fr auto;gap:8px;padding:7px 0;
   border-bottom:1px solid var(--hair);font-size:11px;align-items:center;font-family:'IBM Plex Mono',monospace}
 .sys-bkg:last-child{border-bottom:0}
+.sys-bkg5{display:grid;grid-template-columns:140px 1fr 1fr 1fr auto;gap:8px;padding:7px 0;
+  border-bottom:1px solid var(--hair);font-size:11px;align-items:center;font-family:'IBM Plex Mono',monospace}
+.sys-bkg5:last-child{border-bottom:0}
+.sys-legend{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--fog);
+  margin-bottom:6px;display:flex;flex-wrap:wrap;gap:4px 0;line-height:2}
 .sys-stale{display:inline-block;padding:1px 6px;border-radius:3px;font-size:10px;
   background:var(--warn-bg);color:var(--warn)}
 .sys-err{background:rgba(229,72,77,.08);border:1px solid rgba(229,72,77,.3);
