@@ -1,0 +1,257 @@
+/* ===== system.js — SYSTEM 탭 · Changelog · Restore ===== */
+
+function renderSystemTab(){
+  const el = document.getElementById('sys-content');
+  if(!el) return;
+  const d = CUR;
+  if(!d || !d.shipments){ el.innerHTML = `<div class="sys-err">No data loaded yet.</div>`; return; }
+
+  function nextCron(){
+    const now = new Date();
+    const kst = new Date(now.getTime() + 9*3600000);
+    const hh = kst.getUTCHours(), mm = kst.getUTCMinutes();
+    const times = [[8,10],[14,10],[20,10]];
+    for(const [h,m] of times){
+      const diffM = (h*60+m) - (hh*60+mm);
+      if(diffM > 0) return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')} KST · in ${Math.floor(diffM/60)}h ${diffM%60}m`;
+    }
+    const diffM = (8*60+10) + (24*60 - hh*60 - mm);
+    return `08:10 KST (tomorrow) · in ${Math.floor(diffM/60)}h ${diffM%60}m`;
+  }
+
+  const staleList = d.shipments.filter(s=>s.staleItem);
+  const okCount = d.shipments.filter(s=>!s.staleItem).length;
+
+  let html = `
+  <div class="sys-card">
+    <div class="sys-row"><span class="sys-lbl">LAST COLLECTION</span>
+      <span class="sys-val sys-ok">${fmtSysTime(d.updated)}</span></div>
+    <div class="sys-row"><span class="sys-lbl">SOURCE</span>
+      <span class="sys-val">${d.source||'—'}</span></div>
+    <div class="sys-row"><span class="sys-lbl">RESULT</span>
+      <span class="sys-val"><span class="sys-ok">${okCount} ok</span>${staleList.length?` · <span class="sys-warn">${staleList.length} stale</span>`:''}</span></div>
+    <div class="sys-row"><span class="sys-lbl">SESSIONS USED</span>
+      <span class="sys-val">${d.sessionsUsed||'—'} / 5</span></div>
+    <div class="sys-row"><span class="sys-lbl">BUDGET USED</span>
+      <span class="sys-val">${d.budgetUsed||'—'} / 50 req</span></div>
+    <div class="sys-row"><span class="sys-lbl">NEXT COLLECTION</span>
+      <span class="sys-val sys-dim">${nextCron()}</span></div>
+    <div class="sys-row"><span class="sys-lbl">MAP REFRESH</span>
+      <span class="sys-val"><button class="sys-retry" id="sys-force-map" style="border-color:var(--sail);color:var(--sail)">FORCE MAP REFRESH</button></span></div>
+  </div>
+
+  <div class="sys-sec">
+    <span>BOOKING STATUS</span>
+    ${staleList.length ? `<button class="sys-retry-all" id="sys-retry-all">RETRY ALL STALE</button>` : ''}
+  </div>
+  <div class="sys-card" style="padding:10px 14px">
+    <div class="sys-bkg" style="font-size:10px;color:var(--fog)">
+      <span>BOOKING</span><span>LAST CHECKED</span><span>STATUS</span><span></span>
+    </div>
+    ${d.shipments.map(s=>`
+    <div class="sys-bkg" id="sysr-${s.booking}">
+      <span>${s.booking}</span>
+      <span class="sys-dim">${s.checkedAt ? fmtSysTime(s.checkedAt) : '—'}</span>
+      <span>${s.staleItem
+        ? `<span class="sys-stale">STALE</span> <span class="sys-warn" style="font-size:10px">since ${s.staleSince?fmtSysTime(s.staleSince):'—'}</span>`
+        : `<span class="sys-ok">ok</span>`}</span>
+      <span>${s.staleItem ? `<button class="sys-retry" data-bkg="${s.booking}">RETRY</button>` : ''}</span>
+    </div>`).join('')}
+  </div>`;
+
+  if(d.errors && d.errors.length){
+    html += `<div class="sys-sec">LAST RUN ERRORS</div>
+    <div class="sys-err">${d.errors.map(e=>e.replace(/</g,'&lt;')).join('<br>')}</div>`;
+  }
+
+  el.innerHTML = html;
+
+  el.querySelectorAll('.sys-retry').forEach(btn=>{
+    btn.addEventListener('click', ()=>sysRetry(btn.dataset.bkg, btn));
+  });
+  const retryAllBtn = document.getElementById('sys-retry-all');
+  if(retryAllBtn) retryAllBtn.addEventListener('click', async ()=>{
+    retryAllBtn.disabled = true;
+    retryAllBtn.textContent = '조회중…';
+    for(const s of staleList){
+      const row = document.getElementById(`sysr-${s.booking}`);
+      const btn = row ? row.querySelector('.sys-retry') : null;
+      await sysRetry(s.booking, btn);
+    }
+    retryAllBtn.textContent = '완료';
+  });
+  const forceMapBtn = document.getElementById('sys-force-map');
+  if(forceMapBtn) forceMapBtn.addEventListener('click', ()=>sysForceMap(forceMapBtn));
+}
+
+async function sysRetry(bkg, btn){
+  if(btn){ btn.disabled=true; btn.textContent='↻…'; }
+  const row = document.getElementById(`sysr-${bkg}`);
+  try{
+    const key = await getKey();
+    if(!key){ if(btn){btn.disabled=false;btn.textContent='RETRY';} return; }
+    const r = await fetch(`${API.replace('/data','/lookup')}?bkg=${bkg}`,
+      { headers:{'X-Refresh-Key':key} });
+    const res = await r.json();
+    if(!r.ok) throw new Error(res.error||r.status);
+    if(row){
+      const cells = row.querySelectorAll('span');
+      const now = new Date();
+      cells[1].textContent = fmtDT(now.toISOString().slice(0,16));
+      cells[2].innerHTML = `<span class="sys-ok">ok</span>`;
+      cells[3].innerHTML = '';
+    }
+    fetch(source(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(d=>{ if(d){ render(d); } });
+  } catch(e){
+    if(btn){ btn.disabled=false; btn.textContent='RETRY'; }
+    if(row){
+      const cells = row.querySelectorAll('span');
+      cells[3].innerHTML = `<span class="sys-bad" style="font-size:10px">${e.message||'failed'}</span>`;
+    }
+  }
+}
+
+async function sysForceMap(btn){
+  btn.disabled = true;
+  const orig = btn.textContent;
+  btn.textContent = '수집 중…';
+  try{
+    const key = await getKey();
+    if(!key){ btn.disabled=false; btn.textContent=orig; return; }
+    const r = await fetch(`${API.replace('/data','/collect')}?maps=1`,
+      { method:'POST', headers:{'X-Refresh-Key':key} });
+    const res = await r.json();
+    if(!r.ok) throw new Error(res.error||r.status);
+    btn.textContent = `완료 — ${res.mapOk||0}건 갱신`;
+    setTimeout(()=>{ btn.disabled=false; btn.textContent=orig; }, 4000);
+    fetch(source(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(d=>{ if(d) render(d); });
+  } catch(e){
+    btn.disabled=false;
+    btn.textContent=orig;
+    const el=document.getElementById('sys-content');
+    if(el) el.insertAdjacentHTML('afterbegin',
+      `<div class="sys-err" style="margin-bottom:8px">Map refresh failed — ${e.message||'no response'}</div>`);
+  }
+}
+
+/* ---------- Changelog ---------- */
+const CHANGELOG = [
+  { v:"1.1", date:"2026-08-08", notes:[
+    "admin 계정 추가 — 업데이트 로그(변경 이력)는 이제 admin 계정에서만 볼 수 있음 (kossan 포함 다른 계정에서는 안 보임)",
+    "eta / qc 계정으로 로그인하면 메뉴(01/02 선택 화면) 없이 바로 해당 화면으로 진입",
+    "로그아웃 버튼 추가 — 화면 우측 상단에서 언제든 로그아웃하고 다른 계정으로 재접속 가능"
+  ]},
+  { v:"1.0", date:"2026-08-08", notes:[
+    "역할별 로그인 — kossan(전체 접근), admin(전체 + 업데이트 로그), eta(SHIPMENT STATUS만), qc(QUALITY ANALYSIS만)",
+    "로그인이 5분간 유지돼 새로고침해도 비밀번호를 다시 묻지 않음",
+    "HISTORY 탭: 월별 요약(선박 수 / 평균 지연일 / 최대 지연일)을 표와 차트로 추가",
+    "지연 배지: 빨간 \"!\"(ETB 변경)에 더해 노란 \"!\"(본선 변경) 추가",
+    "사이트 전체 날짜 표기를 \"Mon/DD\"(예: Aug/08) 형식으로 변경",
+    "SHIPMENT STATUS 전반 영문화"
+  ]}
+];
+function renderChangelog(){
+  return CHANGELOG.map(v=>`<div class="cl-v">
+      <div class="vh">v${v.v}<span class="d">${v.date}</span></div>
+      <ul>${v.notes.map(n=>`<li>${n}</li>`).join("")}</ul>
+    </div>`).join("");
+}
+function showChangelog(){
+  if(ACCESS_ROLE !== "admin") return;
+  const box = document.getElementById("changelog");
+  box.innerHTML = `<div class="gl-in" style="max-width:520px">
+      <div class="gl-h"><b>업데이트 로그</b><button class="gl-x" id="changelog-x">✕</button></div>
+      ${renderChangelog()}
+    </div>`;
+  box.hidden = false;
+  document.getElementById("changelog-x").addEventListener("click",()=>{ box.hidden = true; });
+  box.addEventListener("click",e=>{ if(e.target===box) box.hidden = true; },{once:true});
+}
+
+/* ---------- Restore ---------- */
+const BACKUP_API = "https://api.github.com/repos/donghoon2661-prog/q-report/contents/backups";
+
+async function showRestoreModal(){
+  if(ACCESS_ROLE !== "admin") return;
+  const modal = document.getElementById("restore-modal");
+  modal.innerHTML = `<div class="rm-in">
+    <div class="rm-h"><b>⚠ RESTORE</b> — 백업에서 KV 복원<button class="gl-x" id="rm-x">✕</button></div>
+    <div class="rm-note">백업 날짜를 선택하고 RESTORE를 누르면 <b>bookings · pomap · poeta · pophoto · history</b>가 해당 시점으로 복원됩니다.<br>shipments는 복원 후 /collect로 재수집됩니다. 이 작업은 되돌릴 수 없습니다.</div>
+    <div class="rm-list" id="rm-list"><div style="padding:14px;font-size:11px;color:var(--fog)">백업 목록 불러오는 중…</div></div>
+    <div class="rm-actions">
+      <button class="btn" id="rm-cancel">취소</button>
+      <button class="btn danger" id="rm-confirm" disabled>RESTORE</button>
+    </div>
+  </div>`;
+  modal.hidden = false;
+  document.getElementById("rm-x").addEventListener("click",()=>{ modal.hidden=true; });
+  document.getElementById("rm-cancel").addEventListener("click",()=>{ modal.hidden=true; });
+  modal.addEventListener("click",e=>{ if(e.target===modal) modal.hidden=true; });
+
+  let files;
+  try{
+    const r = await fetch(BACKUP_API);
+    if(!r.ok) throw new Error("GitHub API " + r.status);
+    files = await r.json();
+  } catch(e){
+    document.getElementById("rm-list").innerHTML =
+      `<div style="padding:14px;font-size:11px;color:var(--buoy)">목록 불러오기 실패: ${e.message}</div>`;
+    return;
+  }
+
+  const backups = files
+    .filter(f => /^backup-\d{4}-\d{2}-\d{2}\.json$/.test(f.name))
+    .sort((a,b) => b.name.localeCompare(a.name));
+
+  if(!backups.length){
+    document.getElementById("rm-list").innerHTML =
+      `<div style="padding:14px;font-size:11px;color:var(--fog)">백업 파일 없음</div>`;
+    return;
+  }
+
+  let selectedDate = null;
+  document.getElementById("rm-list").innerHTML = backups.map(f=>{
+    const date = f.name.replace("backup-","").replace(".json","");
+    return `<button class="rm-item" data-date="${date}">${date}</button>`;
+  }).join("");
+
+  document.querySelectorAll(".rm-item").forEach(btn=>{
+    btn.addEventListener("click",()=>{
+      document.querySelectorAll(".rm-item").forEach(b=>b.classList.remove("sel"));
+      btn.classList.add("sel");
+      selectedDate = btn.dataset.date;
+      document.getElementById("rm-confirm").disabled = false;
+    });
+  });
+
+  document.getElementById("rm-confirm").addEventListener("click", async ()=>{
+    if(!selectedDate) return;
+    const confirmBtn = document.getElementById("rm-confirm");
+    confirmBtn.disabled = true; confirmBtn.textContent = "복원 중…";
+    const key = await getKey();
+    if(!key){ confirmBtn.disabled=false; confirmBtn.textContent="RESTORE"; return; }
+    try{
+      const r = await fetch(`${API.replace("/data","/restore")}`, {
+        method:"POST",
+        headers:{"Content-Type":"application/json","X-Refresh-Key":key},
+        body: JSON.stringify({ date: selectedDate })
+      });
+      const res = await r.json();
+      if(!r.ok) throw new Error(res.error || r.status);
+      modal.hidden = true;
+      const box = document.getElementById("gaplog");
+      box.innerHTML = `<div class="gl-in">
+        <div class="gl-h"><b>${selectedDate} 복원 완료</b><button class="gl-x" id="rl-x">✕</button></div>
+        <p style="font-size:12px;color:var(--paper);margin-bottom:8px">복원된 키: ${res.restored.join(", ")}</p>
+        <p style="font-size:11px;color:var(--fog)">${res.note}</p>
+      </div>`;
+      box.hidden = false;
+      document.getElementById("rl-x").addEventListener("click",()=>{ box.hidden=true; });
+      fetch(source(),{cache:"no-store"}).then(r=>r.ok?r.json():FALLBACK).then(d=>render(d));
+    } catch(e){
+      confirmBtn.disabled = false; confirmBtn.textContent = "RESTORE";
+      document.getElementById("rm-list").insertAdjacentHTML("afterend",
+        `<p style="font-size:11px;color:var(--buoy);margin-bottom:8px">오류: ${e.message}</p>`);
+    }
+  });
+}
