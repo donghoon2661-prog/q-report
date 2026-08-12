@@ -101,10 +101,11 @@ const DELAY_ALERT_D = 7;    // 7일 이상 지연 → alert 메일
 const ROLLOVER_GRACE_H = 12;
 /* 지도 좌표 유효기간(시간). 지나면 컨테이너가 같아도 다시 받는다. */
 const MAP_TTL_H = 24;
-/* 세션 발급 최대 횟수 (실패분 재시도용) */
-const MAX_SESSIONS = 5;
-/* 건별 재시도 — 같은 세션 안에서는 더 두드려도 잘 안 되므로 낮게 유지 */
-const TRIES_PER_ITEM = 2;
+/* 세션 발급 최대 횟수 (실패분 재시도용)
+   520은 세션(엣지)이 좌우하므로 재시도보다 새 세션이 훨씬 효율적 */
+const MAX_SESSIONS = 8;
+/* 건별 재시도 — 같은 세션에서 재시도는 효과 없음, 새 세션으로 넘기는 게 낫다 */
+const TRIES_PER_ITEM = 1;
 
 /* ---------- 요청 예산 ----------
    Workers는 한 실행당 외부 요청 50개가 상한(KV 접근 포함). 40에서 시작해
@@ -115,12 +116,12 @@ function newBudget(n = 40) { return { left: n, used: 0 }; }
 async function hmmFetch(budget, url, init, label, maxTries = 6) {
   let last;
   for (let i = 0; i < maxTries; i++) {
-    if (budget.left <= 0) throw new Error(label + ": 요청 예산 소진 (Workers 한도)");
+    if (budget.left <= 0) throw new Error(label + ": Request budget exhausted (Workers limit)");
     budget.left--; budget.used++;
     try {
       const r = await fetch(url, init);
       if (r.ok) return r;
-      last = new Error(`${label} 응답 ${r.status} (cf-ray ${r.headers.get("cf-ray") || "-"}, ${i + 1}회)`);
+      last = new Error(`${new Date(Date.now()+9*3600000).toISOString().slice(11,19)} ${label} response ${r.status} (cf-ray ${r.headers.get("cf-ray") || "-"}, attempt ${i + 1})`);
       if (r.status < 500 && r.status !== 429) throw last;
     } catch (e) {
       last = e;
@@ -132,18 +133,18 @@ async function hmmFetch(budget, url, init, label, maxTries = 6) {
 
 /* ---------- 세션 ---------- */
 async function openSession(budget) {
-  const r = await hmmFetch(budget, PAGE, { headers: PAGE_HEADERS }, "세션 페이지", 4);
+  const r = await hmmFetch(budget, PAGE, { headers: PAGE_HEADERS }, "세션 페이지", 1);
   const html = await r.text();
 
   const csrf = (html.match(/name="_csrf"\s+content="([^"]+)"/) ||
                 html.match(/content="([^"]+)"\s+name="_csrf"/) || [])[1];
-  if (!csrf) throw new Error("CSRF 토큰 없음 (len " + html.length + ")");
+  if (!csrf) throw new Error("No CSRF token (len " + html.length + ")");
 
   const raw = typeof r.headers.getSetCookie === "function"
     ? r.headers.getSetCookie()
     : (r.headers.get("set-cookie") || "").split(/,(?=\s*[A-Za-z0-9_-]+=)/);
   const cookie = raw.map(c => c.split(";")[0].trim()).filter(Boolean).join("; ");
-  if (!cookie) throw new Error("세션 쿠키 없음");
+  if (!cookie) throw new Error("No session cookie");
 
   return { csrf, cookie };
 }
@@ -166,7 +167,7 @@ async function queryBooking(budget, session, bkg, tries) {
     body: JSON.stringify({ type: "bkg", listBl: [], listCntr: [], listBkg: [bkg], listPo: [] })
   }, bkg, tries);
   const html = await r.text();
-  if (html.length < 1200) throw new Error(bkg + ": 조회 결과 없음 — 부킹번호를 확인하십시오 (" + html.length + "B)");
+  if (html.length < 1200) throw new Error(bkg + ": No lookup result — please check the booking number (" + html.length + "B)");
   return html;
 }
 
@@ -255,9 +256,9 @@ function parseBooking(html, bkg) {
   /* 검증 1 — 부킹번호 에코 (이전 결과 잔류 방지) */
   const echoes = [...new Set(t.match(/\bKULM\d{8}\b/g) || [])];
   if (!echoes.includes(bkg))
-    throw new Error(bkg + ": 응답에 부킹번호 없음 (에코 " + (echoes.join(",") || "없음") + ")");
+    throw new Error(bkg + ": Booking number missing from response (echo " + (echoes.join(",") || "none") + ")");
   if (echoes.length > 1)
-    throw new Error(bkg + ": 다른 부킹번호 혼입 " + echoes.join(","));
+    throw new Error(bkg + ": Different booking number mixed in " + echoes.join(","));
 
   /* 검증 2 — Current Location.
      없으면 선적 전 부킹(Estimated Movement만 존재)일 수 있으므로 그쪽 파서로 넘긴다. */
@@ -266,7 +267,7 @@ function parseBooking(html, bkg) {
   if (!cm) {
     const pre = parsePreBooking(t, bkg);
     if (pre) return pre;
-    throw new Error(bkg + ": 일정 정보 없음 — 부킹 등록 직후이거나 조회 결과가 없습니다");
+    throw new Error(bkg + ": No schedule info — booking may have just been registered, or no result found");
   }
   const current = { loc: cm[1].trim(), at: iso(cm[2]), status: cm[3].trim() };
 
@@ -280,7 +281,7 @@ function parseBooking(html, bkg) {
     pol:    m[3].trim(), etd: iso(m[4]),
     pod:    m[5].trim(), eta: iso(m[6])
   })) : [];
-  if (!legs.length) throw new Error(bkg + ": Vessel Movement 파싱 실패");
+  if (!legs.length) throw new Error(bkg + ": Vessel Movement parsing failed");
 
   const mother = legs[legs.length - 1];
   const feeder = legs.length > 1 ? legs[0] : null;
@@ -294,12 +295,26 @@ function parseBooking(html, bkg) {
   const locs = sch ? ((sch.match(/Location\n([\s\S]*?)\nTerminal/) || [])[1] || "").split("\n").filter(Boolean) : [];
   const destEta = schArr.length ? iso(schArr[schArr.length - 1]) : null;
 
-  /* 이벤트 */
+  /* 이벤트 — 나중에 delayHistory 구간별 분해(T/S 드웰링 등)에 쓰이므로 넉넉히 보존 */
   const hb = section(t, "Hide Previous Moves|Shipment History", "Excel|Rail ETD");
   const events = hb ? [...hb.matchAll(/(\d{4}-\d\d-\d\d)\n(\d\d:\d\d)\n([^\n]+)\n([^\n]+)\n([^\n]+)/g)]
-    .slice(0, 6).map(m => ({ at: m[1] + "T" + m[2], loc: m[3].trim(), status: m[4].trim(), mode: m[5].trim() })) : [];
+    .slice(0, 30).map(m => ({ at: m[1] + "T" + m[2], loc: m[3].trim(), status: m[4].trim(), mode: m[5].trim() })) : [];
 
   const containers = [...new Set(html.match(/\b[A-Z]{4}\d{7}\b/g) || [])];
+
+  /* Shipment Progress 섹션 — 이 섹션에는 actual 값만 표시됨.
+     파란색(예정)이면 아예 안 뜨고, 빨간색(실제 발생)이면 날짜가 찍힌다.
+     따라서 여기서 파싱한 날짜는 무조건 actual. */
+  let spDep = null, spArr = null;
+  try {
+    const sp = section(t, "Shipment Progress", "Shipment History");
+    if (sp) {
+      const depM = sp.match(/Departure at Origin\s*\n\s*(\d{4}-\d{2}-\d{2}\s+\d{2}:\d{2})/);
+      const arrM = sp.match(/Arrival at Destination\s*\n\s*(\d{4}-\d{2}-\d{2}\s+\d{2}:\d{2})/);
+      if (depM) spDep = iso(depM[1]);
+      if (arrM) spArr = iso(arrM[1]);
+    }
+  } catch(_) {}
 
   return {
     booking: bkg,
@@ -333,7 +348,30 @@ function parseBooking(html, bkg) {
     legs, events,
     containers: containers.slice(0, 20),
     cntrQty: containers.length,
-    container: containers[0] || null
+    container: containers[0] || null,
+    spDep, spArr  /* Shipment Progress 섹션에서 파싱한 출발/도착 시각 */
+  };
+}
+
+/* ---------- 이벤트 기반 actual 플래그 계산 ----------
+   각 날짜 필드가 실제 HMM 이벤트로 확인됐는지 여부를 boolean으로 반환.
+   시간이 지났다는 이유만으로 actual 처리하지 않는다. */
+function computeActualFlags(item) {
+  const evs = (item.events || []).map(e => (e.status || "").toUpperCase());
+  const hasEv = (...kw) => evs.some(st => kw.every(k => st.includes(k)));
+
+  /* 폴백: events 파싱 실패 시 Current Location status 필드로 보완 */
+  const cur = (item.status || "").toUpperCase();
+  const hasCur = (...kw) => kw.every(k => cur.includes(k));
+
+  /* 래칫(ratchet): 한 번 actual로 확인된 플래그는 520 에러·carried 등 어떤 상황에서도
+     다시 false로 롤백하지 않는다. 기존 true를 OR로 보존. */
+  return {
+    polDepActual: !!item.polDepActual || hasEv("DEPARTURE", "POL") || hasEv("FEEDER LOADING", "POL") || hasEv("FEEDER DEPARTURE"),
+    tsArrActual:  !!item.tsArrActual  || hasEv("ARRIVAL", "T/S") || hasEv("FEEDER ARRIVAL", "T/S"),
+    tsDepActual:  !!item.tsDepActual  || hasEv("DEPARTURE", "T/S"),
+    etaActual:    !!item.etaActual    || hasEv("BERTHING", "POD") || hasEv("DISCHARG", "POD") || hasEv("ARRIVAL", "POD")
+                                      || hasCur("DISCHARG", "POD") || hasCur("BERTHING", "POD") || hasCur("ARRIVAL", "POD"),
   };
 }
 
@@ -361,7 +399,7 @@ async function fetchMap(budget, session, blNo, cntrNo, tries) {
   const ratio = +(((seg("currentRouteRatio =", 60) || "").match(/=\s*(-?[\d.]+)/) || [])[1]);
 
   if (!route || route.length < 2 || !Number.isFinite(idx) || !Number.isFinite(ratio))
-    throw new Error("지도 파싱 실패 (points " + (route ? route.length : 0) + ")");
+    throw new Error("Map parsing failed (points " + (route ? route.length : 0) + ")");
 
   /* routePointsName은 좌표 개수만큼만 유효하고 뒤에 'MM' 같은 값이 붙는다 */
   const names = rawNames.length >= route.length
@@ -455,32 +493,83 @@ function monthOf(dateStr) {
   return m ? m[1] : null;
 }
 
+/* 실제 시각(YYYY-MM-DD 또는 YYYY-MM-DDTHH:MM) 두 개의 일수 차이. 반올림. */
+function daysBetween(actualStr, planStr) {
+  if (!actualStr || !planStr) return null;
+  const norm = s => s.length <= 10 ? s + "T00:00:00Z" : s.replace(" ", "T") + (s.includes("Z") ? "" : "Z");
+  const a = Date.parse(norm(actualStr));
+  const p = Date.parse(norm(planStr));
+  if (!Number.isFinite(a) || !Number.isFinite(p)) return null;
+  return Math.round((a - p) / dayMs);
+}
+
+/* 구간별 지연 분해. plan(log[0] 첫 추적 시점 스냅샷) vs 실제(item 현재값 + POD 하역 실제일).
+   각 구간이 "직전 구간 대비 추가로 늘어난 일수"가 되도록 누적 방식으로 계산하고,
+   합계가 총 지연(actualEta - planEta)과 정확히 일치하도록 마지막 구간(해상구간)에서 잔차를 흡수한다. */
+function buildLegBreakdown(item, firstLog, actualEta, totalDelay) {
+  if (!firstLog) return null;   // 추적 시작 시점 스냅샷이 없으면 분해 불가
+
+  const legs = [];
+  let cum = 0;   // 누적 지연(일)
+
+  const add = (label, actualVal, planVal, dwellNote) => {
+    if (!actualVal || !planVal) { legs.push({ label, days: null, note: dwellNote || null }); return; }
+    const total = daysBetween(actualVal, planVal);
+    if (total === null) { legs.push({ label, days: null, note: dwellNote || null }); return; }
+    const delta = total - cum;   // 이 구간에서 "새로" 늘어난 부분만
+    cum = total;
+    legs.push({ label, days: delta, note: dwellNote || null });
+  };
+
+  add("PKG ETD", item.polDep, firstLog.polDep);
+  add("T/S Arrival ETA", item.tsArr, firstLog.tsArr);
+
+  /* T/S 드웰링 — 실제 대기(T/S ETA~ETD)와 계획 대기 비교 (구간 자체가 아니라 참고용 note) */
+  let dwellNote = null;
+  if (item.tsArr && item.tsDep && firstLog.tsArr && firstLog.tsDep) {
+    const actualDwell = daysBetween(item.tsDep, item.tsArr);
+    const planDwell = daysBetween(firstLog.tsDep, firstLog.tsArr);
+    if (actualDwell !== null && planDwell !== null) dwellNote = `${actualDwell}d vs ${planDwell}d plan`;
+  }
+  add("T/S Departure ETD", item.tsDep, firstLog.tsDep, dwellNote);
+
+  /* 마지막 구간(POD 도착) — 잔차를 흡수해 합계를 총 지연과 정확히 맞춘다 */
+  const lastDelta = totalDelay - cum;
+  legs.push({ label: "POD Arrival (incl. ocean leg)", days: lastDelta, note: null });
+
+  return legs;
+}
+
 /* 완료된 부킹 하나의 스냅샷을 delayHistory:{planMonth} KV에 append.
    기존 값을 절대 덮어쓰지 않고 항상 배열에 추가만 한다 (이력 보존). */
-async function recordDelaySnapshot(env, item, planEtaMap) {
-  if (item.delaySnapshotDone) return false;             // 이미 저장됨
+async function recordDelaySnapshot(env, item, planEtaMap, histMap) {
+  if (item.delaySnapshotDone) return { done: false };             // 이미 저장됨
   const planEta = planEtaMap[item.booking];
-  if (!planEta) return false;                            // planEta 필수 — 없으면 수집 대상 아님
+  if (!planEta) return { done: false };                            // planEta 필수 — 없으면 수집 대상 아님
 
   const discEvt = findPodDischargeEvent(item);
-  if (!discEvt) return false;                             // 아직 하역 안 됨
+  if (!discEvt) return { done: false };                             // 아직 하역 안 됨
 
   const actualEta = discEvt.at.slice(0, 10);
   const plan = Date.parse(planEta + "T00:00:00Z");
   const real = Date.parse(actualEta + "T00:00:00Z");
-  if (!Number.isFinite(plan) || !Number.isFinite(real)) return false;
+  if (!Number.isFinite(plan) || !Number.isFinite(real)) return { done: false };
   const delayDays = Math.round((real - plan) / dayMs);
 
   const planMonth = monthOf(planEta);
   const polDepMonth = monthOf(item.polDep);
-  if (!planMonth) return false;
+  if (!planMonth) return { done: false };
+
+  const firstLog = (histMap && histMap[item.booking] && histMap[item.booking][0]) || null;
+  const legBreakdown = buildLegBreakdown(item, firstLog, actualEta, delayDays);
 
   const key = "delayHistory:" + planMonth;
   let arr = [];
   try { arr = JSON.parse((await env.OQC.get(key)) || "[]") || []; } catch (_) { arr = []; }
 
   /* 동일 booking 중복 방지 (재실행/경합 대비 이중 체크) */
-  if (arr.some(r => r.booking === item.booking)) return true;
+  const dup = arr.find(r => r.booking === item.booking);
+  if (dup) return { done: true, completedAt: dup.completedAt };
 
   arr.push({
     booking: item.booking,
@@ -495,20 +584,21 @@ async function recordDelaySnapshot(env, item, planEtaMap) {
     polDep: item.polDep || null,
     planMonth,
     polDepMonth,
-    completedAt: discEvt.at
+    completedAt: discEvt.at,
+    legBreakdown
   });
 
   await env.OQC.put(key, JSON.stringify(arr));
-  return true;
+  return { done: true, completedAt: discEvt.at };
 }
 
 /* 본선/항차/T-S 출항/ETB 변경을 이력에 누적. 변경이 있으면 그 목록을 반환 */
 function diffSchedule(prev, next) {
   if (!prev) return null;
   const f = [
-    ["vessel", "본선"], ["voyage", "항차"],
-    ["polDep", "PKG 출항"],
-    ["tsArr", "T/S 도착"], ["tsDep", "T/S 출항"], ["eta", "양하항 ETB"], ["destEta", "목적지 ETA"]
+    ["vessel", "Vessel"], ["voyage", "Voyage"],
+    ["polDep", "PKG ETD"],
+    ["tsArr", "T/S ETA"], ["tsDep", "T/S ETD"], ["eta", "POD ETB"], ["destEta", "DEST ETA"]
   ];
   const ch = [];
   for (const [k, label] of f) {
@@ -530,7 +620,7 @@ async function sendMail(env, subject, html) {
     headers: { "Authorization": "Bearer " + env.RESEND_KEY, "Content-Type": "application/json" },
     body: JSON.stringify({ from, to, subject, html })
   });
-  if (!r.ok) return { error: "메일 발송 실패 " + r.status + " " + (await r.text()).slice(0, 200) };
+  if (!r.ok) return { error: "Mail send failed " + r.status + " " + (await r.text()).slice(0, 200) };
   return { ok: true };
 }
 
@@ -636,12 +726,29 @@ async function pickSlice(env, list) {
 /* ---------- 1단계: 일정 수집 (지도 제외) ----------
    520은 재시도가 아니라 세션이 좌우한다. 실패분을 모아 새 세션으로 넘기는 것을
    최대 MAX_SESSIONS회 반복한다. */
-async function collectSchedule(env) {
+async function collectSchedule(env, forceBkgs = null) {
   const budget = newBudget();
   const list = await getList(env);
-  const { slice, cursor, partial } = await pickSlice(env, list);
+  const prev = await getSaved(env);
+  const prevMap = new Map((prev && prev.shipments || []).map(s => [s.booking, s]));
+  const discharged = new Set(
+    [...prevMap.values()].filter(s => s.etaActual).map(s => s.booking)
+  );
+
+  /* forceBkgs: stale 재시도 모드 — 지정 부킹만, cursor 이동 없음 */
+  let slice, cursor, partial;
+  if (forceBkgs) {
+    slice = forceBkgs.filter(b => !discharged.has(b));
+    cursor = null; partial = false;
+  } else {
+    ({ slice, cursor, partial } = await pickSlice(env, list));
+  }
+
+  const activeSlice = slice.filter(b => !discharged.has(b));
+  const skippedDischarged = slice.filter(b => discharged.has(b));
+
   const out = new Map(), errors = [];
-  let pending = [...slice], sessionsUsed = 0;
+  let pending = [...activeSlice], sessionsUsed = 0;
 
   for (let round = 0; round < MAX_SESSIONS && pending.length; round++) {
     /* 남은 예산이 이번 라운드를 감당 못 하면 중단 */
@@ -653,7 +760,7 @@ async function collectSchedule(env) {
       session = await openSession(budget);
       sessionsUsed++;
     } catch (e) {
-      errors.push(`세션${round + 1} 실패: ` + String(e.message || e));
+      errors.push(`Session ${round + 1} failed: ` + String(e.message || e));
       continue;                       // 다음 라운드에서 다시 시도
     }
 
@@ -671,11 +778,10 @@ async function collectSchedule(env) {
     }
     pending = stillFailing;
   }
-  if (pending.length) errors.push("미회수: " + pending.join(", "));
+  if (pending.length) errors.push("Unresolved: " + pending.join(", "));
 
-  /* 이전 수집분 승계 — 지도 좌표, 이번에 안 돈 부킹, 실패 건 */
-  const prev = await getSaved(env);
-  const prevMap = new Map((prev && prev.shipments || []).map(s => [s.booking, s]));
+  /* 이전 수집분 승계 — 지도 좌표, 이번에 안 돈 부킹, 실패 건, 완료 건 */
+  /* prevMap은 위에서 이미 로드함 */
   const nowStr = new Date().toISOString().slice(0, 16).replace("T", " ") + "Z";
 
   for (const [bkg, item] of out) {
@@ -685,16 +791,27 @@ async function collectSchedule(env) {
       item.idx = old.idx; item.ratio = old.ratio; item.mapAt = old.mapAt;
     }
     item.checkedAt = nowStr;
+    item.scheduleCheckedAt = nowStr;  // 스케줄 수집 전용 시각 (mapAt과 구분)
   }
   const carried = [];
   for (const bkg of pending) {                       // 조회 실패 → 직전 값 유지
     const old = prevMap.get(bkg);
-    if (old) { out.set(bkg, { ...old, staleItem: true, staleSince: old.checkedAt || (prev && prev.updated) || null }); carried.push(bkg); }
+    if (old) {
+      const carriedItem = { ...old, staleItem: true, staleSince: old.scheduleCheckedAt || old.checkedAt || (prev && prev.updated) || null };
+      /* 이전 이벤트 기반으로 actual 플래그 재계산 — status 폴백 덕분에 etaActual도 복원됨 */
+      Object.assign(carriedItem, computeActualFlags(carriedItem));
+      out.set(bkg, carriedItem);
+      carried.push(bkg);
+    }
+  }
+  /* 하역 완료로 조회 제외된 부킹 — 이전 값 그대로 승계 (staleItem 없음) */
+  for (const bkg of skippedDischarged) {
+    if (prevMap.has(bkg)) out.set(bkg, prevMap.get(bkg));
   }
   for (const bkg of list) {                          // 이번 실행 대상이 아닌 부킹
     if (!out.has(bkg) && prevMap.has(bkg)) out.set(bkg, prevMap.get(bkg));
   }
-  if (!out.size) throw new Error("전 건 실패: " + errors.join(" | "));
+  if (!out.size) throw new Error("All failed: " + errors.join(" | "));
 
   /* ---- 롤오버 · 지연 판정 + 스케줄 변경 이력 ---- */
   let planEta = {}, hist = {};
@@ -705,7 +822,10 @@ async function collectSchedule(env) {
   for (const [bkg, item] of out) {
     if (item.staleItem) continue;
     const prevSnap = prevMap.get(bkg);
-    if (prevSnap && prevSnap.delaySnapshotDone) item.delaySnapshotDone = true;  // 저장 완료 여부 승계
+    if (prevSnap && prevSnap.delaySnapshotDone) {
+      item.delaySnapshotDone = true;             // 저장 완료 여부 승계
+      item.delayCompletedAt = prevSnap.delayCompletedAt || null;  // 완료 시각도 같이 승계
+    }
     const ro = detectRollover(item);
     if (ro) {
       item.rollover = !!ro.rollover;
@@ -725,7 +845,7 @@ async function collectSchedule(env) {
     const log = hist[bkg] || (hist[bkg] = []);
     if (!log.length) {
       log.push({ at: nowStr, first: true, vessel: item.vessel, voyage: item.voyage,
-                 tsArr: item.tsArr, tsDep: item.tsDep, eta: item.eta });
+                 polDep: item.polDep, tsArr: item.tsArr, tsDep: item.tsDep, eta: item.eta });
       histDirty = true;
     } else if (ch) {
       log.push({ at: nowStr, changes: ch });
@@ -735,17 +855,40 @@ async function collectSchedule(env) {
     }
     item.firstSeenEta = log[0] && log[0].eta ? log[0].eta : null;
 
+    /* 이벤트 기반 actual 플래그 — 시간 경과가 아닌 HMM 이벤트 존재 여부로 판단 */
+    Object.assign(item, computeActualFlags(item));
+
     /* delayHistory 백데이터 수집 — POD 하역완료 감지 시 1회만 저장 */
     if (!item.delaySnapshotDone) {
       try {
-        const saved = await recordDelaySnapshot(env, item, planEta);
-        if (saved) item.delaySnapshotDone = true;
+        const res = await recordDelaySnapshot(env, item, planEta, hist);
+        if (res && res.done) {
+          item.delaySnapshotDone = true;
+          item.delayCompletedAt = res.completedAt || null;
+        }
       } catch (e) { /* 백데이터 수집 실패가 본 기능을 막지 않도록 무시 */ }
     }
   }
   if (histDirty) await env.OQC.put("history", JSON.stringify(hist));
 
-  const shipments = list.map(b => out.get(b)).filter(Boolean);
+  /* ---- 완료 후 3일 유예 지난 부킹은 추적 목록에서 제거 (HMM 재조회 중단 + LIST/MAP 노출 종료) ----
+     delayHistory에는 이미 영구 저장돼 있으므로 데이터 손실 없음. */
+  const GRACE_MS = 3 * 24 * 3600 * 1000;
+  const expired = new Set();
+  for (const [bkg, item] of out) {
+    if (!item.delayCompletedAt) continue;
+    const norm = item.delayCompletedAt.length <= 10
+      ? item.delayCompletedAt + "T00:00:00Z"
+      : item.delayCompletedAt.replace(" ", "T") + (item.delayCompletedAt.includes("Z") ? "" : "Z");
+    const t = Date.parse(norm);
+    if (Number.isFinite(t) && (Date.now() - t) >= GRACE_MS) expired.add(bkg);
+  }
+  if (expired.size) {
+    const trimmedList = list.filter(b => !expired.has(b));
+    await env.OQC.put("bookings", JSON.stringify(trimmedList));
+  }
+
+  const shipments = list.map(b => out.get(b)).filter(Boolean).filter(s => !expired.has(s.booking));
   const fresh = slice.map(b => out.get(b)).filter(s => s && !s.staleItem);
 
   /* stale — 직전 수집이 6시간 이내면 판정하지 않는다 (수동 연속 실행 오판 방지) */
@@ -786,17 +929,19 @@ async function collectSchedule(env) {
 
 
 /* ---------- 2단계: 지도 좌표 보충 ----------
-   일정 수집과 동일하게 세션 중심으로 실패분을 넘긴다. */
-async function collectMaps(env) {
+   일정 수집과 동일하게 세션 중심으로 실패분을 넘긴다.
+   forceBkg: 특정 부킹번호 배열 → mapFresh 무시하고 강제 재조회 */
+async function collectMaps(env, forceBkg = []) {
   const saved = await getSaved(env);
   if (!saved || !saved.shipments || !saved.shipments.length)
-    throw new Error("일정 수집분이 없습니다. 먼저 /collect 를 실행하십시오.");
+    throw new Error("No schedule data collected yet. Run /collect first.");
 
   const budget = newBudget();
   const errors = [];
   const byBkg = new Map(saved.shipments.map(s => [s.booking, s]));
+  const forceSet = new Set(forceBkg.map(b => b.trim().toUpperCase()));
   let pending = saved.shipments
-    .filter(s => s.container && (!s.route || s.mapError || !mapFresh(s)))
+    .filter(s => s.container && !s.etaActual && (forceSet.has(s.booking) || !s.route || s.mapError || !mapFresh(s)))
     .map(s => s.booking)
     .slice(0, MAX_PER_RUN);
   if (!pending.length) return { ...saved, mapNote: "보충할 지도 없음" };
@@ -808,7 +953,7 @@ async function collectMaps(env) {
 
     let session;
     try { session = await openSession(budget); sessionsUsed++; }
-    catch (e) { errors.push(`세션${round + 1} 실패: ` + String(e.message || e)); continue; }
+    catch (e) { errors.push(`Session ${round + 1} failed: ` + String(e.message || e)); continue; }
 
     const stillFailing = [];
     for (const bkg of pending) {
@@ -849,7 +994,7 @@ const BKG_RE = /^[A-Z]{4}\d{8}$/;
 const stampNow = () => new Date().toISOString();
 
 export default {
-  async fetch(req, env) {
+  async fetch(req, env, ctx) {
     const url = new URL(req.url);
     if (req.method === "OPTIONS") return new Response(null, { headers: CORS });
 
@@ -858,13 +1003,13 @@ export default {
       if (v) return new Response(v, { headers: JH });
       let lastrun = null;
       try { lastrun = JSON.parse((await env.OQC.get("lastrun")) || "null"); } catch (_) {}
-      return json({ error: "아직 수집된 데이터가 없습니다.", lastrun,
-        hint: lastrun ? "lastrun.error 확인" : "Cron이 아직 실행되지 않았습니다." }, 404);
+      return json({ error: "No data collected yet.", lastrun,
+        hint: lastrun ? "check lastrun.error" : "Cron has not run yet." }, 404);
     }
 
     if (url.pathname === "/lookup") {
       const bkg = (url.searchParams.get("bkg") || "").trim().toUpperCase();
-      if (!BKG_RE.test(bkg)) return json({ error: "부킹번호 형식 오류 (예: KULM68088700)" }, 400);
+      if (!BKG_RE.test(bkg)) return json({ error: "Invalid booking number format (e.g. KULM68088700)" }, 400);
       try {
         const budget = newBudget();
         const session = await openSession(budget);
@@ -881,7 +1026,26 @@ export default {
         }
 
         /* 다음 Cron을 기다리지 않고 저장분에도 바로 반영한다 */
-        one.checkedAt = new Date().toISOString().slice(0, 16).replace("T", " ") + "Z";
+        const nowStr = new Date().toISOString().slice(0, 16).replace("T", " ") + "Z";
+        one.checkedAt = nowStr;
+        one.scheduleCheckedAt = nowStr;
+        /* actual 플래그 — collectSchedule과 동일하게 적용 */
+        Object.assign(one, computeActualFlags(one));
+
+        /* discharge 확인 시 delayHistory 저장 + 삭제 타이머 시작
+           이후 Cron에서 HMM 재조회 없이 3일 유예 후 자동 삭제됨 */
+        if (one.etaActual && !one.delaySnapshotDone) {
+          try {
+            let planEta = {}, hist = {};
+            try { planEta = JSON.parse((await env.OQC.get("poeta")) || "{}") || {}; } catch (_) {}
+            try { hist    = JSON.parse((await env.OQC.get("history")) || "{}") || {}; } catch (_) {}
+            const snap = await recordDelaySnapshot(env, one, planEta, hist);
+            if (snap && snap.done) {
+              one.delaySnapshotDone = true;
+              one.delayCompletedAt = snap.completedAt || null;
+            }
+          } catch (_) {}
+        }
         try {
           const saved = await getSaved(env);
           if (saved && Array.isArray(saved.shipments)) {
@@ -899,7 +1063,7 @@ export default {
           try { hist = JSON.parse((await env.OQC.get("history")) || "{}") || {}; } catch (_) {}
           if (!hist[bkg] || !hist[bkg].length) {
             hist[bkg] = [{ at: one.checkedAt, first: true, vessel: one.vessel, voyage: one.voyage,
-                           tsArr: one.tsArr, tsDep: one.tsDep, eta: one.eta }];
+                           polDep: one.polDep, tsArr: one.tsArr, tsDep: one.tsDep, eta: one.eta }];
             await env.OQC.put("history", JSON.stringify(hist));
           }
         } catch (e) {
@@ -914,12 +1078,12 @@ export default {
     if (url.pathname === "/bookings") {
       if (req.method === "GET") return json({ bookings: await getList(env) });
       if (req.method === "POST") {
-        if (!auth(req, env)) return json({ error: "인증 실패" }, 401);
+        if (!auth(req, env)) return json({ error: "Authentication failed" }, 401);
         let body;
-        try { body = await req.json(); } catch (_) { return json({ error: "JSON 파싱 실패" }, 400); }
+        try { body = await req.json(); } catch (_) { return json({ error: "JSON parse failed" }, 400); }
         const list = (body.bookings || []).map(b => String(b).trim().toUpperCase());
         const bad = list.filter(b => !BKG_RE.test(b));
-        if (bad.length) return json({ error: "형식 오류: " + bad.join(",") }, 400);
+        if (bad.length) return json({ error: "Format error: " + bad.join(",") }, 400);
         const uniq = [...new Set(list)];
         await env.OQC.put("bookings", JSON.stringify(uniq));
         return json({ bookings: uniq });
@@ -937,13 +1101,13 @@ export default {
         return json({ ...po, po, eta, photos });
       }
       if (req.method === "POST") {
-        if (!auth(req, env)) return json({ error: "인증 실패" }, 401);
+        if (!auth(req, env)) return json({ error: "Authentication failed" }, 401);
         let body;
-        try { body = await req.json(); } catch (_) { return json({ error: "JSON 파싱 실패" }, 400); }
+        try { body = await req.json(); } catch (_) { return json({ error: "JSON parse failed" }, 400); }
         const inPo  = body && body.po;
         const inEta = (body && body.eta) || {};
         if (!inPo || typeof inPo !== "object" || Array.isArray(inPo))
-          return json({ error: "po 객체가 필요합니다" }, 400);
+          return json({ error: "po object is required" }, 400);
 
         const inPhotos = (body && body.photos) || {};
         let po = {}, eta = {}, photos = {};
@@ -977,10 +1141,10 @@ export default {
           if (/^[A-Za-z0-9_-]{10,80}$/.test(code)) photos[lot] = code;
         }
 
-        if (bad.length) return json({ error: "부킹번호 형식 오류: " + bad.join(",") }, 400);
+        if (bad.length) return json({ error: "Invalid booking number format: " + bad.join(",") }, 400);
 
         const size = JSON.stringify(po).length + JSON.stringify(eta).length + JSON.stringify(photos).length;
-        if (size > 900000) return json({ error: "매핑이 너무 큽니다 (" + size + "B)" }, 413);
+        if (size > 900000) return json({ error: "Mapping payload too large (" + size + "B)" }, 413);
         await env.OQC.put("pomap", JSON.stringify(po));
         await env.OQC.put("poeta", JSON.stringify(eta));
         await env.OQC.put("pophoto", JSON.stringify(photos));
@@ -1013,9 +1177,9 @@ export default {
        POST body: { records: [{ booking, pol, pod, vessel, voyage, planEta, actualEta, rollover, polDep }, ...] }
        delayDays/planMonth/polDepMonth/completedAt은 서버가 자동 계산. 중복 booking은 skip. */
     if (url.pathname === "/delayhistory/manual" && req.method === "POST") {
-      if (!auth(req, env)) return json({ error: "인증 실패" }, 401);
+      if (!auth(req, env)) return json({ error: "Authentication failed" }, 401);
       let body;
-      try { body = await req.json(); } catch (_) { return json({ error: "JSON 파싱 실패" }, 400); }
+      try { body = await req.json(); } catch (_) { return json({ error: "JSON parse failed" }, 400); }
       const records = Array.isArray(body.records) ? body.records : [];
       const results = [];
       for (const r of records) {
@@ -1046,7 +1210,8 @@ export default {
           planEta: r.planEta, actualEta: r.actualEta, delayDays,
           rollover: !!r.rollover, polDep: r.polDep || null,
           planMonth, polDepMonth,
-          completedAt: r.actualEta + "T00:00", manual: true
+          completedAt: r.actualEta + "T00:00", manual: true,
+          legBreakdown: Array.isArray(r.legBreakdown) ? r.legBreakdown : null
         });
         await env.OQC.put(key, JSON.stringify(arr));
         results.push({ booking, saved: true, delayDays, planMonth });
@@ -1056,7 +1221,7 @@ export default {
 
     /* --- 알림 테스트 / 상태 확인 --- */
     if (url.pathname === "/notify-test") {
-      if (!auth(req, env)) return json({ error: "인증 실패" }, 401);
+      if (!auth(req, env)) return json({ error: "Authentication failed" }, 401);
       const saved = await getSaved(env);
       const list = (saved && saved.shipments || []).filter(s => s.alert && s.alert !== "ok");
       const res = await sendMail(env, "[TEST] HMM 선적 지연 알림 테스트",
@@ -1076,12 +1241,12 @@ export default {
        showpublink 는 폴더 트리를 통째로 주므로 재귀로 찾는다. */
     if (url.pathname === "/pcloud") {
       const code = (url.searchParams.get("code") || "").trim();
-      if (!/^[A-Za-z0-9_-]{10,80}$/.test(code)) return json({ error: "code 형식 오류" }, 400);
+      if (!/^[A-Za-z0-9_-]{10,80}$/.test(code)) return json({ error: "Invalid code format" }, 400);
       const want = (url.searchParams.get("folder") || "").trim().toUpperCase();
       try {
         const r = await fetch("https://api.pcloud.com/showpublink?code=" + encodeURIComponent(code),
           { headers: { "User-Agent": UA, "Accept": "application/json" } });
-        if (!r.ok) return json({ error: "pCloud 응답 " + r.status }, 502);
+        if (!r.ok) return json({ error: "pCloud response " + r.status }, 502);
         const j = await r.json();
         if (j.result !== 0) return json({ error: "pCloud error " + j.result + " " + (j.error || "") }, 502);
 
@@ -1098,7 +1263,7 @@ export default {
         };
 
         const target = want ? findFolder(root, want) : root;
-        if (!target) return json({ error: '폴더 "' + want + '" 없음', folder: root.name || null }, 404);
+        if (!target) return json({ error: 'Folder "' + want + '" not found', folder: root.name || null }, 404);
 
         const byName = (a, b) => String(a.name).localeCompare(String(b.name), undefined, { numeric: true });
         const kids = target.contents || [];
@@ -1118,7 +1283,7 @@ export default {
 
     if (url.pathname === "/raw") {
       const bkg = (url.searchParams.get("bkg") || BOOKINGS[0]).trim().toUpperCase();
-      if (!BKG_RE.test(bkg)) return json({ error: "부킹번호 형식 오류" }, 400);
+      if (!BKG_RE.test(bkg)) return json({ error: "Invalid booking number format" }, 400);
       try {
         const budget = newBudget();
         const session = await openSession(budget);
@@ -1157,11 +1322,14 @@ export default {
     }
 
     if (url.pathname === "/collect" && req.method === "POST") {
-      if (!auth(req, env)) return json({ error: "인증 실패" }, 401);
+      if (!auth(req, env)) return json({ error: "Authentication failed" }, 401);
       const maps = url.searchParams.get("maps") === "1";
-      const trigger = maps ? "manual-maps" : "manual";
+      /* bkg 파라미터: 쉼표 구분 또는 단일 부킹번호 → forceBkg로 mapFresh 무시 강제 재조회 */
+      const bkgParam = url.searchParams.get("bkg") || "";
+      const forceBkg = bkgParam ? bkgParam.split(",").map(b => b.trim()).filter(Boolean) : [];
+      const trigger = maps ? (forceBkg.length ? "manual-maps-force" : "manual-maps") : "manual";
       try {
-        const p = maps ? await collectMaps(env) : await collectSchedule(env);
+        const p = maps ? await collectMaps(env, forceBkg) : await collectSchedule(env);
         await env.OQC.put("lastrun", JSON.stringify({
           at: stampNow(), trigger, ok: true,
           count: p.ok, mapOk: p.mapOk, carried: p.carried,
@@ -1177,8 +1345,70 @@ export default {
       }
     }
 
+    if (url.pathname === "/errorlog") {
+      if (!auth(req, env)) return json({ error: "Authentication failed" }, 401);
+      const raw = await env.OQC.get("errorLog");
+      const log = raw ? JSON.parse(raw) : [];
+      return json({ count: log.length, log: [...log].reverse() });
+    }
+
+    /* ── /backup : KV 전체 스냅샷 반환 (GitHub Actions 주간 백업용, X-Refresh-Key 인증) ── */
+    if (url.pathname === "/backup") {
+      if (!auth(req, env)) return json({ error: "Authentication failed" }, 401);
+      const keys = ["shipments","bookings","pomap","poeta","pophoto","history","alertstate","lastrun","cursor"];
+      const kv = {};
+      for (const k of keys) {
+        const v = await env.OQC.get(k, "text");
+        if (v !== null) try { kv[k] = JSON.parse(v); } catch { kv[k] = v; }
+      }
+      /* delayHistory:YYYY-MM 키도 수집 */
+      const dhList = await env.OQC.list({ prefix: "delayHistory:" });
+      for (const item of dhList.keys) {
+        const v = await env.OQC.get(item.name, "text");
+        if (v !== null) try { kv[item.name] = JSON.parse(v); } catch { kv[item.name] = v; }
+      }
+      return json({ backupAt: stampNow(), kv });
+    }
+
+    /* ── /restore : 날짜 지정 → GitHub에서 백업 fetch → KV 복원 (X-Refresh-Key 인증) ── */
+    if (url.pathname === "/restore" && req.method === "POST") {
+      if (!auth(req, env)) return json({ error: "Authentication failed" }, 401);
+      let body;
+      try { body = await req.json(); } catch { return json({ error: "JSON parse failed" }, 400); }
+      const date = (body.date || "").trim(); // "YYYY-MM-DD" 형식
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return json({ error: "date must be YYYY-MM-DD" }, 400);
+
+      /* GitHub raw URL — public 리포이므로 토큰 불필요 */
+      const rawUrl = `https://raw.githubusercontent.com/donghoon2661-prog/q-report/main/backups/backup-${date}.json`;
+      const ghRes = await fetch(rawUrl);
+      if (!ghRes.ok) return json({ error: `Backup file not found for ${date} (HTTP ${ghRes.status})` }, 404);
+
+      let backup;
+      try { backup = await ghRes.json(); } catch { return json({ error: "Backup file is not valid JSON" }, 502); }
+      const kv = backup.kv || backup; // backupAt 래퍼 있을 수도 없을 수도
+
+      /* 복원 대상 키 (shipments는 /collect로 재수집하므로 제외) */
+      const restoreKeys = ["bookings","pomap","poeta","pophoto","history","alertstate","cursor"];
+      const restored = [], skipped = [];
+      for (const k of restoreKeys) {
+        if (kv[k] !== undefined) {
+          await env.OQC.put(k, JSON.stringify(kv[k]));
+          restored.push(k);
+        } else { skipped.push(k); }
+      }
+      /* delayHistory:YYYY-MM 키 복원 */
+      for (const [k, v] of Object.entries(kv)) {
+        if (k.startsWith("delayHistory:")) {
+          await env.OQC.put(k, JSON.stringify(v));
+          restored.push(k);
+        }
+      }
+      return json({ ok: true, restoredFrom: date, restored, skipped,
+        note: "shipments not restored — run /collect to refresh from HMM" });
+    }
+
     return json({ error: "Not found",
-      paths: ["/data", "/lookup?bkg=", "/bookings", "/po", "/pcloud?code=", "/history", "/alertstate", "/notify-test", "/collect", "/collect?maps=1", "/raw?bkg=", "/debug"] }, 404);
+      paths: ["/data", "/lookup?bkg=", "/bookings", "/po", "/pcloud?code=", "/history", "/alertstate", "/notify-test", "/collect", "/collect?maps=1", "/backup", "/restore", "/raw?bkg=", "/debug"] }, 404);
   },
 
   /* Cron — 분(minute)으로 일정/지도를 구분한다.
@@ -1189,15 +1419,101 @@ export default {
     const trigger = isMaps ? "cron-maps" : "cron";
     ctx.waitUntil(
       (isMaps ? collectMaps(env) : collectSchedule(env))
-        .then(p => env.OQC.put("lastrun", JSON.stringify({
-          at: stampNow(), trigger, cron: evt.cron, ok: true,
-          count: p.ok, mapOk: p.mapOk, carried: p.carried,
-          budgetUsed: isMaps ? p.budgetUsedMaps : p.budgetUsed,
-          errors: isMaps ? p.mapErrors : p.errors
-        })))
+        .then(async p => {
+          if (!isMaps) {
+            /* cron 에러 [cron] 태그로 로그 저장 */
+            const cronErrs = (p.errors || []).map(msg => ({ tag: "cron", msg }));
+            if (cronErrs.length) await appendErrorLog(env, cronErrs);
+
+            /* stale/map 자동 재시도 */
+            const staleBkgs = (p.shipments || []).filter(s => s.staleItem).map(s => s.booking);
+            if (staleBkgs.length) ctx.waitUntil(kickStaleRetry(env, staleBkgs));
+
+            const MAP_STALE_MS = 12 * 60 * 60 * 1000;
+            const now = Date.now();
+            const mapStaleBkgs = (p.shipments || [])
+              .filter(s => !s.staleItem && s.container && (
+                s.mapError || !s.route || !s.mapAt ||
+                (now - Date.parse(s.mapAt.replace(" ", "T").replace("Z", "") + "Z")) >= MAP_STALE_MS
+              ))
+              .map(s => s.booking);
+            if (mapStaleBkgs.length) ctx.waitUntil(kickMapRetry(env, mapStaleBkgs));
+          }
+          return env.OQC.put("lastrun", JSON.stringify({
+            at: stampNow(), trigger, cron: evt.cron, ok: true,
+            count: p.ok, mapOk: p.mapOk, carried: p.carried,
+            budgetUsed: isMaps ? p.budgetUsedMaps : p.budgetUsed,
+            errors: isMaps ? p.mapErrors : p.errors
+          }));
+        })
         .catch(e => env.OQC.put("lastrun", JSON.stringify({
           at: stampNow(), trigger, cron: evt.cron, ok: false, error: String(e.message || e)
         })))
     );
   }
 };
+
+/* ---------- 에러 로그 누적 ----------
+   [cron] / [retry-N] 태그만 저장. [manual] REFRESH는 저장 안 함.
+   KV "errorLog" 에 최대 50개 유지 (7일 TTL). */
+async function appendErrorLog(env, entries) {
+  if (!entries || !entries.length) return;
+  const kst = t => {
+    const d = new Date(typeof t === "number" ? t : Date.now());
+    return new Date(d.getTime() + 9 * 3600 * 1000).toISOString().slice(11, 19);
+  };
+  const newRows = entries.map(e => ({ t: kst(), tag: e.tag, msg: e.msg }));
+  let existing = [];
+  try { existing = JSON.parse(await env.OQC.get("errorLog") || "[]"); } catch (_) {}
+  const combined = [...existing, ...newRows].slice(-50);
+  await env.OQC.put("errorLog", JSON.stringify(combined), { expirationTtl: 7 * 24 * 3600 }).catch(() => {});
+}
+
+/* ---------- stale 자동 재시도 — 30초 × 최대 5회 ----------
+   ctx.waitUntil 안에서 실행. sleep은 CPU 시간 소모 없음. */
+async function kickStaleRetry(env, staleBkgs) {
+  for (let attempt = 1; attempt <= 5; attempt++) {
+    await sleep(30 * 1000);
+    if (!staleBkgs.length) break;
+    let p;
+    try { p = await collectSchedule(env, staleBkgs); }
+    catch (e) {
+      await appendErrorLog(env, [{ tag: `retry-${attempt}`, msg: `collectSchedule error: ${e.message || e}` }]);
+      break;
+    }
+    const newStale = (p.shipments || []).filter(s => s.staleItem).map(s => s.booking);
+    const resolved  = staleBkgs.filter(b => !newStale.includes(b));
+    const logRows = [
+      ...resolved.map(b => ({ tag: `retry-${attempt}`, msg: `${b} ok ✓` })),
+      ...newStale.map(b => ({ tag: `retry-${attempt}`, msg: `${b} 실패 (${(p.errors||[]).find(e=>e.includes(b))||'520'})` })),
+    ];
+    if (logRows.length) await appendErrorLog(env, logRows);
+    staleBkgs = newStale;
+    if (!staleBkgs.length) break;
+  }
+}
+
+async function kickMapRetry(env, mapBkgs) {
+  for (let attempt = 1; attempt <= 5; attempt++) {
+    await sleep(30 * 1000);
+    if (!mapBkgs.length) break;
+    let p;
+    try { p = await collectMaps(env, mapBkgs); }
+    catch (e) {
+      await appendErrorLog(env, [{ tag: `map-retry-${attempt}`, msg: `collectMaps error: ${e.message || e}` }]);
+      break;
+    }
+    const newFailed = mapBkgs.filter(b => {
+      const s = (p.shipments || []).find(x => x.booking === b);
+      return !s || s.mapError || !s.route;
+    });
+    const resolved = mapBkgs.filter(b => !newFailed.includes(b));
+    const logRows = [
+      ...resolved.map(b => ({ tag: `map-retry-${attempt}`, msg: `${b} map ok ✓` })),
+      ...newFailed.map(b => ({ tag: `map-retry-${attempt}`, msg: `${b} map 실패` })),
+    ];
+    if (logRows.length) await appendErrorLog(env, logRows);
+    mapBkgs = newFailed;
+    if (!mapBkgs.length) break;
+  }
+}
