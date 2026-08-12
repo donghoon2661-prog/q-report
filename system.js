@@ -102,10 +102,46 @@ function renderSystemTab(){
 
   if(d.errors && d.errors.length){
     html += `<div class="sys-sec">LAST RUN ERRORS</div>
-    <div class="sys-err">${d.errors.map(e=>e.replace(/</g,'&lt;')).join('<br>')}</div>`;
+    <div class="sys-err" id="sys-err-now">${d.errors.map(e=>`<div class="err-row"><span class="err-msg">${e.replace(/</g,'&lt;')}</span></div>`).join('')}</div>`;
   }
 
+  html += `<div class="sys-sec" style="margin-top:8px">
+    <span>ERROR LOG</span>
+    <button class="sys-retry" id="sys-err-toggle" style="font-size:10px;padding:2px 8px" onclick="toggleErrLog()">
+      최근 50개 ▾
+    </button>
+  </div>
+  <div id="sys-err-log" style="display:none"></div>`;
+
   el.innerHTML = html;
+
+  /* 에러 로그 비동기 로드 */
+  (async ()=>{
+    try{
+      const key = await getKey();
+      if(!key) return;
+      const r = await fetch(API.replace('/data','/errorlog'), { headers:{'X-Refresh-Key':key} });
+      if(!r.ok) return;
+      const res = await r.json();
+      const logEl = document.getElementById('sys-err-log');
+      if(!logEl) return;
+      if(!res.log || !res.log.length){
+        logEl.innerHTML = `<div style="font-size:11px;color:var(--fog);padding:6px 0">로그 없음</div>`;
+        return;
+      }
+      const tagColor = tag => {
+        if(tag==='cron') return '#e5484d';
+        if(tag && tag.startsWith('retry')) return '#f59e0b';
+        if(tag && tag.startsWith('map-retry')) return '#3b82f6';
+        return 'var(--fog)';
+      };
+      logEl.innerHTML = `<div class="sys-err">${res.log.map(e=>`
+        <div class="err-row">
+          <span class="err-msg" style="color:${tagColor(e.tag)}">[${e.tag||'?'}] ${(e.msg||'').replace(/</g,'&lt;')}</span>
+          <span class="err-time">${e.t||''}</span>
+        </div>`).join('')}</div>`;
+    }catch(_){}
+  })();
 
   el.querySelectorAll('.sys-retry').forEach(btn=>{
     btn.addEventListener('click', ()=>sysRetry(btn.dataset.bkg, btn));
@@ -124,6 +160,15 @@ function renderSystemTab(){
   el.querySelectorAll('.sys-map-refresh').forEach(btn=>{
     btn.addEventListener('click', ()=>sysMapRefreshOne(btn.dataset.bkg, btn));
   });
+}
+
+function toggleErrLog(){
+  const el = document.getElementById('sys-err-log');
+  const btn = document.getElementById('sys-err-toggle');
+  if(!el) return;
+  const open = el.style.display === 'none';
+  el.style.display = open ? 'block' : 'none';
+  if(btn) btn.textContent = open ? '접기 ▴' : '최근 50개 ▾';
 }
 
 async function sysRetry(bkg, btn){
