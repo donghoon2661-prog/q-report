@@ -104,7 +104,7 @@ function renderSystemTab(){
         <div style="margin-top:4px">
           ${s.etaActual
             ? `<span style="font-size:10px;color:var(--fog)">도착 완료</span>`
-            : `<button class="sys-map-refresh" data-bkg="${s.booking}" style="font-size:10px;padding:2px 7px;border-color:#F2C14E;color:#F2C14E">REFRESH</button>`}
+            : `<button class="sys-map-refresh" data-bkg="${s.booking}" style="font-size:10px;padding:2px 7px;border:1px solid #F2C14E;color:#F2C14E;background:none">REFRESH</button>`}
         </div>
       </span>
     </div>`;}).join('')}
@@ -268,7 +268,7 @@ async function sysMapRefreshOne(bkg, btn){
               <span class="sys-dim" style="font-size:10px">${mapAt}</span>
             </div>
             <div style="margin-top:4px">
-              <button class="sys-map-refresh" data-bkg="${bkg}" style="font-size:10px;padding:2px 7px;border-color:#F2C14E;color:#F2C14E">REFRESH</button>
+              <button class="sys-map-refresh" data-bkg="${bkg}" style="font-size:10px;padding:2px 7px;border:1px solid #F2C14E;color:#F2C14E;background:none">REFRESH</button>
             </div>`;
         } else {
           const region = (errMsg.match(/cf-ray\s+[\w]+-([A-Z]{2,4})[,)]/i)||[])[1] || '';
@@ -282,7 +282,7 @@ async function sysMapRefreshOne(bkg, btn){
             </div>
             <div style="font-size:10px;color:var(--buoy);margin-top:2px;word-break:break-all">${errTime ? errTime+' ' : ''}${errText.replace(/</g,'&lt;')}</div>
             <div style="margin-top:4px">
-              <button class="sys-map-refresh" data-bkg="${bkg}" style="font-size:10px;padding:2px 7px;border-color:#F2C14E;color:#F2C14E">REFRESH</button>
+              <button class="sys-map-refresh" data-bkg="${bkg}" style="font-size:10px;padding:2px 7px;border:1px solid #F2C14E;color:#F2C14E;background:none">REFRESH</button>
             </div>`;
         }
         /* 새로 생성된 버튼에 이벤트 재등록 */
