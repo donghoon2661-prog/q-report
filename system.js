@@ -102,7 +102,12 @@ function renderSystemTab(){
 
   if(d.errors && d.errors.length){
     html += `<div class="sys-sec">LAST RUN ERRORS</div>
-    <div class="sys-err" id="sys-err-now">${d.errors.map(e=>`<div class="err-row"><span class="err-msg">${e.replace(/</g,'&lt;')}</span></div>`).join('')}</div>`;
+    <div class="sys-err" id="sys-err-now">${d.errors.map(e=>{
+      const m = e.match(/^(\d{2}:\d{2}:\d{2})\s+(.*)/s);
+      const t = m ? m[1] : '';
+      const msg = m ? m[2] : e;
+      return `<div class="err-row"><span class="err-msg">${msg.replace(/</g,'&lt;')}</span><span class="err-time">${t}</span></div>`;
+    }).join('')}</div>`;
   }
 
   html += `<div class="sys-sec" style="margin-top:8px">
