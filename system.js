@@ -71,7 +71,13 @@ function renderSystemTab(){
       const mapStatus = mapOk
         ? `<span style="color:var(--sail)">ok</span>`
         : (s.mapError
-          ? `<span style="color:var(--buoy)">ERR${mapRegion?' · '+mapRegion:''}</span>`
+          ? (()=>{
+              const region = (s.mapError.match(/cf-ray\s+[\w]+-([A-Z]{2,4})[,)]/i)||[])[1]||'';
+              const m = s.mapError.match(/^(\d{2}:\d{2}:\d{2})\s+(.*)/s);
+              const t = m?m[1]:''; const msg = m?m[2]:s.mapError;
+              return `<span style="color:var(--buoy)">ERR${region?' · '+region:''}</span>
+                <div style="font-size:10px;color:var(--buoy);margin-top:2px;word-break:break-all">${t?t+' ':''}${msg.replace(/</g,'&lt;')}</div>`;
+            })()
           : `<span style="color:var(--fog)">—</span>`);
 
       return `
@@ -94,7 +100,7 @@ function renderSystemTab(){
           <span class="sys-dim" style="font-size:10px">${mapAt?fmtSysTime(mapAt):'—'}</span>
         </div>
         <div style="margin-top:4px">
-          <button class="sys-map-refresh" data-bkg="${s.booking}" style="font-size:10px;padding:2px 7px;border-color:var(--border-strong);color:var(--text-primary)">REFRESH</button>
+          <button class="sys-map-refresh" data-bkg="${s.booking}" style="font-size:10px;padding:2px 7px;border-color:#F2C14E;color:#F2C14E">REFRESH</button>
         </div>
       </span>
     </div>`;}).join('')}
@@ -258,18 +264,21 @@ async function sysMapRefreshOne(bkg, btn){
               <span class="sys-dim" style="font-size:10px">${mapAt}</span>
             </div>
             <div style="margin-top:4px">
-              <button class="sys-map-refresh" data-bkg="${bkg}" style="font-size:10px;padding:2px 7px;border-color:var(--border-strong);color:var(--text-primary)">REFRESH</button>
+              <button class="sys-map-refresh" data-bkg="${bkg}" style="font-size:10px;padding:2px 7px;border-color:#F2C14E;color:#F2C14E">REFRESH</button>
             </div>`;
         } else {
           const region = (errMsg.match(/cf-ray\s+[\w]+-([A-Z]{2,4})[,)]/i)||[])[1] || '';
+          const errParsed = errMsg.match(/^(\d{2}:\d{2}:\d{2})\s+(.*)/s);
+          const errTime = errParsed ? errParsed[1] : '';
+          const errText = errParsed ? errParsed[2] : errMsg;
           mapCol.innerHTML = `
             <div style="display:flex;align-items:center;gap:6px">
               <span style="color:var(--buoy)">ERR${region?' · '+region:''}</span>
               <span class="sys-dim" style="font-size:10px">${mapAt}</span>
             </div>
-            <div style="font-size:10px;color:var(--buoy);margin-top:2px">520 — 재시도 가능</div>
+            <div style="font-size:10px;color:var(--buoy);margin-top:2px;word-break:break-all">${errTime ? errTime+' ' : ''}${errText.replace(/</g,'&lt;')}</div>
             <div style="margin-top:4px">
-              <button class="sys-map-refresh" data-bkg="${bkg}" style="font-size:10px;padding:2px 7px;border-color:var(--border-strong);color:var(--text-primary)">REFRESH</button>
+              <button class="sys-map-refresh" data-bkg="${bkg}" style="font-size:10px;padding:2px 7px;border-color:#F2C14E;color:#F2C14E">REFRESH</button>
             </div>`;
         }
         /* 새로 생성된 버튼에 이벤트 재등록 */

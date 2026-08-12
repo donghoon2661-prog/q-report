@@ -627,11 +627,11 @@ html[data-theme="light"] #qview td.near{background:rgba(154,107,18,.08)}
 .err-time{color:rgba(229,72,77,.6);white-space:nowrap;font-size:10px;font-variant-numeric:tabular-nums}
   padding:10px 12px;margin-top:8px;font-size:11px;color:#E5484D;
   font-family:'IBM Plex Mono',monospace;line-height:1.7}
-.sys-retry{background:none;border:1px solid var(--border-strong);color:var(--text-primary);
+.sys-retry{background:none;border:1px solid #F2C14E;color:#F2C14E;
   font-family:'IBM Plex Mono',monospace;font-size:10px;padding:3px 8px;cursor:pointer;white-space:nowrap}
 .sys-retry:hover{background:var(--surface-1)}
 .sys-retry:disabled{opacity:.4;cursor:default}
-.sys-retry-all{background:none;border:1px solid var(--border-strong);color:var(--text-primary);
+.sys-retry-all{background:none;border:1px solid #F2C14E;color:#F2C14E;
   font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:.1em;padding:4px 10px;cursor:pointer}
 .sys-retry-all:hover{background:var(--surface-1)}
 .sys-ok{color:var(--sail)} .sys-warn{color:var(--dock)} .sys-bad{color:var(--buoy)} .sys-dim{color:var(--fog)}
