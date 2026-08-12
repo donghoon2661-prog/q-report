@@ -426,7 +426,7 @@ function render(data){
   const dropped = before - data.shipments.length;
   CUR=data; stampText(data);
   document.getElementById("n-bkg").textContent=data.shipments.length;
-  document.getElementById("n-eta").textContent=fmtD(data.shipments.map(s=>s.eta).sort()[0]);
+  document.getElementById("n-eta").textContent=fmtD(data.shipments.filter(s=>!s.etaActual).map(s=>s.eta).sort()[0]);
   document.getElementById("cardlist").innerHTML=data.shipments.map(cardHTML).join("");
   if(dropped) document.getElementById("rstatus").innerHTML=`Removed <b>${dropped}</b> shipment(s) that arrived over 7 days ago.`;
   const safe = (fn,label)=>{ try{ fn(); }catch(e){ console.error(label,e); const el=document.getElementById("rstatus"); if(el) el.innerHTML += `<div class="warn">${label} failed — ${e.message||e}</div>`; } };
