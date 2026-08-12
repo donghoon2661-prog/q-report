@@ -91,7 +91,9 @@ function renderSystemTab(){
           <span class="sys-dim" style="font-size:10px">${schedAt?fmtSysTime(schedAt):'—'}</span>
         </div>
         <div style="margin-top:4px">
-          <button class="sys-retry" data-bkg="${s.booking}" style="font-size:10px;padding:2px 7px">REFRESH</button>
+          ${s.etaActual
+            ? `<span style="font-size:10px;color:var(--fog)">도착 완료</span>`
+            : `<button class="sys-retry" data-bkg="${s.booking}" style="font-size:10px;padding:2px 7px">REFRESH</button>`}
         </div>
       </span>
       <span>
@@ -100,7 +102,9 @@ function renderSystemTab(){
           <span class="sys-dim" style="font-size:10px">${mapAt?fmtSysTime(mapAt):'—'}</span>
         </div>
         <div style="margin-top:4px">
-          <button class="sys-map-refresh" data-bkg="${s.booking}" style="font-size:10px;padding:2px 7px;border-color:#F2C14E;color:#F2C14E">REFRESH</button>
+          ${s.etaActual
+            ? `<span style="font-size:10px;color:var(--fog)">도착 완료</span>`
+            : `<button class="sys-map-refresh" data-bkg="${s.booking}" style="font-size:10px;padding:2px 7px;border-color:#F2C14E;color:#F2C14E">REFRESH</button>`}
         </div>
       </span>
     </div>`;}).join('')}
