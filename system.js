@@ -31,11 +31,13 @@ function renderSystemTab(){
     <div class="sys-row"><span class="sys-lbl">RESULT</span>
       <span class="sys-val"><span class="sys-ok">${okCount} ok</span>${staleList.length?` · <span class="sys-warn">${staleList.length} stale</span>`:''}</span></div>
     <div class="sys-row"><span class="sys-lbl">SESSIONS USED</span>
-      <span class="sys-val">${d.sessionsUsed||'—'} / 8</span></div>
+      <span class="sys-val">${d.sessionsUsed||'—'} / 5</span></div>
     <div class="sys-row"><span class="sys-lbl">BUDGET USED</span>
       <span class="sys-val">${d.budgetUsed||'—'} / 50 req</span></div>
     <div class="sys-row"><span class="sys-lbl">NEXT COLLECTION</span>
       <span class="sys-val sys-dim">${nextCron()}</span></div>
+    <div class="sys-row"><span class="sys-lbl">MAP REFRESH</span>
+      <span class="sys-val"><button class="sys-retry" id="sys-force-map" style="border-color:var(--sail);color:var(--sail)">FORCE MAP REFRESH</button></span></div>
   </div>
 
   <div class="sys-sec">
@@ -43,120 +45,48 @@ function renderSystemTab(){
     ${staleList.length ? `<button class="sys-retry-all" id="sys-retry-all">RETRY ALL STALE</button>` : ''}
   </div>
   <div class="sys-legend">
-    <span><span class="sys-ok">ok</span> 스케줄 조회 성공</span>
-    <span style="margin-left:14px"><span class="sys-stale">STALE</span> 조회 실패 — 직전 값 표시 중</span>
-    <span style="margin-left:14px">REFRESH: 즉시 재조회 (ok 포함 강제 가능)</span>
-    <span style="margin-left:14px">MAP: 항로 좌표만 재조회</span>
+    <span><span class="sys-ok">ok</span> HMM 일정 조회 성공 (마지막 lookup 정상)</span>
+    <span style="margin-left:14px"><span class="sys-stale">STALE</span> HMM 조회 실패 (데이터 오래됨, RETRY 권장)</span>
+    <span style="margin-left:14px"><span style="color:var(--sail);font-size:10px">MAP ok</span> 항로 좌표 정상</span>
+    <span style="margin-left:14px"><span style="color:var(--buoy);font-size:10px">MAP —</span> 항로 데이터 없음</span>
   </div>
   <div class="sys-card" style="padding:10px 14px">
-    <div class="sys-bkg3" style="font-size:10px;color:var(--fog);margin-bottom:6px">
-      <span>BOOKING</span>
-      <span>SCHEDULE</span>
-      <span>MAP</span>
+    <div class="sys-bkg5" style="font-size:10px;color:var(--fog)">
+      <span>BOOKING</span><span>LAST CHECKED</span><span>SCHEDULE STATUS</span><span>MAP STATUS</span><span></span>
     </div>
     ${d.shipments.map(s=>{
       const hasRoute = !!(s.route && s.route.length);
       const mapOk = hasRoute && !s.mapError;
-      const schedAt = s.scheduleCheckedAt || s.checkedAt;
-      const mapAt   = s.mapAt;
-
-      /* cf-ray에서 지역 코드 추출: "a292ac7dfd4eb501-LAX" → "LAX" */
-      const mapRegion = s.mapError
-        ? (s.mapError.match(/cf-ray\s+[\w]+-([A-Z]{2,4})[,)]/i)||[])[1] || ''
-        : '';
-
-      const schedStatus = s.staleItem
-        ? `<span class="sys-stale">STALE</span><span class="sys-warn" style="font-size:10px;margin-left:4px">since ${s.staleSince?fmtSysTime(s.staleSince):'—'}</span>`
-        : `<span class="sys-ok">ok</span>`;
-      const mapStatus = mapOk
-        ? `<span style="color:var(--sail)">ok</span>`
+      const mapLabel = mapOk
+        ? `<span style="color:var(--sail);font-size:10px">ok${s.mapAt?' · '+fmtSysTime(s.mapAt):''}</span>`
         : (s.mapError
-          ? (()=>{
-              const region = (s.mapError.match(/cf-ray\s+[\w]+-([A-Z]{2,4})[,)]/i)||[])[1]||'';
-              const m = s.mapError.match(/^(\d{2}:\d{2}:\d{2})\s+(.*)/s);
-              const t = m?m[1]:''; const msg = m?m[2]:s.mapError;
-              return `<span style="color:var(--buoy)">ERR${region?' · '+region:''}</span>
-                <div style="font-size:10px;color:var(--buoy);margin-top:2px;word-break:break-all">${t?t+' ':''}${msg.replace(/</g,'&lt;')}</div>`;
-            })()
-          : `<span style="color:var(--fog)">—</span>`);
-
+          ? `<span style="color:var(--buoy);font-size:10px" title="${s.mapError}">ERR</span>`
+          : `<span style="color:var(--fog);font-size:10px">—</span>`);
       return `
-    <div class="sys-bkg3" id="sysr-${s.booking}">
-      <span style="font-size:11px;font-weight:600">${s.booking}<br>
-        <span style="font-size:10px;font-weight:400;color:var(--fog)">${(s.vessel||'').slice(0,16)} ${s.voyage||''}</span>
-      </span>
-      <span>
-        <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
-          ${schedStatus}
-          <span class="sys-dim" style="font-size:10px">${schedAt?fmtSysTime(schedAt):'—'}</span>
-        </div>
-        <div style="margin-top:4px">
-          ${s.etaActual
-            ? `<span style="font-size:10px;color:var(--fog)">도착 완료</span>`
-            : `<button class="sys-retry" data-bkg="${s.booking}" style="font-size:10px;padding:2px 7px;border-color:#F2C14E;color:#F2C14E;background:none;border:1px solid #F2C14E">REFRESH</button>`}
-        </div>
-      </span>
-      <span>
-        <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
-          ${mapStatus}
-          <span class="sys-dim" style="font-size:10px">${mapAt?fmtSysTime(mapAt):'—'}</span>
-        </div>
-        <div style="margin-top:4px">
-          ${s.etaActual
-            ? `<span style="font-size:10px;color:var(--fog)">도착 완료</span>`
-            : `<button class="sys-map-refresh" data-bkg="${s.booking}" style="font-size:10px;padding:2px 7px;border:1px solid #F2C14E;color:#F2C14E;background:none">REFRESH</button>`}
-        </div>
+    <div class="sys-bkg5" id="sysr-${s.booking}">
+      <span>${s.booking}</span>
+      <span class="sys-dim">${s.checkedAt ? fmtSysTime(s.checkedAt) : '—'}</span>
+      <span>${s.staleItem
+        ? (()=>{
+            const loc = s.scheduleError ? (s.scheduleError.match(/-([A-Z]{3})\b/)||[])[1] : null;
+            return `<span class="sys-stale">STALE</span> <span class="sys-warn" style="font-size:10px">since ${s.staleSince?fmtSysTime(s.staleSince):'—'}</span>`
+              + (loc ? ` <span style="color:var(--buoy);font-size:10px" title="${s.scheduleError}">· ${loc}</span>` : '');
+          })()
+        : `<span class="sys-ok">ok</span>`}</span>
+      <span>${mapLabel}</span>
+      <span style="display:flex;gap:4px">
+        ${s.staleItem ? `<button class="sys-retry" data-bkg="${s.booking}">RETRY</button>` : ''}
+        <button class="sys-map-refresh" data-bkg="${s.booking}" style="border-color:var(--sail);color:var(--sail)">MAP</button>
       </span>
     </div>`;}).join('')}
   </div>`;
 
   if(d.errors && d.errors.length){
     html += `<div class="sys-sec">LAST RUN ERRORS</div>
-    <div class="sys-err" id="sys-err-now">${d.errors.map(e=>{
-      const m = e.match(/^(\d{2}:\d{2}:\d{2})\s+(.*)/s);
-      const t = m ? m[1] : '';
-      const msg = m ? m[2] : e;
-      return `<div class="err-row"><span class="err-msg">${msg.replace(/</g,'&lt;')}</span><span class="err-time">${t}</span></div>`;
-    }).join('')}</div>`;
+    <div class="sys-err">${d.errors.map(e=>e.replace(/</g,'&lt;')).join('<br>')}</div>`;
   }
 
-  html += `<div class="sys-sec" style="margin-top:8px">
-    <span>ERROR LOG</span>
-    <button class="sys-retry" id="sys-err-toggle" style="font-size:10px;padding:2px 8px" onclick="toggleErrLog()">
-      최근 50개 ▾
-    </button>
-  </div>
-  <div id="sys-err-log" style="display:none"></div>`;
-
   el.innerHTML = html;
-
-  /* 에러 로그 비동기 로드 */
-  (async ()=>{
-    try{
-      const key = await getKey();
-      if(!key) return;
-      const r = await fetch(API.replace('/data','/errorlog'), { headers:{'X-Refresh-Key':key} });
-      if(!r.ok) return;
-      const res = await r.json();
-      const logEl = document.getElementById('sys-err-log');
-      if(!logEl) return;
-      if(!res.log || !res.log.length){
-        logEl.innerHTML = `<div style="font-size:11px;color:var(--fog);padding:6px 0">로그 없음</div>`;
-        return;
-      }
-      const tagColor = tag => {
-        if(tag==='cron') return '#e5484d';
-        if(tag && tag.startsWith('retry')) return '#f59e0b';
-        if(tag && tag.startsWith('map-retry')) return '#3b82f6';
-        return 'var(--fog)';
-      };
-      logEl.innerHTML = `<div class="sys-err">${res.log.map(e=>`
-        <div class="err-row">
-          <span class="err-msg" style="color:${tagColor(e.tag)}">[${e.tag||'?'}] ${(e.msg||'').replace(/</g,'&lt;')}</span>
-          <span class="err-time">${e.t||''}</span>
-        </div>`).join('')}</div>`;
-    }catch(_){}
-  })();
 
   el.querySelectorAll('.sys-retry').forEach(btn=>{
     btn.addEventListener('click', ()=>sysRetry(btn.dataset.bkg, btn));
@@ -172,18 +102,12 @@ function renderSystemTab(){
     }
     retryAllBtn.textContent = '완료';
   });
+  const forceMapBtn = document.getElementById('sys-force-map');
+  if(forceMapBtn) forceMapBtn.addEventListener('click', ()=>sysForceMap(forceMapBtn));
+
   el.querySelectorAll('.sys-map-refresh').forEach(btn=>{
     btn.addEventListener('click', ()=>sysMapRefreshOne(btn.dataset.bkg, btn));
   });
-}
-
-function toggleErrLog(){
-  const el = document.getElementById('sys-err-log');
-  const btn = document.getElementById('sys-err-toggle');
-  if(!el) return;
-  const open = el.style.display === 'none';
-  el.style.display = open ? 'block' : 'none';
-  if(btn) btn.textContent = open ? '접기 ▴' : '최근 50개 ▾';
 }
 
 async function sysRetry(bkg, btn){
@@ -240,72 +164,25 @@ async function sysMapRefreshOne(bkg, btn){
   btn.disabled = true;
   const orig = btn.textContent;
   btn.textContent = '…';
-  const row = document.getElementById(`sysr-${bkg}`);
   try{
     const key = await getKey();
     if(!key){ btn.disabled=false; btn.textContent=orig; return; }
-    /* bkg= 파라미터로 특정 부킹만 강제 재조회 (mapFresh 무시) */
-    const r = await fetch(`${API.replace('/data','/collect')}?maps=1&bkg=${encodeURIComponent(bkg)}`,
+    const r = await fetch(`${API.replace('/data','/collect')}?maps=1`,
       { method:'POST', headers:{'X-Refresh-Key':key} });
     const res = await r.json();
     if(!r.ok) throw new Error(res.error||r.status);
-
-    /* 응답에서 해당 부킹의 실제 결과 확인 */
-    const item = (res.shipments||[]).find(s=>s.booking===bkg);
-    const mapOk = item && item.route && !item.mapError;
-    const mapAt  = item && item.mapAt ? fmtSysTime(item.mapAt) : '—';
-    const errMsg = item && item.mapError ? item.mapError : (res.mapErrors||[]).find(e=>e.includes(bkg))||'';
-
-    /* MAP 셀(3번째 컬럼) 직접 업데이트 */
-    if(row){
-      const cols = row.querySelectorAll(':scope > span');
-      const mapCol = cols[2];
-      if(mapCol){
-        if(mapOk){
-          mapCol.innerHTML = `
-            <div style="display:flex;align-items:center;gap:6px">
-              <span style="color:var(--sail)">ok</span>
-              <span class="sys-dim" style="font-size:10px">${mapAt}</span>
-            </div>
-            <div style="margin-top:4px">
-              <button class="sys-map-refresh" data-bkg="${bkg}" style="font-size:10px;padding:2px 7px;border:1px solid #F2C14E;color:#F2C14E;background:none">REFRESH</button>
-            </div>`;
-        } else {
-          const region = (errMsg.match(/cf-ray\s+[\w]+-([A-Z]{2,4})[,)]/i)||[])[1] || '';
-          const errParsed = errMsg.match(/^(\d{2}:\d{2}:\d{2})\s+(.*)/s);
-          const errTime = errParsed ? errParsed[1] : '';
-          const errText = errParsed ? errParsed[2] : errMsg;
-          mapCol.innerHTML = `
-            <div style="display:flex;align-items:center;gap:6px">
-              <span style="color:var(--buoy)">ERR${region?' · '+region:''}</span>
-              <span class="sys-dim" style="font-size:10px">${mapAt}</span>
-            </div>
-            <div style="font-size:10px;color:var(--buoy);margin-top:2px;word-break:break-all">${errTime ? errTime+' ' : ''}${errText.replace(/</g,'&lt;')}</div>
-            <div style="margin-top:4px">
-              <button class="sys-map-refresh" data-bkg="${bkg}" style="font-size:10px;padding:2px 7px;border:1px solid #F2C14E;color:#F2C14E;background:none">REFRESH</button>
-            </div>`;
-        }
-        /* 새로 생성된 버튼에 이벤트 재등록 */
-        mapCol.querySelector('.sys-map-refresh')
-          ?.addEventListener('click', e=>{ e.stopPropagation(); sysMapRefreshOne(bkg, e.currentTarget); });
-      }
-    }
-
-    /* 전체 데이터 갱신 */
-    fetch(source(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(d=>{ if(d) render(d); });
+    btn.textContent = '✓';
+    setTimeout(()=>{ btn.disabled=false; btn.textContent=orig; }, 3000);
+    fetch(source(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(d=>{ if(d){ render(d); } });
   } catch(e){
     btn.disabled=false;
     btn.textContent=orig;
+    const row = document.getElementById(`sysr-${bkg}`);
     if(row){
-      const cols = row.querySelectorAll(':scope > span');
-      const mapCol = cols[2];
-      if(mapCol){
-        const errDiv = mapCol.querySelector('.map-err') || document.createElement('div');
-        errDiv.className='map-err';
-        errDiv.style.cssText='font-size:10px;color:var(--buoy);margin-top:2px';
-        errDiv.textContent = e.message||'failed';
-        if(!mapCol.contains(errDiv)) mapCol.appendChild(errDiv);
-      }
+      const spans = row.querySelectorAll('span');
+      const last = spans[spans.length-1];
+      if(last) last.insertAdjacentHTML('afterend',
+        `<span class="sys-bad" style="font-size:10px">${e.message||'failed'}</span>`);
     }
   }
 }
