@@ -749,6 +749,7 @@ async function collectSchedule(env, forceBkgs = null) {
 
   const out = new Map(), errors = [];
   let pending = [...activeSlice], sessionsUsed = 0;
+  const errMap = new Map();
 
   for (let round = 0; round < MAX_SESSIONS && pending.length; round++) {
     /* 남은 예산이 이번 라운드를 감당 못 하면 중단 */
@@ -771,6 +772,7 @@ async function collectSchedule(env, forceBkgs = null) {
         out.set(bkg, parseBooking(await queryBooking(budget, session, bkg, TRIES_PER_ITEM), bkg));
       } catch (e) {
         stillFailing.push(bkg);
+                errMap.set(bkg, String(e.message || e));
         if (round === MAX_SESSIONS - 1 || budget.left < 6)
           errors.push(String(e.message || e));
       }
@@ -797,7 +799,7 @@ async function collectSchedule(env, forceBkgs = null) {
   for (const bkg of pending) {                       // 조회 실패 → 직전 값 유지
     const old = prevMap.get(bkg);
     if (old) {
-      const carriedItem = { ...old, staleItem: true, staleSince: old.scheduleCheckedAt || old.checkedAt || (prev && prev.updated) || null };
+      const carriedItem = { ...old, staleItem: true, staleSince: old.scheduleCheckedAt || old.checkedAt || (prev && prev.updated) || null , scheduleError: errMap.get(bkg)};
       /* 이전 이벤트 기반으로 actual 플래그 재계산 — status 폴백 덕분에 etaActual도 복원됨 */
       Object.assign(carriedItem, computeActualFlags(carriedItem));
       out.set(bkg, carriedItem);
@@ -1012,10 +1014,23 @@ export default {
       if (!BKG_RE.test(bkg)) return json({ error: "Invalid booking number format (e.g. KULM68088700)" }, 400);
       try {
         const budget = newBudget();
-        const session = await openSession(budget);
-        const one = parseBooking(await queryBooking(budget, session, bkg, 5), bkg);
+let one = null, lastErr = null;
+/* 세션 10번 × 조회 1번 — 다른 엣지를 만날 확률 최대화 */
+for (let s = 0; s < 10 && !one; s++) {
+  let session;
+  try { session = await openSession(budget); } catch (e) { lastErr = String(e.message||e); continue; }
+  try { one = parseBooking(await queryBooking(budget, session, bkg, 1), bkg); } catch (e) { lastErr = String(e.message||e); continue; }
+}
+if (!one) return json({ error: "Failed to fetch booking after 10 session attempts", hint: lastErr }, 502);
         try {
-          if (one.container) Object.assign(one, await fetchMap(budget, session, bkg, one.container, 4));
+          if (one.container) {
+            let mapDone = false;
+            for (let s = 0; s < 10 && !mapDone; s++) {
+              let session;
+              try { session = await openSession(budget); } catch (e) { continue; }
+              try { Object.assign(one, await fetchMap(budget, session, bkg, one.container, 1)); mapDone = true; } catch (e) { one.mapError = String(e.message || e); }
+            }
+          }
         } catch (e) { one.mapError = String(e.message || e); }
 
         const known = await getList(env);
@@ -1048,15 +1063,18 @@ export default {
         }
         try {
           const saved = await getSaved(env);
-          if (saved && Array.isArray(saved.shipments)) {
-            const i = saved.shipments.findIndex(x => x.booking === bkg);
-            if (i >= 0) saved.shipments[i] = one; else saved.shipments.push(one);
-            saved.tracked = known.length;
-            saved.ok = saved.shipments.filter(x => !x.staleItem).length;
-            saved.mapOk = saved.shipments.filter(x => x.route).length;
-            await env.OQC.put("shipments", JSON.stringify(saved));
-            one.savedToData = true;
-          }
+          /* saved가 null이거나 shipments 배열이 없으면 최소한의 구조로 새로 만든다 */
+                    const base = (saved && Array.isArray(saved.shipments))
+                                ? saved
+                                            : { updated: one.checkedAt, source: "hmm21.com Track & Trace",
+                                                            shipments: [], tracked: known.length, ok: 0, mapOk: 0 };
+                                                                      const i = base.shipments.findIndex(x => x.booking === bkg);
+                                                                                if (i >= 0) base.shipments[i] = one; else base.shipments.push(one);
+                                                                                          base.tracked = known.length;
+                                                                                                    base.ok = base.shipments.filter(x => !x.staleItem).length;
+                                                                                                              base.mapOk = base.shipments.filter(x => x.route).length;
+                                                                                                                        await env.OQC.put("shipments", JSON.stringify(base));
+                                                                                                                                  one.savedToData = true;
 
           /* 스케줄 이력에도 첫 관측을 남긴다 */
           let hist = {};
@@ -1421,23 +1439,8 @@ export default {
       (isMaps ? collectMaps(env) : collectSchedule(env))
         .then(async p => {
           if (!isMaps) {
-            /* cron 에러 [cron] 태그로 로그 저장 */
             const cronErrs = (p.errors || []).map(msg => ({ tag: "cron", msg }));
             if (cronErrs.length) await appendErrorLog(env, cronErrs);
-
-            /* stale/map 자동 재시도 */
-            const staleBkgs = (p.shipments || []).filter(s => s.staleItem).map(s => s.booking);
-            if (staleBkgs.length) ctx.waitUntil(kickStaleRetry(env, staleBkgs));
-
-            const MAP_STALE_MS = 12 * 60 * 60 * 1000;
-            const now = Date.now();
-            const mapStaleBkgs = (p.shipments || [])
-              .filter(s => !s.staleItem && s.container && (
-                s.mapError || !s.route || !s.mapAt ||
-                (now - Date.parse(s.mapAt.replace(" ", "T").replace("Z", "") + "Z")) >= MAP_STALE_MS
-              ))
-              .map(s => s.booking);
-            if (mapStaleBkgs.length) ctx.waitUntil(kickMapRetry(env, mapStaleBkgs));
           }
           return env.OQC.put("lastrun", JSON.stringify({
             at: stampNow(), trigger, cron: evt.cron, ok: true,
@@ -1467,53 +1470,4 @@ async function appendErrorLog(env, entries) {
   try { existing = JSON.parse(await env.OQC.get("errorLog") || "[]"); } catch (_) {}
   const combined = [...existing, ...newRows].slice(-50);
   await env.OQC.put("errorLog", JSON.stringify(combined), { expirationTtl: 7 * 24 * 3600 }).catch(() => {});
-}
-
-/* ---------- stale 자동 재시도 — 30초 × 최대 5회 ----------
-   ctx.waitUntil 안에서 실행. sleep은 CPU 시간 소모 없음. */
-async function kickStaleRetry(env, staleBkgs) {
-  for (let attempt = 1; attempt <= 5; attempt++) {
-    await sleep(30 * 1000);
-    if (!staleBkgs.length) break;
-    let p;
-    try { p = await collectSchedule(env, staleBkgs); }
-    catch (e) {
-      await appendErrorLog(env, [{ tag: `retry-${attempt}`, msg: `collectSchedule error: ${e.message || e}` }]);
-      break;
-    }
-    const newStale = (p.shipments || []).filter(s => s.staleItem).map(s => s.booking);
-    const resolved  = staleBkgs.filter(b => !newStale.includes(b));
-    const logRows = [
-      ...resolved.map(b => ({ tag: `retry-${attempt}`, msg: `${b} ok ✓` })),
-      ...newStale.map(b => ({ tag: `retry-${attempt}`, msg: `${b} 실패 (${(p.errors||[]).find(e=>e.includes(b))||'520'})` })),
-    ];
-    if (logRows.length) await appendErrorLog(env, logRows);
-    staleBkgs = newStale;
-    if (!staleBkgs.length) break;
-  }
-}
-
-async function kickMapRetry(env, mapBkgs) {
-  for (let attempt = 1; attempt <= 5; attempt++) {
-    await sleep(30 * 1000);
-    if (!mapBkgs.length) break;
-    let p;
-    try { p = await collectMaps(env, mapBkgs); }
-    catch (e) {
-      await appendErrorLog(env, [{ tag: `map-retry-${attempt}`, msg: `collectMaps error: ${e.message || e}` }]);
-      break;
-    }
-    const newFailed = mapBkgs.filter(b => {
-      const s = (p.shipments || []).find(x => x.booking === b);
-      return !s || s.mapError || !s.route;
-    });
-    const resolved = mapBkgs.filter(b => !newFailed.includes(b));
-    const logRows = [
-      ...resolved.map(b => ({ tag: `map-retry-${attempt}`, msg: `${b} map ok ✓` })),
-      ...newFailed.map(b => ({ tag: `map-retry-${attempt}`, msg: `${b} map 실패` })),
-    ];
-    if (logRows.length) await appendErrorLog(env, logRows);
-    mapBkgs = newFailed;
-    if (!mapBkgs.length) break;
-  }
 }
