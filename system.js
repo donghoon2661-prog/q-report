@@ -64,11 +64,11 @@ function renderSystemTab(){
           : `<span style="color:var(--fog);font-size:10px">—</span>`);
       return `
     <div class="sys-bkg5" id="sysr-${s.booking}">
-      <span>${s.booking}<br><span class="sys-dim" style="font-size:10px">${s.vessel||'—'}</span></span>
+      <span>${s.booking}</span>
       <span class="sys-dim">${s.checkedAt ? fmtSysTime(s.checkedAt) : '—'}</span>
       <span>${s.staleItem
         ? `<span class="sys-stale">STALE</span> <span class="sys-warn" style="font-size:10px">since ${s.staleSince?fmtSysTime(s.staleSince):'—'}</span>`
-        : `<span class="sys-ok">ok</span>${s.checkedAt?` <span class="sys-dim" style="font-size:10px">${fmtSysTime(s.checkedAt)}</span>`:''}`}</span>
+        : `<span class="sys-ok">ok</span>`}</span>
       <span>${mapLabel}</span>
       <span style="display:flex;gap:4px">
         ${s.staleItem ? `<button class="sys-retry" data-bkg="${s.booking}">RETRY</button>` : ''}
