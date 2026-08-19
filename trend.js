@@ -1,7 +1,8 @@
-/* ===== trend.js — TREND 탭 (Beta / Admin only) ===== */
+/* ===== trend.js — BETA 탭 (Admin only) ===== */
 
 const TREND_API = "https://kossan-oqc.dhoqc.workers.dev/delayhistory";
 let trendCache = null;
+let betaMenu = 'trend';
 
 async function loadTrendData() {
   if (trendCache) return trendCache;
@@ -16,21 +17,43 @@ async function loadTrendData() {
   return all;
 }
 
-function trendMonthLabel(ym) {
-  if (!ym) return "—";
-  const [y, mo] = ym.split("-");
-  const names = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
-  return (names[parseInt(mo, 10) - 1] || mo) + " " + y;
-}
-
-function renderTrendTab() {
-  const el = document.getElementById("trend");
+/* ---------- BETA 탭 메인 ---------- */
+function renderBetaTab() {
+  const el = document.getElementById("beta");
   if (!el) return;
   el.innerHTML = `
     <div style="padding:24px 20px;max-width:900px;margin:0 auto">
       <div style="display:flex;align-items:center;gap:10px;margin-bottom:20px">
-        <h2 style="margin:0;font-size:18px;letter-spacing:.05em">TREND <span style="font-size:11px;color:var(--buoy);background:rgba(255,160,0,.15);padding:2px 8px;border-radius:3px;vertical-align:middle">BETA</span></h2>
+        <h2 style="margin:0;font-size:18px;letter-spacing:.05em">BETA</h2>
+        <span style="font-size:11px;color:var(--buoy);background:rgba(255,160,0,.15);padding:2px 8px;border-radius:3px">ADMIN ONLY</span>
       </div>
+      <div class="beta-nav">
+        <button class="beta-nav-btn on" data-menu="trend">TREND</button>
+      </div>
+      <div id="beta-content"></div>
+    </div>`;
+
+  el.querySelectorAll('.beta-nav-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      el.querySelectorAll('.beta-nav-btn').forEach(b => b.classList.remove('on'));
+      btn.classList.add('on');
+      betaMenu = btn.dataset.menu;
+      renderBetaContent();
+    });
+  });
+  renderBetaContent();
+}
+
+function renderBetaContent() {
+  if (betaMenu === 'trend') renderTrendContent();
+}
+
+/* ---------- TREND 콘텐츠 ---------- */
+function renderTrendContent() {
+  const el = document.getElementById("beta-content");
+  if (!el) return;
+  el.innerHTML = `
+    <div style="margin-top:20px">
       <div id="trend-loading" style="color:var(--fog);font-size:13px">Loading…</div>
       <div id="trend-content" style="display:none">
         <div class="trend-section">
@@ -39,7 +62,7 @@ function renderTrendTab() {
         </div>
         <div class="trend-section">
           <div class="trend-section-title">월별 평균 지연 추이</div>
-          <canvas id="trend-monthly-chart" height="220"></canvas>
+          <canvas id="trend-monthly-chart" height="220" style="width:100%"></canvas>
         </div>
         <div class="trend-section">
           <div class="trend-section-title">선박별 평균 지연</div>
@@ -66,14 +89,14 @@ function renderLegBreakdown(data) {
   if (!recs.length) { el.innerHTML = `<div style="color:var(--fog);font-size:12px">데이터 없음</div>`; return; }
 
   const labels = ["PKG ETD", "T/S Arrival", "T/S Departure", "POD Arrival"];
-  const sums = [0, 0, 0, 0], counts = [0, 0, 0, 0];
+  const sums = [0,0,0,0], counts = [0,0,0,0];
   recs.forEach(r => {
     r.legBreakdown.forEach((leg, i) => {
-      if (i < 4 && leg.days !== null) { sums[i] += leg.days; counts[i]++; }
+      if (i < 4 && leg.days !== null && leg.days !== undefined) { sums[i] += leg.days; counts[i]++; }
     });
   });
   const avgs = sums.map((s, i) => counts[i] ? +(s / counts[i]).toFixed(1) : null);
-  const maxVal = Math.max(...avgs.filter(v => v !== null), 1);
+  const maxVal = Math.max(...avgs.filter(v => v !== null).map(Math.abs), 1);
 
   el.innerHTML = avgs.map((v, i) => {
     if (v === null) return "";
@@ -109,46 +132,46 @@ function renderMonthlyChart(data) {
   });
 
   const canvas = document.getElementById("trend-monthly-chart");
-  const ctx = canvas.getContext("2d");
-  const W = canvas.offsetWidth || 800;
+  if (!canvas) return;
+  const W = canvas.parentElement.offsetWidth || 800;
   canvas.width = W;
   canvas.height = 220;
+  const ctx = canvas.getContext("2d");
 
-  const pad = { top: 20, right: 20, bottom: 40, left: 40 };
+  const pad = { top: 24, right: 20, bottom: 40, left: 40 };
   const cW = W - pad.left - pad.right;
   const cH = 220 - pad.top - pad.bottom;
   const maxV = Math.max(...avgs.map(Math.abs), 1);
   const minV = Math.min(...avgs, 0);
-  const range = maxV - minV || 1;
-  const barW = Math.max(cW / keys.length - 6, 8);
+  const range = (maxV - minV) || 1;
 
   ctx.clearRect(0, 0, W, 220);
 
-  // 0선
   const zeroY = pad.top + cH * (1 - (0 - minV) / range);
   ctx.strokeStyle = "rgba(255,255,255,0.1)";
+  ctx.lineWidth = 1;
   ctx.beginPath(); ctx.moveTo(pad.left, zeroY); ctx.lineTo(pad.left + cW, zeroY); ctx.stroke();
 
+  const barW = Math.max(cW / keys.length - 6, 8);
   keys.forEach((k, i) => {
     const v = avgs[i];
     const x = pad.left + i * (cW / keys.length) + (cW / keys.length - barW) / 2;
     const barH = Math.abs(v) / range * cH;
     const y = v >= 0 ? zeroY - barH : zeroY;
-    ctx.fillStyle = v > 0 ? "rgba(255,160,0,0.7)" : v < 0 ? "rgba(76,175,138,0.7)" : "rgba(255,255,255,0.2)";
-    ctx.fillRect(x, y, barW, barH || 2);
+    ctx.fillStyle = v > 0 ? "rgba(255,160,0,0.75)" : v < 0 ? "rgba(76,175,138,0.75)" : "rgba(255,255,255,0.15)";
+    ctx.fillRect(x, y, barW, Math.max(barH, 2));
 
-    // 레이블
-    ctx.fillStyle = "rgba(255,255,255,0.5)";
+    const names = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+    const [, mo] = k.split("-");
+    const label = (names[parseInt(mo,10)-1] || mo);
+    ctx.fillStyle = "rgba(255,255,255,0.4)";
     ctx.font = "10px monospace";
     ctx.textAlign = "center";
-    const { m } = trendMonthLabel(k).split(" ").length > 1
-      ? { m: trendMonthLabel(k).split(" ")[0] }
-      : { m: k };
-    ctx.fillText(trendMonthLabel(k).slice(0, 6), x + barW / 2, 220 - pad.bottom + 14);
+    ctx.fillText(label, x + barW / 2, 220 - pad.bottom + 14);
 
-    // 값
-    ctx.fillStyle = v > 0 ? "var(--warn)" : "#4caf8a";
-    ctx.fillText((v > 0 ? "+" : "") + v + "d", x + barW / 2, v >= 0 ? y - 4 : y + barH + 12);
+    ctx.fillStyle = v > 0 ? "rgba(255,160,0,0.9)" : "#4caf8a";
+    ctx.font = "10px monospace";
+    ctx.fillText((v > 0 ? "+" : "") + v + "d", x + barW / 2, v >= 0 ? y - 5 : y + barH + 12);
   });
 }
 
@@ -157,7 +180,7 @@ function renderVesselTable(data) {
   const el = document.getElementById("trend-vessel-table");
   const byVessel = {};
   data.forEach(r => {
-    const k = (r.vessel || "Unknown") + " " + (r.voyage || "");
+    const k = (r.vessel || "Unknown") + "_" + (r.voyage || "");
     if (!byVessel[k]) byVessel[k] = { vessel: r.vessel || "—", voyage: r.voyage || "—", delays: [], rollovers: 0 };
     if (r.delayDays !== null && r.delayDays !== undefined) byVessel[k].delays.push(r.delayDays);
     if (r.rollover) byVessel[k].rollovers++;
@@ -185,11 +208,11 @@ function renderVesselTable(data) {
       <td style="padding:6px 8px">${r.vessel}</td>
       <td style="padding:6px 8px;color:var(--fog)">${r.voyage}</td>
       <td style="padding:6px 8px;text-align:right;color:var(--fog)">${r.count}</td>
-      <td style="padding:6px 8px;text-align:right;color:${r.avg > 0 ? 'var(--warn)' : r.avg < 0 ? '#4caf8a' : 'var(--fog)'}">
-        ${r.avg > 0 ? "+" : ""}${r.avg}d
+      <td style="padding:6px 8px;text-align:right;color:${r.avg>0?'var(--warn)':r.avg<0?'#4caf8a':'var(--fog)'}">
+        ${r.avg>0?"+":""}${r.avg}d
       </td>
-      <td style="padding:6px 8px;text-align:right;color:${r.rollovers > 0 ? 'var(--warn)' : 'var(--fog)'}">
-        ${r.rollovers || "—"}
+      <td style="padding:6px 8px;text-align:right;color:${r.rollovers>0?'var(--warn)':'var(--fog)'}">
+        ${r.rollovers||"—"}
       </td>
     </tr>`).join("")}</tbody>
   </table>`;
