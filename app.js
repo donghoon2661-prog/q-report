@@ -465,11 +465,13 @@ function setView(v){
   document.getElementById('cards').style.display    = v==='list'?'block':'none';
   document.getElementById('history').style.display  = v==='history'?'block':'none';
   document.getElementById('system').style.display   = v==='system'?'block':'none';
+  document.getElementById('trend').style.display    = v==='trend'?'block':'none';
   const laneEl = document.querySelector('.lane');
-  if(laneEl) laneEl.style.display = (v==='history'||v==='system') ? 'none' : 'flex';
+  if(laneEl) laneEl.style.display = (v==='history'||v==='system'||v==='trend') ? 'none' : 'flex';
   if(v==='map'&&map) setTimeout(()=>map.invalidateSize(),60);
   if(v==='history') renderHistoryMonths().catch(e=>console.error("History",e));
   if(v==='system') renderSystemTab();
+  if(v==='trend') renderTrendTab();
 }
 function show(v){
   if(v==="ship" && ACCESS_ROLE==="qc") return;
@@ -528,6 +530,8 @@ function applyRoleRestrictions(){
   const sysTab = document.getElementById('tab-system');
   const mobileSysBtn = document.getElementById('mobile-system-btn');
   if(sysTab) sysTab.style.display = isAdmin ? '' : 'none';
+  const trendTab = document.getElementById('tab-trend');
+  if(trendTab) trendTab.style.display = isAdmin ? '' : 'none';
   if(mobileSysBtn) mobileSysBtn.hidden = !isAdmin;
   if(backBtn)    backBtn.style.display    = restricted ? 'none' : '';
   if(qbackBtn)   qbackBtn.style.display   = restricted ? 'none' : '';
