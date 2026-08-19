@@ -515,6 +515,7 @@ function applyRoleRestrictions(){
   const qualTile  = document.querySelector('.tile[data-go="quality"]');
   const updateBtn  = document.getElementById('update-btn');
   const restoreBtn = document.getElementById('restore-btn');
+  const forceReloadBtn = document.getElementById('force-reload-btn');
   const backBtn    = document.getElementById('back');
   const qbackBtn   = document.getElementById('qback');
   const restricted = (ACCESS_ROLE === 'eta' || ACCESS_ROLE === 'qc');
@@ -523,6 +524,7 @@ function applyRoleRestrictions(){
   if(ACCESS_ROLE === 'qc'  && shipTile) shipTile.style.display = 'none';
   if(updateBtn)  updateBtn.style.display  = isAdmin ? '' : 'none';
   if(restoreBtn) restoreBtn.style.display = isAdmin ? '' : 'none';
+  if(forceReloadBtn) forceReloadBtn.style.display = isAdmin ? '' : 'none';
   const sysTab = document.getElementById('tab-system');
   const mobileSysBtn = document.getElementById('mobile-system-btn');
   if(sysTab) sysTab.style.display = isAdmin ? '' : 'none';
@@ -591,6 +593,13 @@ document.querySelectorAll(".tab").forEach(t=>t.addEventListener("click",()=>setV
 document.querySelectorAll(".ship-tabbar button").forEach(t=>t.addEventListener("click",()=>setView(t.dataset.view)));
 document.getElementById("update-btn").addEventListener("click",showChangelog);
 document.getElementById("restore-btn").addEventListener("click",showRestoreModal);
+document.getElementById("force-reload-btn").addEventListener("click", function(){
+  if('caches' in window){
+    caches.keys().then(names => Promise.all(names.map(n => caches.delete(n)))).then(() => location.reload(true));
+  } else {
+    location.reload(true);
+  }
+});
 
 document.addEventListener("DOMContentLoaded",()=>{
   initTheme();
