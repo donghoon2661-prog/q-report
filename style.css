@@ -653,3 +653,13 @@ html[data-theme="light"] #qview td.near{background:rgba(154,107,18,.08)}
 @media(max-width:760px){
   #mobile-system-btn:not([hidden]){display:block}
 }
+
+/* ===== TREND 탭 ===== */
+.trend-section { margin-bottom: 36px; }
+.trend-section-title { font-size: 11px; letter-spacing: .08em; color: var(--fog); margin-bottom: 14px; text-transform: uppercase; }
+.trend-chart-wrap { display: flex; flex-direction: column; gap: 10px; }
+.trend-leg-row { display: flex; align-items: center; gap: 10px; }
+.trend-leg-label { width: 110px; font-size: 11px; color: var(--fog); flex-shrink: 0; }
+.trend-leg-bar-wrap { flex: 1; background: rgba(255,255,255,0.05); border-radius: 2px; height: 10px; overflow: hidden; }
+.trend-leg-bar { height: 100%; border-radius: 2px; transition: width .4s ease; }
+.trend-leg-val { width: 48px; text-align: right; font-size: 12px; font-family: monospace; flex-shrink: 0; }
