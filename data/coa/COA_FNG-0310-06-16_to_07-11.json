@@ -1845,9 +1845,9 @@
       "item": "Thickness Palm Min",
       "value": 0.05,
       "current_value": 0.05,
-      "note": "[Off-spec] 값=0.05, 스펙 하한 0.06 미달",
-      "grade": "A",
-      "why": "Off-spec — 스펙 위반, 즉시 문의 대상",
+      "note": "[근접] 값=0.05, 스펙 0.06 대비 여유 0.01 — 근접 밴드 진입 (S2-palm)",
+      "grade": "B",
+      "why": "Palm Min 0.05 = S2 근접 구간 — 모니터링 권고",
       "resolved": false
     },
     {
@@ -1858,9 +1858,9 @@
       "item": "Thickness Palm Min",
       "value": 0.05,
       "current_value": 0.05,
-      "note": "[Off-spec] 값=0.05, 스펙 하한 0.06 미달",
-      "grade": "A",
-      "why": "Off-spec — 스펙 위반, 즉시 문의 대상",
+      "note": "[근접] 값=0.05, 스펙 0.06 대비 여유 0.01 — 근접 밴드 진입 (S2-palm)",
+      "grade": "B",
+      "why": "Palm Min 0.05 = S2 근접 구간 — 모니터링 권고",
       "resolved": false
     },
     {
@@ -1871,9 +1871,9 @@
       "item": "Thickness Palm Min",
       "value": 0.05,
       "current_value": 0.05,
-      "note": "[Off-spec] 값=0.05, 스펙 하한 0.06 미달",
-      "grade": "A",
-      "why": "Off-spec — 스펙 위반, 즉시 문의 대상",
+      "note": "[근접] 값=0.05, 스펙 0.06 대비 여유 0.01 — 근접 밴드 진입 (S2-palm)",
+      "grade": "B",
+      "why": "Palm Min 0.05 = S2 근접 구간 — 모니터링 권고",
       "resolved": false
     },
     {
@@ -1884,9 +1884,9 @@
       "item": "Thickness Palm Min",
       "value": 0.05,
       "current_value": 0.05,
-      "note": "[Off-spec] 값=0.05, 스펙 하한 0.06 미달",
-      "grade": "A",
-      "why": "Off-spec — 스펙 위반, 즉시 문의 대상",
+      "note": "[근접] 값=0.05, 스펙 0.06 대비 여유 0.01 — 근접 밴드 진입 (S2-palm)",
+      "grade": "B",
+      "why": "Palm Min 0.05 = S2 근접 구간 — 모니터링 권고",
       "resolved": false
     },
     {
@@ -1897,9 +1897,9 @@
       "item": "Thickness Palm Min",
       "value": 0.05,
       "current_value": 0.05,
-      "note": "[Off-spec] 값=0.05, 스펙 하한 0.06 미달",
-      "grade": "A",
-      "why": "Off-spec — 스펙 위반, 즉시 문의 대상",
+      "note": "[근접] 값=0.05, 스펙 0.06 대비 여유 0.01 — 근접 밴드 진입 (S2-palm)",
+      "grade": "B",
+      "why": "Palm Min 0.05 = S2 근접 구간 — 모니터링 권고",
       "resolved": false
     },
     {
@@ -1910,9 +1910,9 @@
       "item": "Thickness Palm Min",
       "value": 0.05,
       "current_value": 0.05,
-      "note": "[Off-spec] 값=0.05, 스펙 하한 0.06 미달",
-      "grade": "A",
-      "why": "Off-spec — 스펙 위반, 즉시 문의 대상",
+      "note": "[근접] 값=0.05, 스펙 0.06 대비 여유 0.01 — 근접 밴드 진입 (S2-palm)",
+      "grade": "B",
+      "why": "Palm Min 0.05 = S2 근접 구간 — 모니터링 권고",
       "resolved": false
     },
     {
@@ -1923,9 +1923,9 @@
       "item": "Thickness Palm Min",
       "value": 0.05,
       "current_value": 0.05,
-      "note": "[Off-spec] 값=0.05, 스펙 하한 0.06 미달",
-      "grade": "A",
-      "why": "Off-spec — 스펙 위반, 즉시 문의 대상",
+      "note": "[근접] 값=0.05, 스펙 0.06 대비 여유 0.01 — 근접 밴드 진입 (S2-palm)",
+      "grade": "B",
+      "why": "Palm Min 0.05 = S2 근접 구간 — 모니터링 권고",
       "resolved": false
     },
     {
@@ -1936,9 +1936,9 @@
       "item": "Thickness Palm Min",
       "value": 0.05,
       "current_value": 0.05,
-      "note": "[Off-spec] 값=0.05, 스펙 하한 0.06 미달",
-      "grade": "A",
-      "why": "Off-spec — 스펙 위반, 즉시 문의 대상",
+      "note": "[근접] 값=0.05, 스펙 0.06 대비 여유 0.01 — 근접 밴드 진입 (S2-palm)",
+      "grade": "B",
+      "why": "Palm Min 0.05 = S2 근접 구간 — 모니터링 권고",
       "resolved": false
     },
     {
@@ -1949,9 +1949,9 @@
       "item": "Thickness Palm Min",
       "value": 0.05,
       "current_value": 0.05,
-      "note": "[Off-spec] 값=0.05, 스펙 하한 0.06 미달",
-      "grade": "A",
-      "why": "Off-spec — 스펙 위반, 즉시 문의 대상",
+      "note": "[근접] 값=0.05, 스펙 0.06 대비 여유 0.01 — 근접 밴드 진입 (S2-palm)",
+      "grade": "B",
+      "why": "Palm Min 0.05 = S2 근접 구간 — 모니터링 권고",
       "resolved": false
     },
     {
@@ -1962,9 +1962,9 @@
       "item": "Thickness Palm Min",
       "value": 0.05,
       "current_value": 0.05,
-      "note": "[Off-spec] 값=0.05, 스펙 하한 0.06 미달",
-      "grade": "A",
-      "why": "Off-spec — 스펙 위반, 즉시 문의 대상",
+      "note": "[근접] 값=0.05, 스펙 0.06 대비 여유 0.01 — 근접 밴드 진입 (S2-palm)",
+      "grade": "B",
+      "why": "Palm Min 0.05 = S2 근접 구간 — 모니터링 권고",
       "resolved": false
     },
     {
@@ -1975,9 +1975,9 @@
       "item": "Thickness Palm Min",
       "value": 0.05,
       "current_value": 0.05,
-      "note": "[Off-spec] 값=0.05, 스펙 하한 0.06 미달",
-      "grade": "A",
-      "why": "Off-spec — 스펙 위반, 즉시 문의 대상",
+      "note": "[근접] 값=0.05, 스펙 0.06 대비 여유 0.01 — 근접 밴드 진입 (S2-palm)",
+      "grade": "B",
+      "why": "Palm Min 0.05 = S2 근접 구간 — 모니터링 권고",
       "resolved": false
     },
     {
@@ -1988,9 +1988,9 @@
       "item": "Thickness Palm Min",
       "value": 0.05,
       "current_value": 0.05,
-      "note": "[Off-spec] 값=0.05, 스펙 하한 0.06 미달",
-      "grade": "A",
-      "why": "Off-spec — 스펙 위반, 즉시 문의 대상",
+      "note": "[근접] 값=0.05, 스펙 0.06 대비 여유 0.01 — 근접 밴드 진입 (S2-palm)",
+      "grade": "B",
+      "why": "Palm Min 0.05 = S2 근접 구간 — 모니터링 권고",
       "resolved": false
     },
     {
@@ -2001,9 +2001,9 @@
       "item": "Thickness Palm Min",
       "value": 0.05,
       "current_value": 0.05,
-      "note": "[Off-spec] 값=0.05, 스펙 하한 0.06 미달",
-      "grade": "A",
-      "why": "Off-spec — 스펙 위반, 즉시 문의 대상",
+      "note": "[근접] 값=0.05, 스펙 0.06 대비 여유 0.01 — 근접 밴드 진입 (S2-palm)",
+      "grade": "B",
+      "why": "Palm Min 0.05 = S2 근접 구간 — 모니터링 권고",
       "resolved": false
     },
     {
@@ -2014,9 +2014,9 @@
       "item": "Thickness Palm Min",
       "value": 0.05,
       "current_value": 0.05,
-      "note": "[Off-spec] 값=0.05, 스펙 하한 0.06 미달",
-      "grade": "A",
-      "why": "Off-spec — 스펙 위반, 즉시 문의 대상",
+      "note": "[근접] 값=0.05, 스펙 0.06 대비 여유 0.01 — 근접 밴드 진입 (S2-palm)",
+      "grade": "B",
+      "why": "Palm Min 0.05 = S2 근접 구간 — 모니터링 권고",
       "resolved": false
     },
     {
@@ -2027,9 +2027,9 @@
       "item": "Thickness Palm Min",
       "value": 0.05,
       "current_value": 0.05,
-      "note": "[Off-spec] 값=0.05, 스펙 하한 0.06 미달",
-      "grade": "A",
-      "why": "Off-spec — 스펙 위반, 즉시 문의 대상",
+      "note": "[근접] 값=0.05, 스펙 0.06 대비 여유 0.01 — 근접 밴드 진입 (S2-palm)",
+      "grade": "B",
+      "why": "Palm Min 0.05 = S2 근접 구간 — 모니터링 권고",
       "resolved": false
     },
     {
@@ -2040,9 +2040,9 @@
       "item": "Thickness Palm Min",
       "value": 0.05,
       "current_value": 0.05,
-      "note": "[Off-spec] 값=0.05, 스펙 하한 0.06 미달",
-      "grade": "A",
-      "why": "Off-spec — 스펙 위반, 즉시 문의 대상",
+      "note": "[근접] 값=0.05, 스펙 0.06 대비 여유 0.01 — 근접 밴드 진입 (S2-palm)",
+      "grade": "B",
+      "why": "Palm Min 0.05 = S2 근접 구간 — 모니터링 권고",
       "resolved": false
     },
     {
@@ -2053,9 +2053,9 @@
       "item": "Thickness Palm Min",
       "value": 0.05,
       "current_value": 0.05,
-      "note": "[Off-spec] 값=0.05, 스펙 하한 0.06 미달",
-      "grade": "A",
-      "why": "Off-spec — 스펙 위반, 즉시 문의 대상",
+      "note": "[근접] 값=0.05, 스펙 0.06 대비 여유 0.01 — 근접 밴드 진입 (S2-palm)",
+      "grade": "B",
+      "why": "Palm Min 0.05 = S2 근접 구간 — 모니터링 권고",
       "resolved": false
     },
     {
@@ -2066,9 +2066,9 @@
       "item": "Thickness Palm Min",
       "value": 0.05,
       "current_value": 0.05,
-      "note": "[Off-spec] 값=0.05, 스펙 하한 0.06 미달",
-      "grade": "A",
-      "why": "Off-spec — 스펙 위반, 즉시 문의 대상",
+      "note": "[근접] 값=0.05, 스펙 0.06 대비 여유 0.01 — 근접 밴드 진입 (S2-palm)",
+      "grade": "B",
+      "why": "Palm Min 0.05 = S2 근접 구간 — 모니터링 권고",
       "resolved": false
     },
     {
@@ -2079,9 +2079,9 @@
       "item": "Thickness Palm Min",
       "value": 0.05,
       "current_value": 0.05,
-      "note": "[Off-spec] 값=0.05, 스펙 하한 0.06 미달",
-      "grade": "A",
-      "why": "Off-spec — 스펙 위반, 즉시 문의 대상",
+      "note": "[근접] 값=0.05, 스펙 0.06 대비 여유 0.01 — 근접 밴드 진입 (S2-palm)",
+      "grade": "B",
+      "why": "Palm Min 0.05 = S2 근접 구간 — 모니터링 권고",
       "resolved": false
     },
     {
@@ -2092,9 +2092,9 @@
       "item": "Thickness Palm Min",
       "value": 0.05,
       "current_value": 0.05,
-      "note": "[Off-spec] 값=0.05, 스펙 하한 0.06 미달",
-      "grade": "A",
-      "why": "Off-spec — 스펙 위반, 즉시 문의 대상",
+      "note": "[근접] 값=0.05, 스펙 0.06 대비 여유 0.01 — 근접 밴드 진입 (S2-palm)",
+      "grade": "B",
+      "why": "Palm Min 0.05 = S2 근접 구간 — 모니터링 권고",
       "resolved": false
     },
     {
@@ -2105,9 +2105,9 @@
       "item": "Thickness Palm Min",
       "value": 0.05,
       "current_value": 0.05,
-      "note": "[Off-spec] 값=0.05, 스펙 하한 0.06 미달",
-      "grade": "A",
-      "why": "Off-spec — 스펙 위반, 즉시 문의 대상",
+      "note": "[근접] 값=0.05, 스펙 0.06 대비 여유 0.01 — 근접 밴드 진입 (S2-palm)",
+      "grade": "B",
+      "why": "Palm Min 0.05 = S2 근접 구간 — 모니터링 권고",
       "resolved": false
     },
     {
@@ -2118,9 +2118,9 @@
       "item": "Thickness Palm Min",
       "value": 0.05,
       "current_value": 0.05,
-      "note": "[Off-spec] 값=0.05, 스펙 하한 0.06 미달",
-      "grade": "A",
-      "why": "Off-spec — 스펙 위반, 즉시 문의 대상",
+      "note": "[근접] 값=0.05, 스펙 0.06 대비 여유 0.01 — 근접 밴드 진입 (S2-palm)",
+      "grade": "B",
+      "why": "Palm Min 0.05 = S2 근접 구간 — 모니터링 권고",
       "resolved": false
     },
     {
@@ -2131,9 +2131,9 @@
       "item": "Thickness Palm Min",
       "value": 0.05,
       "current_value": 0.05,
-      "note": "[Off-spec] 값=0.05, 스펙 하한 0.06 미달",
-      "grade": "A",
-      "why": "Off-spec — 스펙 위반, 즉시 문의 대상",
+      "note": "[근접] 값=0.05, 스펙 0.06 대비 여유 0.01 — 근접 밴드 진입 (S2-palm)",
+      "grade": "B",
+      "why": "Palm Min 0.05 = S2 근접 구간 — 모니터링 권고",
       "resolved": false
     },
     {
@@ -2144,9 +2144,9 @@
       "item": "Thickness Palm Min",
       "value": 0.05,
       "current_value": 0.05,
-      "note": "[Off-spec] 값=0.05, 스펙 하한 0.06 미달",
-      "grade": "A",
-      "why": "Off-spec — 스펙 위반, 즉시 문의 대상",
+      "note": "[근접] 값=0.05, 스펙 0.06 대비 여유 0.01 — 근접 밴드 진입 (S2-palm)",
+      "grade": "B",
+      "why": "Palm Min 0.05 = S2 근접 구간 — 모니터링 권고",
       "resolved": false
     },
     {
@@ -2157,9 +2157,9 @@
       "item": "Thickness Palm Min",
       "value": 0.05,
       "current_value": 0.05,
-      "note": "[Off-spec] 값=0.05, 스펙 하한 0.06 미달",
-      "grade": "A",
-      "why": "Off-spec — 스펙 위반, 즉시 문의 대상",
+      "note": "[근접] 값=0.05, 스펙 0.06 대비 여유 0.01 — 근접 밴드 진입 (S2-palm)",
+      "grade": "B",
+      "why": "Palm Min 0.05 = S2 근접 구간 — 모니터링 권고",
       "resolved": false
     },
     {
@@ -2170,9 +2170,9 @@
       "item": "Thickness Palm Min",
       "value": 0.05,
       "current_value": 0.05,
-      "note": "[Off-spec] 값=0.05, 스펙 하한 0.06 미달",
-      "grade": "A",
-      "why": "Off-spec — 스펙 위반, 즉시 문의 대상",
+      "note": "[근접] 값=0.05, 스펙 0.06 대비 여유 0.01 — 근접 밴드 진입 (S2-palm)",
+      "grade": "B",
+      "why": "Palm Min 0.05 = S2 근접 구간 — 모니터링 권고",
       "resolved": false
     },
     {
@@ -2183,9 +2183,9 @@
       "item": "Thickness Palm Min",
       "value": 0.05,
       "current_value": 0.05,
-      "note": "[Off-spec] 값=0.05, 스펙 하한 0.06 미달",
-      "grade": "A",
-      "why": "Off-spec — 스펙 위반, 즉시 문의 대상",
+      "note": "[근접] 값=0.05, 스펙 0.06 대비 여유 0.01 — 근접 밴드 진입 (S2-palm)",
+      "grade": "B",
+      "why": "Palm Min 0.05 = S2 근접 구간 — 모니터링 권고",
       "resolved": false
     },
     {
@@ -2196,9 +2196,9 @@
       "item": "Thickness Palm Min",
       "value": 0.05,
       "current_value": 0.05,
-      "note": "[Off-spec] 값=0.05, 스펙 하한 0.06 미달",
-      "grade": "A",
-      "why": "Off-spec — 스펙 위반, 즉시 문의 대상",
+      "note": "[근접] 값=0.05, 스펙 0.06 대비 여유 0.01 — 근접 밴드 진입 (S2-palm)",
+      "grade": "B",
+      "why": "Palm Min 0.05 = S2 근접 구간 — 모니터링 권고",
       "resolved": false
     },
     {
@@ -2209,9 +2209,9 @@
       "item": "Thickness Palm Min",
       "value": 0.05,
       "current_value": 0.05,
-      "note": "[Off-spec] 값=0.05, 스펙 하한 0.06 미달",
-      "grade": "A",
-      "why": "Off-spec — 스펙 위반, 즉시 문의 대상",
+      "note": "[근접] 값=0.05, 스펙 0.06 대비 여유 0.01 — 근접 밴드 진입 (S2-palm)",
+      "grade": "B",
+      "why": "Palm Min 0.05 = S2 근접 구간 — 모니터링 권고",
       "resolved": false
     },
     {
@@ -2222,9 +2222,9 @@
       "item": "Thickness Palm Min",
       "value": 0.05,
       "current_value": 0.05,
-      "note": "[Off-spec] 값=0.05, 스펙 하한 0.06 미달",
-      "grade": "A",
-      "why": "Off-spec — 스펙 위반, 즉시 문의 대상",
+      "note": "[근접] 값=0.05, 스펙 0.06 대비 여유 0.01 — 근접 밴드 진입 (S2-palm)",
+      "grade": "B",
+      "why": "Palm Min 0.05 = S2 근접 구간 — 모니터링 권고",
       "resolved": false
     },
     {
@@ -2235,9 +2235,9 @@
       "item": "Thickness Palm Min",
       "value": 0.05,
       "current_value": 0.05,
-      "note": "[Off-spec] 값=0.05, 스펙 하한 0.06 미달",
-      "grade": "A",
-      "why": "Off-spec — 스펙 위반, 즉시 문의 대상",
+      "note": "[근접] 값=0.05, 스펙 0.06 대비 여유 0.01 — 근접 밴드 진입 (S2-palm)",
+      "grade": "B",
+      "why": "Palm Min 0.05 = S2 근접 구간 — 모니터링 권고",
       "resolved": false
     },
     {
@@ -2248,9 +2248,9 @@
       "item": "Thickness Palm Min",
       "value": 0.05,
       "current_value": 0.05,
-      "note": "[Off-spec] 값=0.05, 스펙 하한 0.06 미달",
-      "grade": "A",
-      "why": "Off-spec — 스펙 위반, 즉시 문의 대상",
+      "note": "[근접] 값=0.05, 스펙 0.06 대비 여유 0.01 — 근접 밴드 진입 (S2-palm)",
+      "grade": "B",
+      "why": "Palm Min 0.05 = S2 근접 구간 — 모니터링 권고",
       "resolved": false
     },
     {
@@ -2261,9 +2261,9 @@
       "item": "Thickness Palm Min",
       "value": 0.05,
       "current_value": 0.05,
-      "note": "[Off-spec] 값=0.05, 스펙 하한 0.06 미달",
-      "grade": "A",
-      "why": "Off-spec — 스펙 위반, 즉시 문의 대상",
+      "note": "[근접] 값=0.05, 스펙 0.06 대비 여유 0.01 — 근접 밴드 진입 (S2-palm)",
+      "grade": "B",
+      "why": "Palm Min 0.05 = S2 근접 구간 — 모니터링 권고",
       "resolved": false
     },
     {
@@ -2274,9 +2274,9 @@
       "item": "Thickness Palm Min",
       "value": 0.05,
       "current_value": 0.05,
-      "note": "[Off-spec] 값=0.05, 스펙 하한 0.06 미달",
-      "grade": "A",
-      "why": "Off-spec — 스펙 위반, 즉시 문의 대상",
+      "note": "[근접] 값=0.05, 스펙 0.06 대비 여유 0.01 — 근접 밴드 진입 (S2-palm)",
+      "grade": "B",
+      "why": "Palm Min 0.05 = S2 근접 구간 — 모니터링 권고",
       "resolved": false
     },
     {
@@ -2287,9 +2287,9 @@
       "item": "Thickness Palm Min",
       "value": 0.05,
       "current_value": 0.05,
-      "note": "[Off-spec] 값=0.05, 스펙 하한 0.06 미달",
-      "grade": "A",
-      "why": "Off-spec — 스펙 위반, 즉시 문의 대상",
+      "note": "[근접] 값=0.05, 스펙 0.06 대비 여유 0.01 — 근접 밴드 진입 (S2-palm)",
+      "grade": "B",
+      "why": "Palm Min 0.05 = S2 근접 구간 — 모니터링 권고",
       "resolved": false
     },
     {
@@ -2300,9 +2300,9 @@
       "item": "Thickness Palm Min",
       "value": 0.05,
       "current_value": 0.05,
-      "note": "[Off-spec] 값=0.05, 스펙 하한 0.06 미달",
-      "grade": "A",
-      "why": "Off-spec — 스펙 위반, 즉시 문의 대상",
+      "note": "[근접] 값=0.05, 스펙 0.06 대비 여유 0.01 — 근접 밴드 진입 (S2-palm)",
+      "grade": "B",
+      "why": "Palm Min 0.05 = S2 근접 구간 — 모니터링 권고",
       "resolved": false
     },
     {
@@ -2313,9 +2313,9 @@
       "item": "Thickness Palm Min",
       "value": 0.05,
       "current_value": 0.05,
-      "note": "[Off-spec] 값=0.05, 스펙 하한 0.06 미달",
-      "grade": "A",
-      "why": "Off-spec — 스펙 위반, 즉시 문의 대상",
+      "note": "[근접] 값=0.05, 스펙 0.06 대비 여유 0.01 — 근접 밴드 진입 (S2-palm)",
+      "grade": "B",
+      "why": "Palm Min 0.05 = S2 근접 구간 — 모니터링 권고",
       "resolved": false
     },
     {
@@ -2326,9 +2326,9 @@
       "item": "Thickness Palm Min",
       "value": 0.05,
       "current_value": 0.05,
-      "note": "[Off-spec] 값=0.05, 스펙 하한 0.06 미달",
-      "grade": "A",
-      "why": "Off-spec — 스펙 위반, 즉시 문의 대상",
+      "note": "[근접] 값=0.05, 스펙 0.06 대비 여유 0.01 — 근접 밴드 진입 (S2-palm)",
+      "grade": "B",
+      "why": "Palm Min 0.05 = S2 근접 구간 — 모니터링 권고",
       "resolved": false
     },
     {
@@ -2339,9 +2339,9 @@
       "item": "Thickness Palm Min",
       "value": 0.05,
       "current_value": 0.05,
-      "note": "[Off-spec] 값=0.05, 스펙 하한 0.06 미달",
-      "grade": "A",
-      "why": "Off-spec — 스펙 위반, 즉시 문의 대상",
+      "note": "[근접] 값=0.05, 스펙 0.06 대비 여유 0.01 — 근접 밴드 진입 (S2-palm)",
+      "grade": "B",
+      "why": "Palm Min 0.05 = S2 근접 구간 — 모니터링 권고",
       "resolved": false
     },
     {
@@ -2352,9 +2352,9 @@
       "item": "Thickness Palm Min",
       "value": 0.05,
       "current_value": 0.05,
-      "note": "[Off-spec] 값=0.05, 스펙 하한 0.06 미달",
-      "grade": "A",
-      "why": "Off-spec — 스펙 위반, 즉시 문의 대상",
+      "note": "[근접] 값=0.05, 스펙 0.06 대비 여유 0.01 — 근접 밴드 진입 (S2-palm)",
+      "grade": "B",
+      "why": "Palm Min 0.05 = S2 근접 구간 — 모니터링 권고",
       "resolved": false
     },
     {
@@ -2365,9 +2365,9 @@
       "item": "Thickness Palm Min",
       "value": 0.05,
       "current_value": 0.05,
-      "note": "[Off-spec] 값=0.05, 스펙 하한 0.06 미달",
-      "grade": "A",
-      "why": "Off-spec — 스펙 위반, 즉시 문의 대상",
+      "note": "[근접] 값=0.05, 스펙 0.06 대비 여유 0.01 — 근접 밴드 진입 (S2-palm)",
+      "grade": "B",
+      "why": "Palm Min 0.05 = S2 근접 구간 — 모니터링 권고",
       "resolved": false
     },
     {
@@ -2378,9 +2378,9 @@
       "item": "Thickness Palm Min",
       "value": 0.05,
       "current_value": 0.05,
-      "note": "[Off-spec] 값=0.05, 스펙 하한 0.06 미달",
-      "grade": "A",
-      "why": "Off-spec — 스펙 위반, 즉시 문의 대상",
+      "note": "[근접] 값=0.05, 스펙 0.06 대비 여유 0.01 — 근접 밴드 진입 (S2-palm)",
+      "grade": "B",
+      "why": "Palm Min 0.05 = S2 근접 구간 — 모니터링 권고",
       "resolved": false
     },
     {
@@ -2391,9 +2391,9 @@
       "item": "Thickness Palm Min",
       "value": 0.05,
       "current_value": 0.05,
-      "note": "[Off-spec] 값=0.05, 스펙 하한 0.06 미달",
-      "grade": "A",
-      "why": "Off-spec — 스펙 위반, 즉시 문의 대상",
+      "note": "[근접] 값=0.05, 스펙 0.06 대비 여유 0.01 — 근접 밴드 진입 (S2-palm)",
+      "grade": "B",
+      "why": "Palm Min 0.05 = S2 근접 구간 — 모니터링 권고",
       "resolved": false
     },
     {
@@ -2404,9 +2404,9 @@
       "item": "Thickness Palm Min",
       "value": 0.05,
       "current_value": 0.05,
-      "note": "[Off-spec] 값=0.05, 스펙 하한 0.06 미달",
-      "grade": "A",
-      "why": "Off-spec — 스펙 위반, 즉시 문의 대상",
+      "note": "[근접] 값=0.05, 스펙 0.06 대비 여유 0.01 — 근접 밴드 진입 (S2-palm)",
+      "grade": "B",
+      "why": "Palm Min 0.05 = S2 근접 구간 — 모니터링 권고",
       "resolved": false
     },
     {
@@ -2417,9 +2417,9 @@
       "item": "Thickness Palm Min",
       "value": 0.05,
       "current_value": 0.05,
-      "note": "[Off-spec] 값=0.05, 스펙 하한 0.06 미달",
-      "grade": "A",
-      "why": "Off-spec — 스펙 위반, 즉시 문의 대상",
+      "note": "[근접] 값=0.05, 스펙 0.06 대비 여유 0.01 — 근접 밴드 진입 (S2-palm)",
+      "grade": "B",
+      "why": "Palm Min 0.05 = S2 근접 구간 — 모니터링 권고",
       "resolved": false
     },
     {
@@ -2430,9 +2430,9 @@
       "item": "Thickness Palm Min",
       "value": 0.05,
       "current_value": 0.05,
-      "note": "[Off-spec] 값=0.05, 스펙 하한 0.06 미달",
-      "grade": "A",
-      "why": "Off-spec — 스펙 위반, 즉시 문의 대상",
+      "note": "[근접] 값=0.05, 스펙 0.06 대비 여유 0.01 — 근접 밴드 진입 (S2-palm)",
+      "grade": "B",
+      "why": "Palm Min 0.05 = S2 근접 구간 — 모니터링 권고",
       "resolved": false
     },
     {
@@ -2443,9 +2443,9 @@
       "item": "Thickness Palm Min",
       "value": 0.05,
       "current_value": 0.05,
-      "note": "[Off-spec] 값=0.05, 스펙 하한 0.06 미달",
-      "grade": "A",
-      "why": "Off-spec — 스펙 위반, 즉시 문의 대상",
+      "note": "[근접] 값=0.05, 스펙 0.06 대비 여유 0.01 — 근접 밴드 진입 (S2-palm)",
+      "grade": "B",
+      "why": "Palm Min 0.05 = S2 근접 구간 — 모니터링 권고",
       "resolved": false
     },
     {
@@ -2456,9 +2456,9 @@
       "item": "Thickness Palm Min",
       "value": 0.05,
       "current_value": 0.05,
-      "note": "[Off-spec] 값=0.05, 스펙 하한 0.06 미달",
-      "grade": "A",
-      "why": "Off-spec — 스펙 위반, 즉시 문의 대상",
+      "note": "[근접] 값=0.05, 스펙 0.06 대비 여유 0.01 — 근접 밴드 진입 (S2-palm)",
+      "grade": "B",
+      "why": "Palm Min 0.05 = S2 근접 구간 — 모니터링 권고",
       "resolved": false
     },
     {
@@ -2469,9 +2469,9 @@
       "item": "Thickness Palm Min",
       "value": 0.05,
       "current_value": 0.05,
-      "note": "[Off-spec] 값=0.05, 스펙 하한 0.06 미달",
-      "grade": "A",
-      "why": "Off-spec — 스펙 위반, 즉시 문의 대상",
+      "note": "[근접] 값=0.05, 스펙 0.06 대비 여유 0.01 — 근접 밴드 진입 (S2-palm)",
+      "grade": "B",
+      "why": "Palm Min 0.05 = S2 근접 구간 — 모니터링 권고",
       "resolved": false
     },
     {
@@ -2482,9 +2482,9 @@
       "item": "Thickness Palm Min",
       "value": 0.05,
       "current_value": 0.05,
-      "note": "[Off-spec] 값=0.05, 스펙 하한 0.06 미달",
-      "grade": "A",
-      "why": "Off-spec — 스펙 위반, 즉시 문의 대상",
+      "note": "[근접] 값=0.05, 스펙 0.06 대비 여유 0.01 — 근접 밴드 진입 (S2-palm)",
+      "grade": "B",
+      "why": "Palm Min 0.05 = S2 근접 구간 — 모니터링 권고",
       "resolved": false
     },
     {
@@ -2495,9 +2495,9 @@
       "item": "Thickness Palm Min",
       "value": 0.05,
       "current_value": 0.05,
-      "note": "[Off-spec] 값=0.05, 스펙 하한 0.06 미달",
-      "grade": "A",
-      "why": "Off-spec — 스펙 위반, 즉시 문의 대상",
+      "note": "[근접] 값=0.05, 스펙 0.06 대비 여유 0.01 — 근접 밴드 진입 (S2-palm)",
+      "grade": "B",
+      "why": "Palm Min 0.05 = S2 근접 구간 — 모니터링 권고",
       "resolved": false
     },
     {
@@ -2508,9 +2508,9 @@
       "item": "Thickness Palm Min",
       "value": 0.05,
       "current_value": 0.05,
-      "note": "[Off-spec] 값=0.05, 스펙 하한 0.06 미달",
-      "grade": "A",
-      "why": "Off-spec — 스펙 위반, 즉시 문의 대상",
+      "note": "[근접] 값=0.05, 스펙 0.06 대비 여유 0.01 — 근접 밴드 진입 (S2-palm)",
+      "grade": "B",
+      "why": "Palm Min 0.05 = S2 근접 구간 — 모니터링 권고",
       "resolved": false
     },
     {
@@ -2521,9 +2521,9 @@
       "item": "Thickness Palm Min",
       "value": 0.05,
       "current_value": 0.05,
-      "note": "[Off-spec] 값=0.05, 스펙 하한 0.06 미달",
-      "grade": "A",
-      "why": "Off-spec — 스펙 위반, 즉시 문의 대상",
+      "note": "[근접] 값=0.05, 스펙 0.06 대비 여유 0.01 — 근접 밴드 진입 (S2-palm)",
+      "grade": "B",
+      "why": "Palm Min 0.05 = S2 근접 구간 — 모니터링 권고",
       "resolved": false
     },
     {
@@ -2534,9 +2534,9 @@
       "item": "Thickness Palm Min",
       "value": 0.05,
       "current_value": 0.05,
-      "note": "[Off-spec] 값=0.05, 스펙 하한 0.06 미달",
-      "grade": "A",
-      "why": "Off-spec — 스펙 위반, 즉시 문의 대상",
+      "note": "[근접] 값=0.05, 스펙 0.06 대비 여유 0.01 — 근접 밴드 진입 (S2-palm)",
+      "grade": "B",
+      "why": "Palm Min 0.05 = S2 근접 구간 — 모니터링 권고",
       "resolved": false
     },
     {
@@ -2547,9 +2547,9 @@
       "item": "Thickness Palm Min",
       "value": 0.05,
       "current_value": 0.05,
-      "note": "[Off-spec] 값=0.05, 스펙 하한 0.06 미달",
-      "grade": "A",
-      "why": "Off-spec — 스펙 위반, 즉시 문의 대상",
+      "note": "[근접] 값=0.05, 스펙 0.06 대비 여유 0.01 — 근접 밴드 진입 (S2-palm)",
+      "grade": "B",
+      "why": "Palm Min 0.05 = S2 근접 구간 — 모니터링 권고",
       "resolved": false
     },
     {
@@ -2560,9 +2560,9 @@
       "item": "Thickness Palm Min",
       "value": 0.05,
       "current_value": 0.05,
-      "note": "[Off-spec] 값=0.05, 스펙 하한 0.06 미달",
-      "grade": "A",
-      "why": "Off-spec — 스펙 위반, 즉시 문의 대상",
+      "note": "[근접] 값=0.05, 스펙 0.06 대비 여유 0.01 — 근접 밴드 진입 (S2-palm)",
+      "grade": "B",
+      "why": "Palm Min 0.05 = S2 근접 구간 — 모니터링 권고",
       "resolved": false
     }
   ]
