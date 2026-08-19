@@ -197,7 +197,7 @@ async function sysRetry(bkg, btn){
     const r = await fetch(`${API.replace('/data','/lookup')}?bkg=${bkg}`,
       { headers:{'X-Refresh-Key':key} });
     const res = await r.json();
-    if(!r.ok) throw new Error(res.error||r.status);
+    if(!r.ok) throw new Error(`${res.error||'error'} (${r.status})`);
     if(row){
       const cells = row.querySelectorAll('span');
       const now = new Date();
@@ -229,7 +229,7 @@ async function sysForceMap(btn){
     const r = await fetch(`${API.replace('/data','/collect')}?maps=1`,
       { method:'POST', headers:{'X-Refresh-Key':key} });
     const res = await r.json();
-    if(!r.ok) throw new Error(res.error||r.status);
+    if(!r.ok) throw new Error(`${res.error||'error'} (${r.status})`);
     btn.textContent = `완료 — ${res.mapOk||0}건 갱신`;
     setTimeout(()=>{ btn.disabled=false; btn.textContent=orig; }, 4000);
     fetch(source(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(d=>{ if(d) render(d); });
