@@ -17,7 +17,7 @@ const ITEMS = [
   {id:'powder', name:'Powder', dir:'hi', s1:1.5, s2:1.2, s1incl:true, key:'powder', unit:'', specTxt:'Max 1.50'},
   {id:'len', name:'Length Min', dir:'lo', s1:240, s2:243, key:'len_min', unit:'mm', specTxt:'≥ 240'},
   {id:'cuff', name:'Thk Cuff Min', dir:'lo', s1:0.05, s2:null, key:'cuff_min', unit:'mm', specTxt:'≥ 0.05 · 근접밴드 없음', specTxt_en:'≥ 0.05 · no near-limit band'},
-  {id:'palm', name:'Thk Palm Min', dir:'lo', s1:0.06, s2:null, key:'palm_min', unit:'mm', specTxt:'≥ 0.06 · 근접밴드 없음', specTxt_en:'≥ 0.06 · no near-limit band'},
+  {id:'palm', name:'Thk Palm Min', dir:'lo', s1:0.05, s2:0.06, key:'palm_min', unit:'mm', specTxt:'≥ 0.06 (S2 근접) / 0.05 미만 S1', specTxt_en:'≥ 0.06 (S2 near) / <0.05 S1'},
   {id:'fin', name:'Thk Finger Min', dir:'lo', s1:0.08, s2:null, key:'fin_min', unit:'mm', specTxt:'≥ 0.08 · 근접밴드 없음', specTxt_en:'≥ 0.08 · no near-limit band'},
   {id:'width', name:'Width 경계 여유', name_en:'Width Boundary Margin', dir:'lo', s1:0, s2:1, key:null, unit:'mm', specTxt:'사이즈별 ±5, 0 = 스펙 경계', specTxt_en:'±5 per size, 0 = spec boundary', margin:true},
 ];
@@ -257,7 +257,7 @@ function buildQuality(){
   const left = document.getElementById('left');
   DATA.sheets.forEach(s=>{
     const dets = detBySheet[s.name];
-    const openCount = dets.filter(d=>!d.resolved).length;
+    const openCount = dets.filter(d=>!d.resolved && d.grade==='A').length;
     const slots = [...new Set(s.sectors.map(x=>x.lot))].join(' · ');
     const btn = document.createElement('button');
     btn.className='sheet-item'; btn.setAttribute('aria-expanded','false');
@@ -425,7 +425,7 @@ function buildQuality(){
     if(k==='powder') return v>1.5?'viol':v>=1.2?'near':'';
     if(k==='len_min') return v<240?'viol':v<243?'near':'';
     if(k==='cuff_min') return Math.round((v-0.05)*1e6)<0?'viol':'';
-    if(k==='palm_min') return Math.round((v-0.06)*1e6)<0?'viol':'';
+    if(k==='palm_min') return Math.round((v-0.05)*1e6)<0?'viol':Math.round((v-0.06)*1e6)<0?'near':'';
     if(k==='fin_min') return Math.round((v-0.08)*1e6)<0?'viol':'';
     if(k==='w_min'||k==='w_med'){const b=WSPEC[sz];if(!b)return '';return (v<b[0]||v>b[1])?'viol':(v<=b[0]+1||v>=b[1]-1)?'near':'';}
     return '';
@@ -469,7 +469,7 @@ function buildQuality(){
 
   /* ── 모바일 탭 전환 ── */
   const mq = window.matchMedia('(max-width:900px)');
-  const openTotal = DATA.detections.filter(d=>!d.resolved).length;
+  const openTotal = DATA.detections.filter(d=>!d.resolved && d.grade==='A').length;
   document.getElementById('tbBadge').textContent = openTotal || '';
   if(!openTotal) document.getElementById('tbBadge').style.display='none';
   document.querySelectorAll('.tabbar button').forEach(b=>{
