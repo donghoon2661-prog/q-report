@@ -573,6 +573,13 @@ html[data-theme="light"] #qview td.near{background:rgba(154,107,18,.08)}
   font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.14em;
   padding:6px 12px;cursor:pointer}
 #restore-btn:hover{background:var(--buoy);color:var(--ink)}
+
+/* FORCE RELOAD 버튼 — RESTORE 버튼 왼쪽 */
+#force-reload-btn{position:fixed;right:195px;bottom:16px;z-index:5;
+  background:none;border:1px solid var(--buoy);color:var(--buoy);
+  font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.14em;
+  padding:6px 12px;cursor:pointer}
+#force-reload-btn:hover{background:var(--buoy);color:var(--ink)}
 #restore-modal{position:fixed;inset:0;background:rgba(4,12,18,.72);z-index:60;
   display:flex;align-items:center;justify-content:center;padding:20px}
 #restore-modal[hidden]{display:none}
