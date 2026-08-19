@@ -211,10 +211,11 @@ async function sysRetry(bkg, btn){
     if(row){
       const cells = row.querySelectorAll('span');
       const _m=e.message||"failed";
-        const _c=(_m.match(/(\d{3})/)||[])[1]||"";
-        const _l=(_m.match(/-([A-Z]{3})\b/)||[])[1]||"";
+        const _hint=(_m.match(/\[([^\]]+)\]/)||[])[1]||"";
+        const _c=(_hint.match(/response\s+(\d{3})/)||[])[1]||(_m.match(/(\d{3})/)||[])[1]||"";
+        const _l=(_hint.match(/-([A-Z]{3})\b/)||[])[1]||"";
         const _lbl=_c||_l?`Failed to retry (${[_c,_l].filter(Boolean).join(" · ")})`:"Failed to retry";
-        cells[3].innerHTML = `<span class="sys-bad" style="font-size:10px" title="${_m}">${_lbl}</span>`;
+        cells[3].innerHTML = `<span class="sys-bad" style="font-size:10px" title="${_hint||_m}">${_lbl}</span>`;
     }
   }
 }
