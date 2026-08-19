@@ -181,10 +181,16 @@ async function sysMapRefreshOne(bkg, btn){
     btn.textContent=orig;
     const row = document.getElementById(`sysr-${bkg}`);
     if(row){
+      const msg = e.message || 'failed';
+      const code = (msg.match(/response\s+(\d{3})/) || [])[1] || '';
+      const loc  = (msg.match(/-([A-Z]{3})\b/) || [])[1] || '';
+      const label = code || loc
+        ? `Failed to refresh (${[code, loc].filter(Boolean).join(' · ')})`
+        : 'Failed to refresh';
       const spans = row.querySelectorAll('span');
       const last = spans[spans.length-1];
       if(last) last.insertAdjacentHTML('afterend',
-        `<span class="sys-bad" style="font-size:10px">${e.message||'failed'}</span>`);
+        `<span class="sys-bad" style="font-size:10px" title="${msg}">${label}</span>`);
     }
   }
 }
