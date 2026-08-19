@@ -1,0 +1,196 @@
+/* ===== trend.js — TREND 탭 (Beta / Admin only) ===== */
+
+const TREND_API = "https://kossan-oqc.dhoqc.workers.dev/delayhistory";
+let trendCache = null;
+
+async function loadTrendData() {
+  if (trendCache) return trendCache;
+  const res = await fetch(TREND_API, { cache: "no-store" }).then(r => r.ok ? r.json() : { months: [] });
+  const months = res.months || [];
+  const all = [];
+  for (const m of months) {
+    const d = await fetch(`${TREND_API}?month=${m}`, { cache: "no-store" }).then(r => r.ok ? r.json() : { records: [] });
+    (d.records || []).forEach(r => all.push(r));
+  }
+  trendCache = all;
+  return all;
+}
+
+function trendMonthLabel(ym) {
+  if (!ym) return "—";
+  const [y, mo] = ym.split("-");
+  const names = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+  return (names[parseInt(mo, 10) - 1] || mo) + " " + y;
+}
+
+function renderTrendTab() {
+  const el = document.getElementById("trend");
+  if (!el) return;
+  el.innerHTML = `
+    <div style="padding:24px 20px;max-width:900px;margin:0 auto">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:20px">
+        <h2 style="margin:0;font-size:18px;letter-spacing:.05em">TREND <span style="font-size:11px;color:var(--buoy);background:rgba(255,160,0,.15);padding:2px 8px;border-radius:3px;vertical-align:middle">BETA</span></h2>
+      </div>
+      <div id="trend-loading" style="color:var(--fog);font-size:13px">Loading…</div>
+      <div id="trend-content" style="display:none">
+        <div class="trend-section">
+          <div class="trend-section-title">구간별 지연 분해 (평균, 일)</div>
+          <div id="trend-leg-chart" class="trend-chart-wrap"></div>
+        </div>
+        <div class="trend-section">
+          <div class="trend-section-title">월별 평균 지연 추이</div>
+          <canvas id="trend-monthly-chart" height="220"></canvas>
+        </div>
+        <div class="trend-section">
+          <div class="trend-section-title">선박별 평균 지연</div>
+          <div id="trend-vessel-table"></div>
+        </div>
+      </div>
+    </div>`;
+
+  loadTrendData().then(data => {
+    document.getElementById("trend-loading").style.display = "none";
+    document.getElementById("trend-content").style.display = "block";
+    renderLegBreakdown(data);
+    renderMonthlyChart(data);
+    renderVesselTable(data);
+  }).catch(e => {
+    document.getElementById("trend-loading").textContent = "Failed: " + (e.message || e);
+  });
+}
+
+/* ---------- 구간별 지연 분해 ---------- */
+function renderLegBreakdown(data) {
+  const el = document.getElementById("trend-leg-chart");
+  const recs = data.filter(r => Array.isArray(r.legBreakdown) && r.legBreakdown.length);
+  if (!recs.length) { el.innerHTML = `<div style="color:var(--fog);font-size:12px">데이터 없음</div>`; return; }
+
+  const labels = ["PKG ETD", "T/S Arrival", "T/S Departure", "POD Arrival"];
+  const sums = [0, 0, 0, 0], counts = [0, 0, 0, 0];
+  recs.forEach(r => {
+    r.legBreakdown.forEach((leg, i) => {
+      if (i < 4 && leg.days !== null) { sums[i] += leg.days; counts[i]++; }
+    });
+  });
+  const avgs = sums.map((s, i) => counts[i] ? +(s / counts[i]).toFixed(1) : null);
+  const maxVal = Math.max(...avgs.filter(v => v !== null), 1);
+
+  el.innerHTML = avgs.map((v, i) => {
+    if (v === null) return "";
+    const pct = Math.abs(v) / maxVal * 100;
+    const color = v > 0 ? "var(--warn)" : v < 0 ? "#4caf8a" : "var(--fog)";
+    const sign = v > 0 ? "+" : "";
+    return `<div class="trend-leg-row">
+      <div class="trend-leg-label">${labels[i]}</div>
+      <div class="trend-leg-bar-wrap">
+        <div class="trend-leg-bar" style="width:${pct}%;background:${color}"></div>
+      </div>
+      <div class="trend-leg-val" style="color:${color}">${sign}${v}d</div>
+    </div>`;
+  }).join("");
+}
+
+/* ---------- 월별 평균 지연 추이 ---------- */
+function renderMonthlyChart(data) {
+  const byMonth = {};
+  data.forEach(r => {
+    const k = r.polDepMonth || r.planMonth || "unknown";
+    if (k === "unknown") return;
+    if (!byMonth[k]) byMonth[k] = [];
+    if (r.delayDays !== null && r.delayDays !== undefined) byMonth[k].push(r.delayDays);
+  });
+
+  const keys = Object.keys(byMonth).filter(k => byMonth[k].length).sort();
+  if (!keys.length) return;
+
+  const avgs = keys.map(k => {
+    const arr = byMonth[k];
+    return +(arr.reduce((a, b) => a + b, 0) / arr.length).toFixed(1);
+  });
+
+  const canvas = document.getElementById("trend-monthly-chart");
+  const ctx = canvas.getContext("2d");
+  const W = canvas.offsetWidth || 800;
+  canvas.width = W;
+  canvas.height = 220;
+
+  const pad = { top: 20, right: 20, bottom: 40, left: 40 };
+  const cW = W - pad.left - pad.right;
+  const cH = 220 - pad.top - pad.bottom;
+  const maxV = Math.max(...avgs.map(Math.abs), 1);
+  const minV = Math.min(...avgs, 0);
+  const range = maxV - minV || 1;
+  const barW = Math.max(cW / keys.length - 6, 8);
+
+  ctx.clearRect(0, 0, W, 220);
+
+  // 0선
+  const zeroY = pad.top + cH * (1 - (0 - minV) / range);
+  ctx.strokeStyle = "rgba(255,255,255,0.1)";
+  ctx.beginPath(); ctx.moveTo(pad.left, zeroY); ctx.lineTo(pad.left + cW, zeroY); ctx.stroke();
+
+  keys.forEach((k, i) => {
+    const v = avgs[i];
+    const x = pad.left + i * (cW / keys.length) + (cW / keys.length - barW) / 2;
+    const barH = Math.abs(v) / range * cH;
+    const y = v >= 0 ? zeroY - barH : zeroY;
+    ctx.fillStyle = v > 0 ? "rgba(255,160,0,0.7)" : v < 0 ? "rgba(76,175,138,0.7)" : "rgba(255,255,255,0.2)";
+    ctx.fillRect(x, y, barW, barH || 2);
+
+    // 레이블
+    ctx.fillStyle = "rgba(255,255,255,0.5)";
+    ctx.font = "10px monospace";
+    ctx.textAlign = "center";
+    const { m } = trendMonthLabel(k).split(" ").length > 1
+      ? { m: trendMonthLabel(k).split(" ")[0] }
+      : { m: k };
+    ctx.fillText(trendMonthLabel(k).slice(0, 6), x + barW / 2, 220 - pad.bottom + 14);
+
+    // 값
+    ctx.fillStyle = v > 0 ? "var(--warn)" : "#4caf8a";
+    ctx.fillText((v > 0 ? "+" : "") + v + "d", x + barW / 2, v >= 0 ? y - 4 : y + barH + 12);
+  });
+}
+
+/* ---------- 선박별 평균 지연 ---------- */
+function renderVesselTable(data) {
+  const el = document.getElementById("trend-vessel-table");
+  const byVessel = {};
+  data.forEach(r => {
+    const k = (r.vessel || "Unknown") + " " + (r.voyage || "");
+    if (!byVessel[k]) byVessel[k] = { vessel: r.vessel || "—", voyage: r.voyage || "—", delays: [], rollovers: 0 };
+    if (r.delayDays !== null && r.delayDays !== undefined) byVessel[k].delays.push(r.delayDays);
+    if (r.rollover) byVessel[k].rollovers++;
+  });
+
+  const rows = Object.values(byVessel)
+    .filter(v => v.delays.length)
+    .map(v => {
+      const avg = +(v.delays.reduce((a, b) => a + b, 0) / v.delays.length).toFixed(1);
+      return { ...v, avg, count: v.delays.length };
+    })
+    .sort((a, b) => b.avg - a.avg);
+
+  if (!rows.length) { el.innerHTML = `<div style="color:var(--fog);font-size:12px">데이터 없음</div>`; return; }
+
+  el.innerHTML = `<table style="width:100%;border-collapse:collapse;font-size:12px">
+    <thead><tr style="color:var(--fog);border-bottom:1px solid rgba(255,255,255,0.08)">
+      <th style="text-align:left;padding:6px 8px">VESSEL</th>
+      <th style="text-align:left;padding:6px 8px">VOYAGE</th>
+      <th style="text-align:right;padding:6px 8px">건수</th>
+      <th style="text-align:right;padding:6px 8px">평균 지연</th>
+      <th style="text-align:right;padding:6px 8px">롤오버</th>
+    </tr></thead>
+    <tbody>${rows.map(r => `<tr style="border-bottom:1px solid rgba(255,255,255,0.04)">
+      <td style="padding:6px 8px">${r.vessel}</td>
+      <td style="padding:6px 8px;color:var(--fog)">${r.voyage}</td>
+      <td style="padding:6px 8px;text-align:right;color:var(--fog)">${r.count}</td>
+      <td style="padding:6px 8px;text-align:right;color:${r.avg > 0 ? 'var(--warn)' : r.avg < 0 ? '#4caf8a' : 'var(--fog)'}">
+        ${r.avg > 0 ? "+" : ""}${r.avg}d
+      </td>
+      <td style="padding:6px 8px;text-align:right;color:${r.rollovers > 0 ? 'var(--warn)' : 'var(--fog)'}">
+        ${r.rollovers || "—"}
+      </td>
+    </tr>`).join("")}</tbody>
+  </table>`;
+}
