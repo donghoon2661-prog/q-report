@@ -1050,6 +1050,16 @@ if (!one) return json({ error: "Failed to fetch booking after 10 session attempt
         /* actual 플래그 — collectSchedule과 동일하게 적용 */
         Object.assign(one, computeActualFlags(one));
 
+        /* planEta / delayDays — poeta KV에서 읽어서 붙임 */
+        try {
+          const poetaRaw = await env.OQC.get("poeta");
+          const poetaMap = poetaRaw ? JSON.parse(poetaRaw) : {};
+          const dv = delayVsPlan(one, poetaMap[bkg]);
+          if (dv !== null) { one.planEta = poetaMap[bkg]; one.delayDays = dv; }
+          const lvl = alertLevel(dv, null);
+          if (lvl) one.alert = lvl;
+        } catch (_) {}
+
         /* discharge 확인 시 delayHistory 저장 + 삭제 타이머 시작
            이후 Cron에서 HMM 재조회 없이 3일 유예 후 자동 삭제됨 */
         if (one.etaActual && !one.delaySnapshotDone) {
