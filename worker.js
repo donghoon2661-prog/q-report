@@ -120,7 +120,7 @@ async function hmmFetch(budget, url, init, label, maxTries = 6) {
     budget.left--; budget.used++;
     try {
       const r = await fetch(url, init);
-      if (r.ok) return r;
+      if (r.ok) { budget.lastCfRay = r.headers.get("cf-ray") || null; return r; }
       last = new Error(`${new Date(Date.now()+9*3600000).toISOString().slice(11,19)} ${label} response ${r.status} (cf-ray ${r.headers.get("cf-ray") || "-"}, attempt ${i + 1})`);
       if (r.status < 500 && r.status !== 429) throw last;
     } catch (e) {
@@ -769,7 +769,10 @@ async function collectSchedule(env, forceBkgs = null) {
     for (const bkg of pending) {
       if (budget.left < 3) { stillFailing.push(bkg); continue; }
       try {
-        out.set(bkg, parseBooking(await queryBooking(budget, session, bkg, TRIES_PER_ITEM), bkg));
+        const _html = await queryBooking(budget, session, bkg, TRIES_PER_ITEM);
+        const _item = parseBooking(_html, bkg);
+        if (budget.lastCfRay) _item.successEdge = (budget.lastCfRay.match(/-([A-Z]{3})/) || [])[1] || null;
+        out.set(bkg, _item);
       } catch (e) {
         stillFailing.push(bkg);
                 errMap.set(bkg, String(e.message || e));
@@ -1019,7 +1022,7 @@ let one = null, lastErr = null;
 for (let s = 0; s < 10 && !one; s++) {
   let session;
   try { session = await openSession(budget); } catch (e) { lastErr = String(e.message||e); continue; }
-  try { one = parseBooking(await queryBooking(budget, session, bkg, 1), bkg); } catch (e) { lastErr = String(e.message||e); continue; }
+  try { const _h = await queryBooking(budget, session, bkg, 1); one = parseBooking(_h, bkg); if (budget.lastCfRay) one.successEdge = (budget.lastCfRay.match(/-([A-Z]{3})\b/) || [])[1] || null; } catch (e) { lastErr = String(e.message||e); continue; }
 }
 if (!one) return json({ error: "Failed to fetch booking after 10 session attempts", hint: lastErr }, 502);
         try {
