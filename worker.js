@@ -659,20 +659,20 @@ function mailBody(list, updated) {
       <td style="padding:8px 10px;border-bottom:1px solid #ddd;font-size:12px;color:#555">
         ${esc(s.pol || "")} → ${esc(s.ts || "-")} → ${esc(s.pod || "")}<br>${esc(s.last || "")}</td>
     </tr>`;
-  return `<div style="font-family:system-ui,'Malgun Gothic',sans-serif;color:#222">
-    <h2 style="margin:0 0 4px">HMM 선적 지연 알림</h2>
-    <p style="margin:0 0 14px;color:#666;font-size:13px">수집 ${esc(updated)} · 기준: ${DELAY_WATCH_D}일 이상 Notice / ${DELAY_ALERT_D}일 이상 Alert</p>
+  return `<div style="font-family:system-ui,sans-serif;color:#222">
+    <h2 style="margin:0 0 4px">HMM Shipment Delay Alert</h2>
+    <p style="margin:0 0 14px;color:#666;font-size:13px">Updated: ${esc(updated)} · Threshold: Notice ≥ ${DELAY_WATCH_D}d / Alert ≥ ${DELAY_ALERT_D}d</p>
     <table style="border-collapse:collapse;font-size:13px;width:100%">
       <tr style="background:#f2f5f7">
-        <th style="padding:8px 10px;text-align:left">부킹 / 본선</th>
-        <th style="padding:8px 10px;text-align:left">원 계획</th>
-        <th style="padding:8px 10px;text-align:left">현재 ETB</th>
-        <th style="padding:8px 10px;text-align:left">편차</th>
-        <th style="padding:8px 10px;text-align:left">구간 / 최근 이벤트</th>
+        <th style="padding:8px 10px;text-align:left">Booking / Vessel</th>
+        <th style="padding:8px 10px;text-align:left">Original ETA</th>
+        <th style="padding:8px 10px;text-align:left">Current ETB</th>
+        <th style="padding:8px 10px;text-align:left">Variance</th>
+        <th style="padding:8px 10px;text-align:left">Route / Latest Event</th>
       </tr>
       ${list.map(row).join("")}
     </table>
-    <p style="margin:16px 0 0;font-size:12px;color:#888">같은 상태는 반복 발송하지 않습니다. 등급이 올라가거나 지연이 더 커질 때만 다시 보냅니다.</p>
+    <p style="margin:16px 0 0;font-size:12px;color:#888">Notifications are sent only when the alert level escalates or delay worsens. Repeated alerts for the same status are suppressed.</p>
   </div>`;
 }
 
@@ -692,7 +692,7 @@ async function notifyIfNeeded(env, payload) {
 
   if (!targets.length) return { sent: 0 };
   const worst = targets.some(s => s.alert === "alert") ? "Alert" : "Notice";
-  const subject = `[${worst}] HMM 선적 지연 ${targets.length}건 — ${targets.map(s => s.booking).join(", ")}`;
+  const subject = `[${worst}] HMM Shipment Delay — ${targets.length} booking(s): ${targets.map(s => s.booking).join(", ")}`;
   const res = await sendMail(env, subject, mailBody(targets, payload.updated));
   return { sent: res.ok ? targets.length : 0, bookings: targets.map(s => s.booking), ...res };
 }
