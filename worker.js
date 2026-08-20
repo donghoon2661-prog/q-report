@@ -1444,6 +1444,9 @@ if (!one) return json({ error: "Failed to fetch booking after 10 session attempt
           if (!isMaps) {
             const cronErrs = (p.errors || []).map(msg => ({ tag: "cron", msg }));
             if (cronErrs.length) await appendErrorLog(env, cronErrs);
+            /* 알림 메일 */
+            const saved = await getSaved(env);
+            if (saved) await notifyIfNeeded(env, saved).catch(() => {});
           }
           return env.OQC.put("lastrun", JSON.stringify({
             at: stampNow(), trigger, cron: evt.cron, ok: true,
