@@ -95,7 +95,7 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
 const MAX_PER_RUN = 8;
 /* 원 스케줄 대비 지연일 임계값.
    WATCH_D 미만은 정상, WATCH_D 이상은 주의, ALERT_D 이상은 경보. */
-const DELAY_WATCH_D = 4;    // 4일 이상 지연 → watch 메일
+const DELAY_WATCH_D = 3;    // 3일 이상 지연 → notice 메일
 const DELAY_ALERT_D = 7;    // 7일 이상 지연 → alert 메일
 /* 본선 예정 출항 후 이 시간이 지나도록 선적 이벤트가 없으면 미선적으로 판정 */
 const ROLLOVER_GRACE_H = 12;
@@ -661,7 +661,7 @@ function mailBody(list, updated) {
     </tr>`;
   return `<div style="font-family:system-ui,'Malgun Gothic',sans-serif;color:#222">
     <h2 style="margin:0 0 4px">HMM 선적 지연 알림</h2>
-    <p style="margin:0 0 14px;color:#666;font-size:13px">수집 ${esc(updated)} · 기준: ${DELAY_WATCH_D}일 이상 WATCH / ${DELAY_ALERT_D}일 이상 ALERT</p>
+    <p style="margin:0 0 14px;color:#666;font-size:13px">수집 ${esc(updated)} · 기준: ${DELAY_WATCH_D}일 이상 Notice / ${DELAY_ALERT_D}일 이상 Alert</p>
     <table style="border-collapse:collapse;font-size:13px;width:100%">
       <tr style="background:#f2f5f7">
         <th style="padding:8px 10px;text-align:left">부킹 / 본선</th>
@@ -691,7 +691,7 @@ async function notifyIfNeeded(env, payload) {
   await env.OQC.put("alertstate", JSON.stringify(state));
 
   if (!targets.length) return { sent: 0 };
-  const worst = targets.some(s => s.alert === "alert") ? "ALERT" : "WATCH";
+  const worst = targets.some(s => s.alert === "alert") ? "Alert" : "Notice";
   const subject = `[${worst}] HMM 선적 지연 ${targets.length}건 — ${targets.map(s => s.booking).join(", ")}`;
   const res = await sendMail(env, subject, mailBody(targets, payload.updated));
   return { sent: res.ok ? targets.length : 0, bookings: targets.map(s => s.booking), ...res };
