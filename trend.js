@@ -29,6 +29,7 @@ function renderBetaTab() {
       </div>
       <div class="beta-nav">
         <button class="beta-nav-btn on" data-menu="trend">TREND</button>
+        <button class="beta-nav-btn" data-menu="errorlog">ERROR LOG</button>
       </div>
       <div id="beta-content"></div>
     </div>`;
@@ -46,6 +47,7 @@ function renderBetaTab() {
 
 function renderBetaContent() {
   if (betaMenu === 'trend') renderTrendContent();
+  if (betaMenu === 'errorlog') renderErrorLogContent();
 }
 
 /* ---------- TREND 콘텐츠 ---------- */
@@ -216,4 +218,64 @@ function renderVesselTable(data) {
       </td>
     </tr>`).join("")}</tbody>
   </table>`;
+}
+
+/* ---------- ERROR LOG ---------- */
+async function renderErrorLogContent() {
+  const el = document.getElementById("beta-content");
+  if (!el) return;
+  el.innerHTML = `
+    <div style="margin-top:20px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+        <span style="font-size:11px;color:var(--fog);letter-spacing:.08em;text-transform:uppercase">SESSION LOG</span>
+        <span id="errlog-stats" style="font-size:11px;color:var(--fog)"></span>
+      </div>
+      <div id="errlog-loading" style="color:var(--fog);font-size:12px">Loading…</div>
+      <div id="errlog-table"></div>
+    </div>`;
+
+  try {
+    const API_BASE = typeof API !== 'undefined' ? API.replace('/data','') : 'https://kossan-oqc.dhoqc.workers.dev';
+    const key = typeof getKey === 'function' ? await getKey() : null;
+    const headers = key ? {'X-Refresh-Key': key} : {};
+    const r = await fetch(API_BASE + '/debug', {cache:'no-store', headers});
+    const d = await r.json();
+    const logs = (d.sessionLog ? JSON.parse(d.sessionLog) : []).reverse();
+
+    document.getElementById("errlog-loading").style.display = "none";
+
+    if (!logs.length) {
+      document.getElementById("errlog-table").innerHTML =
+        '<div style="color:var(--fog);font-size:12px">아직 로그 없음 — Cron 실행 후 쌓임</div>';
+      return;
+    }
+
+    // 통계
+    const total = logs.length;
+    const ok = logs.filter(l => l.ok).length;
+    const rate = total ? Math.round(ok/total*100) : 0;
+    document.getElementById("errlog-stats").textContent =
+      `성공 ${ok} / 전체 ${total} (${rate}%)`;
+
+    // 테이블
+    document.getElementById("errlog-table").innerHTML = `
+      <div style="font-size:11px;font-family:monospace;display:flex;flex-direction:column;gap:4px">
+        ${logs.map(l => {
+          const color = l.ok ? '#4caf8a' : 'var(--buoy)';
+          const status = l.ok ? '✓' : '✗';
+          const err = (!l.ok && (l.code || l.loc)) ? ` (${[l.code, l.loc].filter(Boolean).join(' · ')})` : '';
+          const tag = l.tag ? `[${l.tag}]` : '[cron]';
+          return `<div style="display:flex;gap:8px;padding:4px 0;border-bottom:1px solid rgba(255,255,255,0.04);align-items:center">
+            <span style="color:${color};width:12px;flex-shrink:0">${status}</span>
+            <span style="color:var(--fog);width:90px;flex-shrink:0">${l.date || ''} ${l.time || ''}</span>
+            <span style="color:var(--fog);width:60px;flex-shrink:0;font-size:10px">${tag}</span>
+            <span style="flex:1">${l.booking || '—'}</span>
+            <span style="color:var(--fog);width:40px;text-align:right;flex-shrink:0">×${l.attempt||1}</span>
+            <span style="color:${l.ok ? '#4caf8a' : 'var(--buoy)'};width:100px;text-align:right;flex-shrink:0;font-size:10px">${l.ok ? 'ok' : err}</span>
+          </div>`;
+        }).join('')}
+      </div>`;
+  } catch(e) {
+    document.getElementById("errlog-loading").textContent = "Failed: " + (e.message || e);
+  }
 }
