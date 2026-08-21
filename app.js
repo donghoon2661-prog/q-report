@@ -55,14 +55,20 @@ function showSide(s,L2){
   const log = (HIST[s.booking]||[]).slice().reverse();
   const FL = {vessel:"VESSEL", voyage:"VOYAGE", polDep:"PKG ETD", tsDep:"SIN ETD", eta:"LA ETB", destEta:"DEST ETA"};
   const shortV = v => /^\d{4}-\d\d-\d\dT/.test(v||"") ? fmtDT(v) : v;
+  // 변경 횟수별 색상: 1회=노란, 2회=주황, 3회+=빨간
+  const changeColor = n => n >= 3 ? '#ef4444' : n === 2 ? '#f97316' : '#f6c90e';
+  const changeLegend = `<div style="display:flex;gap:14px;font-size:10px;margin-bottom:10px">
+    <span style="color:#f6c90e">■ 1 change</span>
+    <span style="color:#f97316">■ 2 changes</span>
+    <span style="color:#ef4444">■ 3+ changes</span>
+  </div>`;
   const histHTML = log.length
-    ? `<div class="schist"><div class="sh-h">SCHEDULE CHANGES</div>` + log.map(e=>{
+    ? `<div class="schist"><div class="sh-h">SCHEDULE CHANGES</div>${changeLegend}` + log.map(e=>{
         if(e.first) return `<div class="sh"><span class="st">${toKST(e.at)}</span>`
           + `<span class="sc dim">first seen · SIN ETD ${fmtDT(e.tsDep)} · LA ETB ${fmtDT(e.eta)}</span></div>`;
         return `<div class="sh"><span class="st">${toKST(e.at)}</span><span class="sc">`
           + (e.changes||[]).map(c=>{
               const field = FL[c.field]||c.label;
-              // 이 항목 이전의 로그에서 같은 필드의 변경 체인 수집
               const eIdx = log.indexOf(e);
               const prevChanges = [];
               for(let pi = log.length-1; pi > eIdx; pi--){
@@ -71,20 +77,16 @@ function showSide(s,L2){
                 const prevC = (prevE.changes||[]).find(x=>x.field===c.field);
                 if(prevC) prevChanges.push(prevC);
               }
-              // 체인: 최초값(회색취소선) → 중간값들(노란취소선) → 최신값(노란굵게)
               let chain = '';
               if(prevChanges.length){
-                // 최초 from (회색 취소선)
                 chain += `<s style="color:var(--fog)">${shortV(prevChanges[prevChanges.length-1].from)}</s>`;
-                // 중간 변경값들 (노란 취소선)
                 for(let ci=prevChanges.length-1;ci>=0;ci--){
-                  chain += ` → <s style="color:var(--warn)">${shortV(prevChanges[ci].to)}</s>`;
+                  const nthChange = prevChanges.length - ci;
+                  chain += ` → <s style="color:${changeColor(nthChange)}">${shortV(prevChanges[ci].to)}</s>`;
                 }
-                // 현재 최신값 (노란 굵게)
-                chain += ` → <b>${shortV(c.to)}</b>`;
+                chain += ` → <b style="color:${changeColor(prevChanges.length+1)}">${shortV(c.to)}</b>`;
               } else {
-                // 첫 번째 변경: from(회색취소선) → to(노란굵게)
-                chain += `<s style="color:var(--fog)">${shortV(c.from)}</s> → <b>${shortV(c.to)}</b>`;
+                chain += `<s style="color:var(--fog)">${shortV(c.from)}</s> → <b style="color:${changeColor(1)}">${shortV(c.to)}</b>`;
               }
               return `${field} ${chain}`;
             }).join("<br>")
