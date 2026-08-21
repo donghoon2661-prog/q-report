@@ -547,7 +547,21 @@ function setView(v){
   document.getElementById('beta').style.display     = v==='beta'?'block':'none';
   const laneEl = document.querySelector('.lane');
   if(laneEl) laneEl.style.display = (v==='history'||v==='system'||v==='beta') ? 'none' : 'flex';
-  if(v==='map'&&map) setTimeout(()=>map.invalidateSize(),60);
+  if(v==='map'&&map) {
+    setTimeout(()=>map.invalidateSize(),60);
+    /* MAP 첫 진입 시 ETA 가장 빠른 vessel 자동 표시 */
+    setTimeout(()=>{
+      const panel = document.getElementById('side');
+      if(!panel || panel.innerHTML.trim()) return; // 이미 선택된 게 있으면 skip
+      if(!CUR || !CUR.shipments) return;
+      const active = CUR.shipments.filter(s => !s.etaActual && s.eta);
+      if(!active.length) return;
+      active.sort((a,b)=>new Date(a.eta)-new Date(b.eta));
+      const s = active[0];
+      const i = CUR.shipments.indexOf(s);
+      if(i>=0) { select(s, i, true); if(typeof showPO==='function') showPO(s, i); }
+    }, 200);
+  }
   if(v==='history') renderHistoryMonths().catch(e=>console.error("History",e));
   if(v==='system') renderSystemTab();
   if(v==='beta') renderBetaTab();
