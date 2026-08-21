@@ -345,7 +345,8 @@ dd .dim{opacity:.65}
   #map{height:200px}
   #mapwrap{gap:10px;grid-template-columns:1fr!important}
   #side{padding:14px;order:-1}          /* 정보 패널을 지도 위로 */
-  #side dd{overflow-wrap:break-word;word-break:break-word;display:flex;flex-wrap:wrap;gap:4px;align-items:center}
+  #side dl{grid-template-columns:1fr!important}
+  #side dd{overflow-wrap:break-word;word-break:break-word}
   .tsdwell{font-size:11px}
   .tsdwell .dtag{display:inline-block;margin-top:4px}
   #side dl{grid-template-columns:1fr}
