@@ -346,6 +346,11 @@ dd .dim{opacity:.65}
   #mapwrap{gap:10px;grid-template-columns:1fr!important}
   #side{padding:14px;order:-1}          /* 정보 패널을 지도 위로 */
   #side dd{overflow-wrap:break-word;word-break:break-word;display:flex;flex-wrap:wrap;gap:4px;align-items:center}
+  .tsdwell{font-size:11px}
+  .tsdwell .dtag{display:inline-block;margin-top:4px}
+  #side dl{grid-template-columns:1fr}
+  #side dt{padding-top:6px;border-top:1px solid rgba(255,255,255,0.04)}
+  #side dt:first-of-type{border-top:none}
   #side:empty{display:none}
   .addbar input{width:100%}
   .tabs{display:none}                   /* 상단 탭 대신 하단 탭바 사용 */
