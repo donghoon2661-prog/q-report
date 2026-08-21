@@ -726,8 +726,8 @@ async function pickSlice(env, list) {
 /* ---------- 1단계: 일정 수집 (지도 제외) ----------
    520은 재시도가 아니라 세션이 좌우한다. 실패분을 모아 새 세션으로 넘기는 것을
    최대 MAX_SESSIONS회 반복한다. */
-async function collectSchedule(env, forceBkgs = null) {
-  const budget = newBudget();
+async function collectSchedule(env, forceBkgs = null, sharedBudget = null) {
+  const budget = sharedBudget || newBudget();
   const list = await getList(env);
   const prev = await getSaved(env);
   const prevMap = new Map((prev && prev.shipments || []).map(s => [s.booking, s]));
@@ -914,7 +914,7 @@ async function collectSchedule(env, forceBkgs = null) {
     tracked: list.length,
     requested: slice.length,
     ok: fresh.length,
-    carried: carried.length,
+    carried: carried,  // stale 부킹 목록
     missing: slice.filter(b => !out.has(b)),
     mapOk: shipments.filter(s => s.route).length,
     rollovers: shipments.filter(s => s.rollover).length,
@@ -926,7 +926,8 @@ async function collectSchedule(env, forceBkgs = null) {
     cursor,
     stale,
     shipments,
-    errors
+    errors,
+    budget
   };
   await env.OQC.put("shipments", JSON.stringify(payload));
   return payload;
@@ -941,7 +942,7 @@ async function collectMaps(env, forceBkg = []) {
   if (!saved || !saved.shipments || !saved.shipments.length)
     throw new Error("No schedule data collected yet. Run /collect first.");
 
-  const budget = newBudget();
+  const budget = sharedBudget || newBudget();
   const errors = [];
   const byBkg = new Map(saved.shipments.map(s => [s.booking, s]));
   const forceSet = new Set(forceBkg.map(b => b.trim().toUpperCase()));
@@ -1016,7 +1017,7 @@ export default {
       const bkg = (url.searchParams.get("bkg") || "").trim().toUpperCase();
       if (!BKG_RE.test(bkg)) return json({ error: "Invalid booking number format (e.g. KULM68088700)" }, 400);
       try {
-        const budget = newBudget();
+        const budget = sharedBudget || newBudget();
 let one = null, lastErr = null;
 /* 세션 10번 × 조회 1번 — 다른 엣지를 만날 확률 최대화 */
 for (let s = 0; s < 10 && !one; s++) {
@@ -1316,7 +1317,7 @@ if (!one) return json({ error: "Failed to fetch booking after 10 session attempt
       const bkg = (url.searchParams.get("bkg") || BOOKINGS[0]).trim().toUpperCase();
       if (!BKG_RE.test(bkg)) return json({ error: "Invalid booking number format" }, 400);
       try {
-        const budget = newBudget();
+        const budget = sharedBudget || newBudget();
         const session = await openSession(budget);
         const html = await queryBooking(budget, session, bkg, 5);
         const t = strip(html);
@@ -1454,13 +1455,24 @@ if (!one) return json({ error: "Failed to fetch booking after 10 session attempt
           if (!isMaps) {
             const cronErrs = (p.errors || []).map(msg => ({ tag: "cron", msg }));
             if (cronErrs.length) await appendErrorLog(env, cronErrs);
+
+            /* stale 부킹 재시도 — 남은 subrequest 예산으로 */
+            const staleBkgs = (p.carried || []);
+            if (staleBkgs.length && p.budget && p.budget.left >= 6) {
+              try {
+                const r2 = await collectSchedule(env, staleBkgs, p.budget);
+                const retryErrs = (r2.errors || []).map(msg => ({ tag: "retry-1", msg }));
+                if (retryErrs.length) await appendErrorLog(env, retryErrs);
+              } catch (_) {}
+            }
+
             /* 알림 메일 */
             const saved = await getSaved(env);
             if (saved) await notifyIfNeeded(env, saved).catch(() => {});
           }
           return env.OQC.put("lastrun", JSON.stringify({
             at: stampNow(), trigger, cron: evt.cron, ok: true,
-            count: p.ok, mapOk: p.mapOk, carried: p.carried,
+            count: p.ok, mapOk: p.mapOk, carried: Array.isArray(p.carried) ? p.carried.length : (p.carried||0),
             budgetUsed: isMaps ? p.budgetUsedMaps : p.budgetUsed,
             errors: isMaps ? p.mapErrors : p.errors
           }));
