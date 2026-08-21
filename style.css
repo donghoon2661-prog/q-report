@@ -344,7 +344,8 @@ dd .dim{opacity:.65}
      지도를 낮추고, 선박을 고르면 정보가 먼저 보이도록 순서를 바꾼다. */
   #map{height:200px}
   #mapwrap{gap:10px;grid-template-columns:1fr!important}
-  #side{padding:14px;order:-1;margin-right:20px}          /* 정보 패널을 지도 위로, 오른쪽 스크롤 여백 */
+  #side{padding:14px;order:-1}          /* 정보 패널을 지도 위로 */
+  #side dd{overflow-wrap:break-word;word-break:break-word}
   #side:empty{display:none}
   .addbar input{width:100%}
   .tabs{display:none}                   /* 상단 탭 대신 하단 탭바 사용 */
