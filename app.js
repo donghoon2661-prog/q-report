@@ -55,12 +55,52 @@ function showSide(s,L2){
   const log = (HIST[s.booking]||[]).slice().reverse();
   const FL = {vessel:"VESSEL", voyage:"VOYAGE", polDep:"PKG ETD", tsDep:"SIN ETD", eta:"LA ETB", destEta:"DEST ETA"};
   const shortV = v => /^\d{4}-\d\d-\d\dT/.test(v||"") ? fmtDT(v) : v;
-  // 변경 횟수별 색상: 1회=노란, 2회=주황, 3회+=빨간
-  const changeColor = n => n >= 3 ? '#ef4444' : n === 2 ? '#f97316' : '#f6c90e';
-  const changeLegend = `<div style="display:flex;gap:14px;font-size:10px;margin-bottom:10px">
-    <span style="color:#f6c90e">■ 1 change</span>
-    <span style="color:#f97316">■ 2 changes</span>
-    <span style="color:#ef4444">■ 3+ changes</span>
+  // 변경 횟수별 색상 로직
+  // - 12h 이내 변경: 색상 유지
+  // - 12h 초과 늦어짐: 단계 올라감 (노란→주황→빨간)
+  // - 12h 초과 빨라짐: 첫 변경=초록, 이후 색상 변화 없음
+  const TWELVE_H = 12 * 60 * 60 * 1000;
+  const toMs = v => v && /^\d{4}-\d\d-\d\dT/.test(v) ? new Date(v).getTime() : null;
+  const delayColor = n => n >= 3 ? '#ef4444' : n === 2 ? '#f97316' : n === 1 ? '#f6c90e' : null;
+
+  // 값 배열로부터 색상 배열 계산
+  // vals: [{v: isoString}] 순서대로
+  function calcChainColors(vals) {
+    const colors = []; // 각 값의 색상 (첫번째 최초값 제외)
+    let delayCount = 0;
+    let hasEarlied = false; // 빨라진 적 있는지
+    for (let i = 1; i < vals.length; i++) {
+      const prevMs = toMs(vals[i-1].v);
+      const curMs = toMs(vals[i].v);
+      if (prevMs === null || curMs === null) { colors.push(null); continue; }
+      const diff = curMs - prevMs;
+      if (Math.abs(diff) <= TWELVE_H) {
+        // 12h 이내: 색상 유지 (이전 색상과 동일)
+        colors.push(colors.length ? colors[colors.length-1] : null);
+      } else if (diff > 0) {
+        // 12h 초과 늦어짐
+        delayCount++;
+        colors.push(delayColor(delayCount));
+      } else {
+        // 12h 초과 빨라짐
+        if (!hasEarlied && delayCount === 0) {
+          hasEarlied = true;
+          colors.push('#4caf8a'); // 첫 변경이고 늦어진 적 없으면 초록
+        } else {
+          // 빨라지더라도 색상 변화 없음 (이전 색상 유지)
+          colors.push(colors.length ? colors[colors.length-1] : null);
+        }
+      }
+    }
+    return colors;
+  }
+
+  const changeLegend = `<div style="display:flex;gap:14px;font-size:10px;margin-bottom:10px;flex-wrap:wrap">
+    <span style="color:#4caf8a">■ earlier (&gt;12h)</span>
+    <span style="color:#f6c90e">■ 1 delay (&gt;12h)</span>
+    <span style="color:#f97316">■ 2 delays</span>
+    <span style="color:#ef4444">■ 3+ delays</span>
+    <span style="color:var(--fog)">■ &lt;12h change</span>
   </div>`;
   const histHTML = log.length
     ? `<div class="schist"><div class="sh-h">SCHEDULE CHANGES</div>${changeLegend}` + log.map(e=>{
@@ -77,16 +117,26 @@ function showSide(s,L2){
                 const prevC = (prevE.changes||[]).find(x=>x.field===c.field);
                 if(prevC) prevChanges.push(prevC);
               }
-              let chain = '';
+              // 전체 값 배열 구성 (시간순: 최초값 → ... → 현재값)
+              const allVals = [];
               if(prevChanges.length){
-                chain += `<s style="color:var(--fog)">${shortV(prevChanges[prevChanges.length-1].from)}</s>`;
-                for(let ci=prevChanges.length-1;ci>=0;ci--){
-                  const nthChange = prevChanges.length - ci;
-                  chain += ` → <s style="color:${changeColor(nthChange)}">${shortV(prevChanges[ci].to)}</s>`;
-                }
-                chain += ` → <b style="color:${changeColor(prevChanges.length+1)}">${shortV(c.to)}</b>`;
+                allVals.push({ v: prevChanges[prevChanges.length-1].from });
+                for(let ci=prevChanges.length-1;ci>=0;ci--) allVals.push({ v: prevChanges[ci].to });
               } else {
-                chain += `<s style="color:var(--fog)">${shortV(c.from)}</s> → <b style="color:${changeColor(1)}">${shortV(c.to)}</b>`;
+                allVals.push({ v: c.from });
+              }
+              allVals.push({ v: c.to });
+
+              const colors = calcChainColors(allVals);
+
+              let chain = `<s style="color:var(--fog)">${shortV(allVals[0].v)}</s>`;
+              for(let vi=1;vi<allVals.length;vi++){
+                const col = colors[vi-1] || 'var(--fog)';
+                const isLast = vi === allVals.length-1;
+                const val = shortV(allVals[vi].v);
+                chain += isLast
+                  ? ` → <b style="color:${col}">${val}</b>`
+                  : ` → <s style="color:${col}">${val}</s>`;
               }
               return `${field} ${chain}`;
             }).join("<br>")
