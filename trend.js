@@ -257,6 +257,51 @@ async function renderErrorLogContent() {
     document.getElementById("errlog-stats").textContent =
       `성공 ${ok} / 전체 ${total} (${rate}%)`;
 
+    // 부킹별 최신 성공까지 시도 횟수 요약 테이블
+    const bookingMap = {};
+    // 시간 역순(최신순)으로 순회하면서 각 부킹의 마지막 성공까지 누적
+    const logsAsc = [...logs].reverse(); // 시간 오름차순
+    for (const l of logsAsc) {
+      if (!l.booking) continue;
+      if (!bookingMap[l.booking]) bookingMap[l.booking] = { attempts: 0, success: false, lastOk: null };
+      bookingMap[l.booking].attempts++;
+      if (l.ok) {
+        bookingMap[l.booking].success = true;
+        bookingMap[l.booking].lastOk = l.time ? `${l.date} ${l.time}` : null;
+        bookingMap[l.booking].attemptsToSuccess = bookingMap[l.booking].attempts;
+      }
+    }
+
+    const summaryRows = Object.entries(bookingMap)
+      .sort((a, b) => (b[1].attemptsToSuccess||999) - (a[1].attemptsToSuccess||999));
+
+    const summaryHtml = `
+      <div style="margin-bottom:24px">
+        <div style="font-size:11px;color:var(--fog);letter-spacing:.08em;text-transform:uppercase;margin-bottom:10px">부킹별 성공 시도 횟수</div>
+        <table style="width:100%;border-collapse:collapse;font-size:12px;font-family:monospace">
+          <thead><tr style="color:var(--fog);border-bottom:1px solid rgba(255,255,255,0.08)">
+            <th style="text-align:left;padding:5px 8px">BOOKING</th>
+            <th style="text-align:right;padding:5px 8px">총 시도</th>
+            <th style="text-align:right;padding:5px 8px">성공까지</th>
+            <th style="text-align:right;padding:5px 8px">마지막 성공</th>
+          </tr></thead>
+          <tbody>${summaryRows.map(([bkg, v]) => `
+            <tr style="border-bottom:1px solid rgba(255,255,255,0.04)">
+              <td style="padding:5px 8px">${bkg}</td>
+              <td style="padding:5px 8px;text-align:right;color:var(--fog)">${v.attempts}</td>
+              <td style="padding:5px 8px;text-align:right;color:${v.success ? '#4caf8a' : 'var(--buoy)'}">
+                ${v.success ? v.attemptsToSuccess + '회' : '미성공'}
+              </td>
+              <td style="padding:5px 8px;text-align:right;color:var(--fog);font-size:10px">
+                ${v.lastOk || '—'}
+              </td>
+            </tr>`).join('')}
+          </tbody>
+        </table>
+      </div>`;
+
+    document.getElementById("errlog-table").insertAdjacentHTML('beforebegin', summaryHtml);
+
     // 테이블
     document.getElementById("errlog-table").innerHTML = `
       <div style="font-size:11px;font-family:monospace;display:flex;flex-direction:column;gap:4px">
