@@ -942,7 +942,7 @@ async function collectMaps(env, forceBkg = []) {
   if (!saved || !saved.shipments || !saved.shipments.length)
     throw new Error("No schedule data collected yet. Run /collect first.");
 
-  const budget = sharedBudget || newBudget();
+  const budget = newBudget();
   const errors = [];
   const byBkg = new Map(saved.shipments.map(s => [s.booking, s]));
   const forceSet = new Set(forceBkg.map(b => b.trim().toUpperCase()));
@@ -1017,7 +1017,7 @@ export default {
       const bkg = (url.searchParams.get("bkg") || "").trim().toUpperCase();
       if (!BKG_RE.test(bkg)) return json({ error: "Invalid booking number format (e.g. KULM68088700)" }, 400);
       try {
-        const budget = sharedBudget || newBudget();
+        const budget = newBudget();
 let one = null, lastErr = null;
 /* 세션 10번 × 조회 1번 — 다른 엣지를 만날 확률 최대화 */
 for (let s = 0; s < 10 && !one; s++) {
@@ -1317,7 +1317,7 @@ if (!one) return json({ error: "Failed to fetch booking after 10 session attempt
       const bkg = (url.searchParams.get("bkg") || BOOKINGS[0]).trim().toUpperCase();
       if (!BKG_RE.test(bkg)) return json({ error: "Invalid booking number format" }, 400);
       try {
-        const budget = sharedBudget || newBudget();
+        const budget = newBudget();
         const session = await openSession(budget);
         const html = await queryBooking(budget, session, bkg, 5);
         const t = strip(html);
