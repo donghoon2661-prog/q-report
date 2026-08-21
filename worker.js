@@ -750,6 +750,7 @@ async function collectSchedule(env, forceBkgs = null, sharedBudget = null) {
   const out = new Map(), errors = [];
   let pending = [...activeSlice], sessionsUsed = 0;
   const errMap = new Map();
+  const sessionLogs = [];
 
   for (let round = 0; round < MAX_SESSIONS && pending.length; round++) {
     /* 남은 예산이 이번 라운드를 감당 못 하면 중단 */
@@ -771,11 +772,16 @@ async function collectSchedule(env, forceBkgs = null, sharedBudget = null) {
       try {
         const _html = await queryBooking(budget, session, bkg, TRIES_PER_ITEM);
         const _item = parseBooking(_html, bkg);
-        if (budget.lastCfRay) _item.successEdge = (budget.lastCfRay.match(/-([A-Z]{3})/) || [])[1] || null;
+        const _loc = budget.lastCfRay ? (budget.lastCfRay.match(/-([A-Z]{3})/) || [])[1] || null : null;
+        if (_loc) _item.successEdge = _loc;
         out.set(bkg, _item);
+        sessionLogs.push({ ok: true, booking: bkg, attempt: round + 1, loc: _loc });
       } catch (e) {
         stillFailing.push(bkg);
-                errMap.set(bkg, String(e.message || e));
+        errMap.set(bkg, String(e.message || e));
+        const _code = (String(e.message||e).match(/response\s+(\d{3})/) || [])[1] || null;
+        const _loc = (String(e.message||e).match(/-([A-Z]{3})/) || [])[1] || null;
+        sessionLogs.push({ ok: false, booking: bkg, attempt: round + 1, code: _code, loc: _loc });
         if (round === MAX_SESSIONS - 1 || budget.left < 6)
           errors.push(String(e.message || e));
       }
@@ -784,6 +790,11 @@ async function collectSchedule(env, forceBkgs = null, sharedBudget = null) {
     pending = stillFailing;
   }
   if (pending.length) errors.push("Unresolved: " + pending.join(", "));
+
+  /* 세션 로그 저장 */
+  if (sessionLogs.length) {
+    appendSessionLog(env, sessionLogs.map(l => ({ ...l, tag: forceBkgs ? "retry" : "cron" }))).catch(() => {});
+  }
 
   /* 이전 수집분 승계 — 지도 좌표, 이번에 안 돈 부킹, 실패 건, 완료 건 */
   /* prevMap은 위에서 이미 로드함 */
@@ -942,7 +953,7 @@ async function collectMaps(env, forceBkg = []) {
   if (!saved || !saved.shipments || !saved.shipments.length)
     throw new Error("No schedule data collected yet. Run /collect first.");
 
-  const budget = newBudget();
+  const budget = sharedBudget || newBudget();
   const errors = [];
   const byBkg = new Map(saved.shipments.map(s => [s.booking, s]));
   const forceSet = new Set(forceBkg.map(b => b.trim().toUpperCase()));
@@ -1017,7 +1028,7 @@ export default {
       const bkg = (url.searchParams.get("bkg") || "").trim().toUpperCase();
       if (!BKG_RE.test(bkg)) return json({ error: "Invalid booking number format (e.g. KULM68088700)" }, 400);
       try {
-        const budget = newBudget();
+        const budget = sharedBudget || newBudget();
 let one = null, lastErr = null;
 /* 세션 10번 × 조회 1번 — 다른 엣지를 만날 확률 최대화 */
 for (let s = 0; s < 10 && !one; s++) {
@@ -1317,7 +1328,7 @@ if (!one) return json({ error: "Failed to fetch booking after 10 session attempt
       const bkg = (url.searchParams.get("bkg") || BOOKINGS[0]).trim().toUpperCase();
       if (!BKG_RE.test(bkg)) return json({ error: "Invalid booking number format" }, 400);
       try {
-        const budget = newBudget();
+        const budget = sharedBudget || newBudget();
         const session = await openSession(budget);
         const html = await queryBooking(budget, session, bkg, 5);
         const t = strip(html);
@@ -1387,7 +1398,7 @@ if (!one) return json({ error: "Failed to fetch booking after 10 session attempt
     /* ── /backup : KV 전체 스냅샷 반환 (GitHub Actions 주간 백업용, X-Refresh-Key 인증) ── */
     if (url.pathname === "/backup") {
       if (!auth(req, env)) return json({ error: "Authentication failed" }, 401);
-      const keys = ["shipments","bookings","pomap","poeta","pophoto","history","alertstate","lastrun","cursor"];
+      const keys = ["shipments","bookings","pomap","poeta","pophoto","history","alertstate","lastrun","cursor","sessionLog"];
       const kv = {};
       for (const k of keys) {
         const v = await env.OQC.get(k, "text");
@@ -1498,4 +1509,27 @@ async function appendErrorLog(env, entries) {
   try { existing = JSON.parse(await env.OQC.get("errorLog") || "[]"); } catch (_) {}
   const combined = [...existing, ...newRows].slice(-50);
   await env.OQC.put("errorLog", JSON.stringify(combined), { expirationTtl: 7 * 24 * 3600 }).catch(() => {});
+}
+
+/* ---------- 세션 로그 (성공/실패 모두 기록) ----------
+   KV "sessionLog" 에 최대 200개 유지 (14일 TTL)
+   { t, date, ok, tag, booking, attempt, code, loc } */
+async function appendSessionLog(env, entries) {
+  if (!entries || !entries.length) return;
+  const now = new Date(Date.now() + 9 * 3600 * 1000);
+  const date = now.toISOString().slice(5, 10).replace('-', '/'); // MM/DD
+  const time = now.toISOString().slice(11, 16);                  // HH:MM
+  const newRows = entries.map(e => ({
+    t: Date.now(), date, time,
+    ok: e.ok,
+    tag: e.tag || 'cron',
+    booking: e.booking,
+    attempt: e.attempt || 1,
+    code: e.code || null,
+    loc: e.loc || null
+  }));
+  let existing = [];
+  try { existing = JSON.parse(await env.OQC.get("sessionLog") || "[]"); } catch (_) {}
+  const combined = [...existing, ...newRows].slice(-200);
+  await env.OQC.put("sessionLog", JSON.stringify(combined), { expirationTtl: 14 * 24 * 3600 }).catch(() => {});
 }
