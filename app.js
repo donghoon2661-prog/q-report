@@ -686,6 +686,12 @@ document.getElementById("force-reload-btn").addEventListener("click", function()
 
 document.addEventListener("DOMContentLoaded",()=>{
   initTheme();
+  /* 모바일: #side 패널 터치 스크롤이 Leaflet 지도로 전파되지 않도록 차단 */
+  const sideEl = document.getElementById("side");
+  if(sideEl){
+    sideEl.addEventListener("touchmove", e => { e.stopPropagation(); }, { passive: true });
+    sideEl.addEventListener("wheel",     e => { e.stopPropagation(); }, { passive: true });
+  }
   const sw = document.getElementById("themesw");
   if(sw) sw.addEventListener("click", ()=> applyTheme(THEME === "light" ? "dark" : "light"));
   const qb=document.getElementById("qback");
