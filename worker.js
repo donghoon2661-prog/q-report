@@ -1469,7 +1469,7 @@ if (!one) return json({ error: "Failed to fetch booking after 10 session attempt
 
             /* stale 부킹 재시도 — 남은 subrequest 예산으로 */
             const staleBkgs = (p.carried || []);
-            if (staleBkgs.length && p.budget && p.budget.left >= 6) {
+            if (staleBkgs.length && p.budget && p.budget.left >= 3) {
               try {
                 const r2 = await collectSchedule(env, staleBkgs, p.budget);
                 const retryErrs = (r2.errors || []).map(msg => ({ tag: "retry-1", msg }));
