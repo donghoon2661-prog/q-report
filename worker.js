@@ -1089,17 +1089,17 @@ if (!one) return json({ error: "Failed to fetch booking after 10 session attempt
         try {
           const saved = await getSaved(env);
           /* saved가 null이거나 shipments 배열이 없으면 최소한의 구조로 새로 만든다 */
-                    const base = (saved && Array.isArray(saved.shipments))
-                                ? saved
-                                            : { updated: one.checkedAt, source: "hmm21.com Track & Trace",
-                                                            shipments: [], tracked: known.length, ok: 0, mapOk: 0 };
-                                                                      const i = base.shipments.findIndex(x => x.booking === bkg);
-                                                                                if (i >= 0) base.shipments[i] = one; else base.shipments.push(one);
-                                                                                          base.tracked = known.length;
-                                                                                                    base.ok = base.shipments.filter(x => !x.staleItem).length;
-                                                                                                              base.mapOk = base.shipments.filter(x => x.route).length;
-                                                                                                                        await env.OQC.put("shipments", JSON.stringify(base));
-                                                                                                                                  one.savedToData = true;
+          const base = (saved && Array.isArray(saved.shipments))
+            ? saved
+            : { updated: one.checkedAt, source: "hmm21.com Track & Trace",
+                shipments: [], tracked: known.length, ok: 0, mapOk: 0 };
+          const i = base.shipments.findIndex(x => x.booking === bkg);
+          if (i >= 0) base.shipments[i] = one; else base.shipments.push(one);
+          base.tracked = known.length;
+          base.ok = base.shipments.filter(x => !x.staleItem).length;
+          base.mapOk = base.shipments.filter(x => x.route).length;
+          await env.OQC.put("shipments", JSON.stringify(base));
+          one.savedToData = true;
 
           /* 스케줄 이력에도 첫 관측을 남긴다 */
           let hist = {};
