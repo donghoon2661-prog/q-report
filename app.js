@@ -552,7 +552,9 @@ function setView(v){
     /* MAP 첫 진입 시 ETA 가장 빠른 vessel 자동 표시 */
     setTimeout(()=>{
       const panel = document.getElementById('side');
-      if(!panel || panel.innerHTML.trim()) return; // 이미 선택된 게 있으면 skip
+      if(!panel) return;
+      // h3 태그가 있으면 이미 vessel 선택된 것 — skip
+      if(panel.querySelector('h3')) return;
       if(!CUR || !CUR.shipments) return;
       const active = CUR.shipments.filter(s => !s.etaActual && s.eta);
       if(!active.length) return;
