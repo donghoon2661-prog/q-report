@@ -277,7 +277,7 @@ dd .dim{opacity:.65}
 .leaflet-control-attribution a{color:var(--fog)!important}
 /* 지도와 같은 높이로 고정하고, 내용이 길면 패널 안에서만 스크롤한다 */
 #side{border:1px solid var(--line);background:var(--hull);padding:18px;
-  height:560px;overflow-y:auto;overscroll-behavior:contain}
+  height:560px;overflow-y:auto;overscroll-behavior:contain;touch-action:pan-y}
 #side::-webkit-scrollbar{width:8px}
 #side::-webkit-scrollbar-thumb{background:var(--line);border-radius:4px}
 #side::-webkit-scrollbar-track{background:transparent}
