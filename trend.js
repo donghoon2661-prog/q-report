@@ -67,6 +67,10 @@ function renderTrendContent() {
           <canvas id="trend-monthly-chart" height="220" style="width:100%"></canvas>
         </div>
         <div class="trend-section">
+          <div class="trend-section-title">노선별 현황 (진행 중)</div>
+          <div id="trend-route-table"></div>
+        </div>
+        <div class="trend-section">
           <div class="trend-section-title">선박별 평균 지연</div>
           <div id="trend-vessel-table"></div>
         </div>
@@ -79,6 +83,7 @@ function renderTrendContent() {
     renderLegBreakdown(data);
     renderMonthlyChart(data);
     renderVesselTable(data);
+    renderRouteTable();
   }).catch(e => {
     document.getElementById("trend-loading").textContent = "Failed: " + (e.message || e);
   });
@@ -322,5 +327,57 @@ async function renderErrorLogContent() {
       </div>`;
   } catch(e) {
     document.getElementById("errlog-loading").textContent = "Failed: " + (e.message || e);
+  }
+}
+
+/* ---------- 노선별 현황 (진행 중 부킹 기준) ---------- */
+async function renderRouteTable() {
+  const el = document.getElementById("trend-route-table");
+  if (!el) return;
+
+  try {
+    const r = await fetch(typeof source === 'function' ? source() : 'https://kossan-oqc.dhoqc.workers.dev/data', {cache:'no-store'});
+    const d = await r.json();
+    const ships = (d.shipments || []).filter(s => !s.etaActual);
+
+    if (!ships.length) { el.innerHTML = '<div style="color:var(--fog);font-size:12px">진행 중인 부킹 없음</div>'; return; }
+
+    // SVC별 그룹핑
+    const byRoute = {};
+    for (const s of ships) {
+      const key = s.svc || 'UNKNOWN';
+      if (!byRoute[key]) byRoute[key] = { svc: key, bookings: [], vessels: new Set() };
+      byRoute[key].bookings.push(s);
+      if (s.vessel) byRoute[key].vessels.add(s.vessel);
+    }
+
+    const rows = Object.values(byRoute).sort((a,b) => a.svc.localeCompare(b.svc));
+
+    el.innerHTML = `<table style="width:100%;border-collapse:collapse;font-size:12px">
+      <thead><tr style="color:var(--fog);border-bottom:1px solid rgba(255,255,255,0.08)">
+        <th style="text-align:left;padding:6px 8px">노선</th>
+        <th style="text-align:left;padding:6px 8px">T/S</th>
+        <th style="text-align:right;padding:6px 8px">진행</th>
+        <th style="text-align:right;padding:6px 8px">평균 지연</th>
+        <th style="text-align:left;padding:6px 8px">운항 선박</th>
+      </tr></thead>
+      <tbody>${rows.map(r => {
+        const delays = r.bookings.filter(s => typeof s.delayDays === 'number').map(s => s.delayDays);
+        const avgDelay = delays.length ? (delays.reduce((a,b)=>a+b,0)/delays.length).toFixed(1) : null;
+        const delayColor = avgDelay === null ? 'var(--fog)' : avgDelay > 7 ? '#ef4444' : avgDelay > 3 ? '#f97316' : avgDelay > 0 ? '#f6c90e' : '#4caf8a';
+        const ts = r.bookings[0]?.ts || '—';
+        return `<tr style="border-bottom:1px solid rgba(255,255,255,0.04)">
+          <td style="padding:6px 8px;font-weight:600">${r.svc}</td>
+          <td style="padding:6px 8px;color:var(--fog)">${ts}</td>
+          <td style="padding:6px 8px;text-align:right;color:var(--fog)">${r.bookings.length}건</td>
+          <td style="padding:6px 8px;text-align:right;color:${delayColor}">
+            ${avgDelay !== null ? (avgDelay > 0 ? '+' : '') + avgDelay + 'd' : '—'}
+          </td>
+          <td style="padding:6px 8px;color:var(--fog);font-size:11px">${[...r.vessels].join(', ')}</td>
+        </tr>`;
+      }).join('')}</tbody>
+    </table>`;
+  } catch(e) {
+    el.innerHTML = `<div style="color:var(--fog);font-size:12px">Failed: ${e.message}</div>`;
   }
 }
