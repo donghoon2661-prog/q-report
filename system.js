@@ -202,10 +202,20 @@ async function sysRetry(bkg, btn){
       const cells = row.querySelectorAll('span');
       const now = new Date();
       cells[1].textContent = fmtDT(now.toISOString().slice(0,16));
-      cells[2].innerHTML = `<span class="sys-ok">ok</span>`;
-      cells[3].innerHTML = '';
+      if(res.savedToData){
+        cells[2].innerHTML = `<span class="sys-ok">ok</span>`;
+        cells[3].innerHTML = '';
+      } else {
+        cells[2].innerHTML = `<span class="sys-warn">⚠ 조회 성공, KV 저장 실패</span>`;
+        cells[3].innerHTML = res.saveWarn
+          ? `<span class="sys-bad" style="font-size:10px">${res.saveWarn}</span>` : '';
+      }
     }
-    fetch(source(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(d=>{ if(d){ render(d); } });
+    if(res.savedToData){
+      setTimeout(()=>{
+        fetch(source(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(d=>{ if(d){ render(d); } });
+      }, 1000);
+    }
   } catch(e){
     if(btn){ btn.disabled=false; btn.textContent='RETRY'; }
     if(row){
