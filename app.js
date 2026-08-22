@@ -482,8 +482,7 @@ function stampText(d){
   document.getElementById("stamp").innerHTML =
     `HMM retrieved ${toKST(d.updated)} · ${ago(d.updated)}` +
     (d.stale ? `<span class="warn"> · no new HMM events</span>` : "") +
-    `<span class="dim2"> · next update in ${nextRun()}</span>` +
-    `<span class="dim2"> · ${CRON_KST.length}× daily (${CRON_LABEL})</span>`;
+    `<br><span class="dim2">next update in ${nextRun()} · ${CRON_KST.length}× daily (${CRON_LABEL})</span>`;
 }
 
 /* ---------- 렌더링 ---------- */
