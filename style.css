@@ -74,13 +74,13 @@ html[data-theme="light"] .tile:hover{background:#F0F5F8;border-color:#0F2430}
   font-size:13px;letter-spacing:.16em;color:var(--fog)}
 .btn:hover{color:var(--paper);border-color:var(--fog)}
 .topbar h1{font-family:'Barlow Condensed';font-weight:700;font-size:26px;letter-spacing:.06em;margin:0}
-.stamp{font-family:'IBM Plex Mono';font-size:11px;color:var(--fog);line-height:1.7;flex:1}
+.stamp{font-family:'IBM Plex Mono';font-size:11px;color:var(--fog);line-height:1.7;min-width:260px;max-width:320px}
 .topbar .spacer{flex:1}.topbar .brand{font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.14em;
   color:var(--sail);text-align:right;line-height:1.5;white-space:nowrap}
 .topbar .brand .l1{display:block;opacity:.6}
 .topbar .brand .l2{display:block;font-weight:600}
 .stamp .dim2{color:var(--fog);opacity:.62}
-.world-clocks{display:flex;align-items:center;gap:10px;font-family:'IBM Plex Mono',monospace}
+.world-clocks{display:flex;align-items:center;gap:10px;font-family:'IBM Plex Mono',monospace;margin-left:auto}
 .wc-zone{display:flex;flex-direction:column;align-items:center;gap:1px}
 .wc-flag{font-size:14px;line-height:1}
 .wc-time{font-size:14px;font-weight:600;color:var(--text);letter-spacing:.03em;white-space:nowrap}
