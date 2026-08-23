@@ -721,21 +721,3 @@ document.addEventListener("DOMContentLoaded",()=>{
   if(ts && (Date.now()-ts) < AUTH_TTL_MS){ proceedAfterUnlock(); }
 })();
 
-(function worldClock(){
-  function p(n){ return String(n).padStart(2,"0"); }
-  function fmt(tz){
-    const d = new Date(new Date().toLocaleString("en-US",{timeZone:tz}));
-    return { time:`${p(d.getHours())}:${p(d.getMinutes())}`, secs:p(d.getSeconds()), date:`${p(d.getMonth()+1)}/${p(d.getDate())}` };
-  }
-  function tick(){
-    const kst=fmt("Asia/Seoul"), myt=fmt("Asia/Kuala_Lumpur"), la=fmt("America/Los_Angeles");
-    const kt=document.getElementById("wc-kst"); if(kt) kt.textContent=kst.time+":"+kst.secs;
-    const kd=document.getElementById("wc-kst-d"); if(kd) kd.textContent=kst.date+" KST";
-    const mt=document.getElementById("wc-myt"); if(mt) mt.textContent=myt.time;
-    const md=document.getElementById("wc-myt-d"); if(md) md.textContent=myt.date+" MYT";
-    const lt=document.getElementById("wc-la"); if(lt) lt.textContent=la.time;
-    const ld=document.getElementById("wc-la-d"); if(ld) ld.textContent=la.date+" PDT";
-  }
-  tick();
-  setInterval(tick,1000);
-})();
