@@ -183,7 +183,8 @@ function select(s,i,pan){
 const SIGNAL_DAYS = 5;
 const GAP_REMARK = `<p class="gapremark">The <b>!</b> mark appears when the LA ETB has moved
   against the original plan, and disappears automatically ${SIGNAL_DAYS} days after the change was
-  detected. Click the number box at any time to see the full change log.</p>`;
+  detected. Click the number box at any time to see the full change log.</p>
+<p class="gapremark">All dates and times are local dates and times.</p>`;
 
 function etaChangeLog(booking){
   const plan = POETA[booking] || null;
