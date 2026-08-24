@@ -969,7 +969,7 @@ async function collectMaps(env, forceBkg = []) {
   const byBkg = new Map(saved.shipments.map(s => [s.booking, s]));
   const forceSet = new Set(forceBkg.map(b => b.trim().toUpperCase()));
   let pending = saved.shipments
-    .filter(s => s.container && !s.etaActual && (forceSet.has(s.booking) || !s.route || s.mapError || true))
+    .filter(s => s.container && !s.etaActual && (forceSet.size ? forceSet.has(s.booking) : (!s.route || s.mapError || !mapFresh(s))))
     .map(s => s.booking)
     .slice(0, MAX_PER_RUN);
   if (!pending.length) return { ...saved, mapNote: "보충할 지도 없음" };
