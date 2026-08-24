@@ -1046,7 +1046,7 @@ if (!one) return json({ error: "Failed to fetch booking after 10 session attempt
             for (let s = 0; s < 10 && !mapDone; s++) {
               let session;
               try { session = await openSession(budget); } catch (e) { continue; }
-              try { Object.assign(one, await fetchMap(budget, session, bkg, one.container, 1)); mapDone = true; } catch (e) { one.mapError = String(e.message || e); }
+              try { Object.assign(one, await fetchMap(budget, session, bkg, one.container, 1)); mapDone = true; } catch (e) { if (!one.route) one.mapError = String(e.message || e); }
             }
           }
         } catch (e) { one.mapError = String(e.message || e); }
