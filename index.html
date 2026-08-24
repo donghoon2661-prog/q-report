@@ -56,6 +56,7 @@
 <section id="ship">
   <div class="topbar">
     <button class="btn" id="back">← MENU</button>
+    <span class="tz-mob-display" id="tz-mob-display" style="display:none"></span>
     <h1 id="ship-title" title="Click to reload data">SHIPMENT STATUS</h1>
     <div class="stamp" id="stamp"></div>
     <span class="spacer"></span>
@@ -116,8 +117,6 @@
     <button class="tz-mob-btn active" id="tzm-KR" onclick="setTzMobile('KR')">KO</button>
     <button class="tz-mob-btn" id="tzm-MY" onclick="setTzMobile('MY')">MY</button>
     <button class="tz-mob-btn" id="tzm-US" onclick="setTzMobile('US')">US</button>
-    <span class="tz-mob-time" id="tz-mob-time">--:--:--</span>
-    <span class="tz-mob-abbr" id="tz-mob-abbr">KST</span>
   </div>
   <nav class="ship-tabbar" aria-label="Section switch">
     <button data-view="map" class="on"><span class="ico">▥</span>Map</button>
