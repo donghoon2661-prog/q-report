@@ -992,12 +992,34 @@ async function collectMaps(env, forceBkg = []) {
         delete item.mapError;
       } catch (e) {
         stillFailing.push(bkg);
-        item.mapError = String(e.message || e);
+        /* 기존 route가 있으면 mapError 쓰지 않음 — ok 상태 유지 */
+        if (!item.route) item.mapError = String(e.message || e);
         if (round === MAX_SESSIONS - 1) errors.push(String(e.message || e));
       }
       await sleep(2000);
     }
     pending = stillFailing;
+  }
+
+  /* Race condition 방지 — 저장 직전 최신 KV를 다시 읽어서
+     다른 요청이 이미 성공시킨 부킹의 route/mapAt은 보존 */
+  const latest = await getSaved(env);
+  if (latest && latest.shipments) {
+    const latestMap = new Map(latest.shipments.map(s => [s.booking, s]));
+    for (const item of saved.shipments) {
+      const fresh = latestMap.get(item.booking);
+      if (!fresh) continue;
+      /* 현재 수집에서 실패했지만 최신 KV에 route가 있으면 보존 */
+      if (!item.route && fresh.route) {
+        item.route = fresh.route;
+        item.names = fresh.names;
+        item.namedPorts = fresh.namedPorts;
+        item.idx = fresh.idx;
+        item.ratio = fresh.ratio;
+        item.mapAt = fresh.mapAt;
+        delete item.mapError;
+      }
+    }
   }
 
   saved.mapUpdated = new Date().toISOString().slice(0, 16).replace("T", " ") + "Z";
