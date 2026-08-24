@@ -60,21 +60,18 @@
     <div class="stamp" id="stamp"></div>
     <span class="spacer"></span>
     <div class="tz-group" id="tz-group">
-      <button class="tz-btn active" id="tz-btn-KR" onclick="setTz('KR')">
-        <span class="tz-flag">🇰🇷</span>
-        <span class="tz-label">KR</span>
-        <span class="tz-time" id="tz-time-KR">--:--</span>
-      </button>
-      <button class="tz-btn" id="tz-btn-MY" onclick="setTz('MY')">
-        <span class="tz-flag">🇲🇾</span>
-        <span class="tz-label">MY</span>
-        <span class="tz-time" id="tz-time-MY">--:--</span>
-      </button>
-      <button class="tz-btn" id="tz-btn-US" onclick="setTz('US')">
-        <span class="tz-flag">🇺🇸</span>
-        <span class="tz-label">US</span>
-        <span class="tz-time" id="tz-time-US">--:--</span>
-      </button>
+      <div class="tz-clock">
+        <span class="tz-time" id="tz-time-KR">--:--:--</span>
+        <span class="tz-abbr" id="tz-time-KR-abbr">KST</span>
+      </div>
+      <div class="tz-clock">
+        <span class="tz-time" id="tz-time-MY">--:--:--</span>
+        <span class="tz-abbr" id="tz-time-MY-abbr">MYT</span>
+      </div>
+      <div class="tz-clock">
+        <span class="tz-time" id="tz-time-US">--:--:--</span>
+        <span class="tz-abbr" id="tz-time-US-abbr">PDT</span>
+      </div>
     </div>
     <span class="brand"><span class="l1">KOSSAN</span><span class="l2">SHIPMENT CONTROL</span></span>
   </div>
