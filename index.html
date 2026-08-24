@@ -112,6 +112,13 @@
     <button class="tab tab-admin" data-view="beta" id="tab-beta" style="display:none">BETA</button>
     <button class="tab tab-admin" data-view="system" id="tab-system" style="display:none">SYSTEM</button>
   </div>
+  <div class="tz-mobile-bar" id="tz-mobile-bar">
+    <button class="tz-mob-btn active" id="tzm-KR" onclick="setTzMobile('KR')">KO</button>
+    <button class="tz-mob-btn" id="tzm-MY" onclick="setTzMobile('MY')">MY</button>
+    <button class="tz-mob-btn" id="tzm-US" onclick="setTzMobile('US')">US</button>
+    <span class="tz-mob-time" id="tz-mob-time">--:--:--</span>
+    <span class="tz-mob-abbr" id="tz-mob-abbr">KST</span>
+  </div>
   <nav class="ship-tabbar" aria-label="Section switch">
     <button data-view="map" class="on"><span class="ico">▥</span>Map</button>
     <button data-view="list"><span class="ico">☰</span>List</button>
