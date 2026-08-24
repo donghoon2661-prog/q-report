@@ -685,3 +685,14 @@ html[data-theme="light"] #qview td.near{background:rgba(154,107,18,.08)}
 .tz-clock:last-child{border-right:none}
 .tz-clock .tz-time{font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:600;color:var(--paper);letter-spacing:.04em;line-height:1.3}
 .tz-clock .tz-abbr{font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--fog);letter-spacing:.08em;line-height:1.4}
+/* 모바일에서 데스크탑 시계 숨김 */
+@media(max-width:760px){.tz-group{display:none}}
+/* 모바일 TZ 버튼 바 */
+.tz-mobile-bar{display:none}
+@media(max-width:760px){
+  .tz-mobile-bar{display:flex;align-items:center;gap:6px;padding:6px 0 8px;border-bottom:1px solid var(--line-soft);margin-bottom:4px}
+  .tz-mob-btn{background:none;border:1px solid var(--line);color:var(--fog);font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;letter-spacing:.1em;padding:3px 10px;cursor:pointer}
+  .tz-mob-btn.active{border-color:var(--sail);color:var(--sail);background:var(--hull)}
+  .tz-mob-time{font-family:'IBM Plex Mono',monospace;font-size:15px;font-weight:600;color:var(--paper);letter-spacing:.04em;margin-left:6px}
+  .tz-mob-abbr{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--fog);letter-spacing:.08em}
+}
