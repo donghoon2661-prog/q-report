@@ -114,47 +114,16 @@ function ago(ts){
   return m<60 ? m+"m ago" : m<1440 ? Math.round(m/60)+"h ago" : Math.round(m/1440)+"d ago";
 }
 
-/* ===== TZ 상태 관리 ===== */
-const TZ_CONFIG = {
-  KR: { zone:'Asia/Seoul',          abbr:'KST', offsetH:9  },
-  MY: { zone:'Asia/Kuala_Lumpur',   abbr:'MYT', offsetH:8  },
-  US: { zone:'America/Los_Angeles', abbr:null,  offsetH:null }
-};
-let _curTz = localStorage.getItem('shipTz') || 'KR';
-
-function getTzAbbr(key){
-  if(TZ_CONFIG[key].abbr) return TZ_CONFIG[key].abbr;
-  return new Intl.DateTimeFormat('en-US',{timeZone:TZ_CONFIG[key].zone,timeZoneName:'short'})
-    .formatToParts(new Date()).find(p=>p.type==='timeZoneName')?.value||'';
-}
-
-function setTz(key){
-  _curTz = key;
-  localStorage.setItem('shipTz', key);
-  document.querySelectorAll('.tz-btn').forEach(b=>b.classList.remove('active'));
-  const btn = document.getElementById('tz-btn-'+key);
-  if(btn) btn.classList.add('active');
-  if(typeof CUR !== 'undefined' && CUR) { stampText(CUR); render(CUR); }
-}
-
-/* "2026-08-03 23:13Z"(UTC) → "08-04 08:13 KST" (선택된 TZ 기준) */
+/* "2026-08-03 23:13Z"(UTC) → "08-04 08:13 KST" */
 function toKST(ts){
   if(!ts) return "—";
   const t = String(ts).trim().replace(" ","T");
   const d = new Date(/Z$/i.test(t) ? t : t+"+09:00");
   if(isNaN(d)) return ts;
-  const cfg = TZ_CONFIG[_curTz];
-  const abbr = getTzAbbr(_curTz);
-  const fmt = new Intl.DateTimeFormat('en-US',{
-    timeZone: cfg.zone,
-    month:'2-digit', day:'2-digit',
-    hour:'2-digit', minute:'2-digit', hour12:false
-  });
-  const parts = fmt.formatToParts(d);
-  const get = type => parts.find(p=>p.type===type)?.value||'00';
-  return `${get('month')}-${get('day')} ${get('hour')}:${get('minute')} ${abbr}`;
+  const k = new Date(d.getTime() + 9*3600000);
+  const p = n => String(n).padStart(2,"0");
+  return `${p(k.getUTCMonth()+1)}-${p(k.getUTCDate())} ${p(k.getUTCHours())}:${p(k.getUTCMinutes())} KST`;
 }
-
 /* SYSTEM 탭 시간: "Aug/11 09:01 (08:01)" — KST, 괄호는 MYT */
 function fmtSysTime(ts){
   if(!ts) return "—";
