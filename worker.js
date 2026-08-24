@@ -293,6 +293,7 @@ function parseBooking(html, bkg) {
         .split("\n").filter(s => DT_RE.test(s))
     : [];
   const locs = sch ? ((sch.match(/Location\n([\s\S]*?)\nTerminal/) || [])[1] || "").split("\n").filter(Boolean) : [];
+  const terms = sch ? ((sch.match(/Terminal\n([\s\S]*?)\nVessel/) || [])[1] || "").split("\n").filter(Boolean) : [];
   const destEta = schArr.length ? iso(schArr[schArr.length - 1]) : null;
 
   /* 이벤트 — 나중에 delayHistory 구간별 분해(T/S 드웰링 등)에 쓰이므로 넉넉히 보존 */
@@ -327,6 +328,7 @@ function parseBooking(html, bkg) {
     ts:   feeder ? feeder.pod : null,
     pod:  mother.pod,
     dest: locs[locs.length - 1] || null,
+    terminals: terms.length ? terms : null,
 
     polDep: feeder ? feeder.etd : mother.etd,
     tsArr:  feeder ? feeder.eta : null,
@@ -600,6 +602,7 @@ function diffSchedule(prev, next) {
   if (!prev) return null;
   const f = [
     ["vessel", "Vessel"], ["voyage", "Voyage"],
+    ["feeder", "Feeder"],
     ["polDep", "PKG ETD"],
     ["tsArr", "T/S ETA"], ["tsDep", "T/S ETD"], ["eta", "POD ETB"], ["destEta", "DEST ETA"]
   ];
