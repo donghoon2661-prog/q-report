@@ -155,7 +155,7 @@ function showSide(s,L2){
     ? `<dt>CHECKED</dt><dd>${toKST(s.checkedAt)} · ${ago(s.checkedAt)}${s.staleItem?' <b class="warn">(retry pending)</b>':''}</dd>` : "";
 
   document.getElementById('side').innerHTML=`
-    <h3>${s.vessel} ${s.voyage}</h3>
+    <h3>${s.vessel} ${s.voyage}${phaseBadge(s,L2)}</h3>
     <div class="sb">${s.booking} · ${s.svc} · ${s.cntrQty||(s.containers&&s.containers.length)||"—"} CNTR${s.cntrType?" "+s.cntrType:""}</div>
     <dl>
       ${geo}
@@ -181,6 +181,19 @@ function select(s,i,pan){
 
 /* ---------- 변동 로그 ---------- */
 const SIGNAL_DAYS = 5;
+
+function phaseBadge(s, L2) {
+  if (!L2) return "";
+  if (s.etaActual) return `<span class="ph done">ARRIVED</span>`;
+  if (L2.atPort) {
+    const cur = L2.names[L2.i] || "";
+    const ts  = (s.ts || "").toUpperCase();
+    if (ts && cur.toUpperCase().includes(ts.slice(0,3)))
+      return `<span class="ph dock">AT T/S PORT</span>`;
+    return `<span class="ph dock">BERTHED</span>`;
+  }
+  return `<span class="ph sail">AT SEA</span>`;
+}
 const GAP_REMARK = `<p class="gapremark">The <b>!</b> mark appears when the LA ETB has moved
   against the original plan, and disappears automatically ${SIGNAL_DAYS} days after the change was
   detected. Click the number box at any time to see the full change log.</p>
@@ -301,9 +314,10 @@ function rowsHTML(list){
   return list.map((s,i)=>{
     const etaActTag  = actTag(!!s.etaActual);
     const destActTag = s.destEta ? actTag(!!s.etaActual) : "";
+    const L2 = locate(s);
     return `
     <tr data-i="${i}">
-      <td><span class="nm">${s.vessel}</span><span class="vy">${s.voyage}</span>
+      <td><span class="nm">${s.vessel}</span><span class="vy">${s.voyage}</span>${phaseBadge(s,L2)}
           <span class="bk">${s.booking} · ${s.cntrQty||"—"} CNTR${s.staleItem?" · STALE":""}</span></td>
       <td data-l="PKG ETD"><span class="dt">${fmtDT(s.polDep)}</span><span class="est">${actTag(!!s.polDepActual)}</span></td>
       <td data-l="SIN ETD"><span class="dt">${fmtDT(s.tsDep)}</span><span class="est">${actTag(!!s.tsDepActual)}</span></td>
@@ -337,6 +351,110 @@ function buildTable(data){
 }
 
 /* ---------- 카드 ---------- */
+/* ---------- Shipment Schedule 테이블 ---------- */
+function schTableHTML(s) {
+  const hist = HIST[s.booking] || [];
+
+  /* 필드별 변경 이력 추출 */
+  function fieldHist(field) {
+    const entries = [];
+    for (const e of hist) {
+      if (!Array.isArray(e.changes)) continue;
+      const c = e.changes.find(x => x.field === field);
+      if (c) entries.push({ at: e.at, from: c.from });
+    }
+    return entries.reverse(); /* 최신순 */
+  }
+
+  /* 이력 HTML — 취소선 + 감지일 */
+  function histHTML(field, fmtFn) {
+    const log = fieldHist(field);
+    if (!log.length) return "";
+    return `<div class="sch-hl">${log.map(e =>
+      `<div class="sch-he"><div class="sch-hdot"></div><div>` +
+      `<div class="sch-hv">${fmtFn(e.from)}</div>` +
+      `<div class="sch-hw">${fmtDT(e.at)} 변경</div></div></div>`
+    ).join("")}</div>`;
+  }
+
+  /* 현재값 셀 */
+  function cv(val, field, fmtFn, actualFlag) {
+    if (!val) return `<div class="sch-na">—</div>`;
+    const changed = fieldHist(field).length > 0;
+    const actual  = actualFlag ? !!s[actualFlag] : false;
+    const cls     = actual ? "" : (changed ? " sch-changed" : "");
+    const actBadge = actual ? ` <span class="sch-act">ACT</span>` : "";
+    return `<div class="sch-cv${cls}">${fmtFn(val)}${actBadge}</div>${histHTML(field, fmtFn)}`;
+  }
+
+  /* 터미널 — 이력 없음(신규 파싱), 단순 표시 */
+  const terms = s.terminals || [];
+  function term(idx) {
+    return terms[idx] ? `<div class="sch-cv">${terms[idx]}</div>` : `<div class="sch-na">—</div>`;
+  }
+
+  /* 피더/모선 vessel 이력 */
+  function vesselCV(field, voyField) {
+    const cur = s[field];
+    if (!cur) return `<div class="sch-na">—</div>`;
+    const log = fieldHist(field);
+    const changed = log.length > 0;
+    const cls = changed ? " sch-changed" : "";
+    const vlog = log.map(e => {
+      return `<div class="sch-he"><div class="sch-hdot"></div><div>` +
+             `<div class="sch-hv">${e.from}</div>` +
+             `<div class="sch-hw">${fmtDT(e.at)} 변경</div></div></div>`;
+    }).join("");
+    return `<div class="sch-cv${cls}">${cur}</div>${vlog ? `<div class="sch-hl">${vlog}</div>` : ""}`;
+  }
+
+  return `<div class="sch-wrap">
+    <div class="sch-label">SHIPMENT SCHEDULE</div>
+    <table class="sch-tbl">
+      <thead><tr>
+        <th></th><th>Origin</th><th>Loading Port</th><th>T/S Port</th><th>Discharging Port</th>
+      </tr></thead>
+      <tbody>
+        <tr>
+          <td>Location</td>
+          <td><div class="sch-cv">${s.origin||"—"}</div></td>
+          <td><div class="sch-cv">${s.pol||"—"}</div></td>
+          <td><div class="sch-cv">${s.ts||"—"}</div></td>
+          <td><div class="sch-cv">${s.pod||"—"}</div></td>
+        </tr>
+        <tr>
+          <td>Terminal</td>
+          <td>${term(0)}</td>
+          <td>${term(1)}</td>
+          <td>${term(2)}</td>
+          <td>${term(3)}</td>
+        </tr>
+        <tr>
+          <td>Vessel</td>
+          <td><div class="sch-na">—</div></td>
+          <td>${vesselCV("feeder","feeder")}</td>
+          <td>${vesselCV("vessel","voyage")}</td>
+          <td><div class="sch-na">—</div></td>
+        </tr>
+        <tr>
+          <td>Arrival (ETB)</td>
+          <td><div class="sch-na">—</div></td>
+          <td>${cv(s.tsArr,"tsArr",fmtDT,"tsArrActual")}</td>
+          <td>${cv(s.tsArr,"tsArr",fmtDT,"tsArrActual")}</td>
+          <td>${cv(s.eta,"eta",fmtDT,"etaActual")}</td>
+        </tr>
+        <tr>
+          <td>Departure</td>
+          <td>${cv(s.polDep,"polDep",fmtDT,"polDepActual")}</td>
+          <td>${cv(s.polDep,"polDep",fmtDT,"polDepActual")}</td>
+          <td>${cv(s.tsDep,"tsDep",fmtDT,"tsDepActual")}</td>
+          <td><div class="sch-na">—</div></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>`;
+}
+
 function cardHTML(s){
   const L2 = locate(s);
   const pre = s.preShipment ? `<span class="dtag pre">NOT SHIPPED</span>` : "";
@@ -367,6 +485,7 @@ function cardHTML(s){
       <span class="tag ${cls}">${phase}</span>${stale}${pre}${rolloverHTML(s)}${delayHTML(s)}</div>
     <div class="card-bd">
       ${railHTML}
+      ${schTableHTML(s)}
       <div class="grid">
         <div class="f"><label>PKG ETD</label><span>${fmtDT(s.polDep)}</span></div>
         <div class="f"><label>SIN ETA</label><span>${fmtDT(s.tsArr)}</span></div>
