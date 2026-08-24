@@ -120,6 +120,7 @@ html[data-theme="light"] .tile:hover{background:#F0F5F8;border-color:#0F2430}
 .gapbang:hover{color:#FF6B6B}
 @keyframes bang{0%,100%{opacity:1}50%{opacity:.35}}
 .gapremark{margin:10px 2px 0;font-size:11px;line-height:1.6;color:var(--fog);opacity:.85}
+.local-time-note{font-size:11px;line-height:1.6;color:var(--fog);opacity:.85;margin:8px 0 4px}
 .gapremark b{color:#E5484D}
 #gaplog{position:fixed;inset:0;background:rgba(4,12,18,.72);z-index:60;
   display:flex;align-items:center;justify-content:center;padding:20px}
