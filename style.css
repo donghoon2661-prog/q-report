@@ -677,3 +677,16 @@ html[data-theme="light"] #qview td.near{background:rgba(154,107,18,.08)}
 .beta-nav-btn { background:none; border:1px solid rgba(255,255,255,0.15); color:var(--fog); font-family:var(--mono); font-size:11px; letter-spacing:.08em; padding:4px 14px; border-radius:3px; cursor:pointer; transition:all .15s; }
 .beta-nav-btn.on { border-color:var(--sail); color:var(--sail); }
 .beta-nav-btn:hover:not(.on) { border-color:rgba(255,255,255,0.3); color:#fff; }
+
+/* ===== TZ 타임존 버튼 그룹 ===== */
+.tz-group{display:flex;gap:0;border:1px solid var(--line)}
+.tz-btn{background:none;border:none;border-right:1px solid var(--line);padding:0;cursor:pointer;display:flex;flex-direction:column;align-items:center;width:54px;transition:background .15s}
+.tz-btn:last-child{border-right:none}
+.tz-btn:hover{background:var(--hull)}
+.tz-btn.active{background:var(--hull)}
+.tz-btn .tz-flag{font-size:14px;line-height:1;padding-top:5px}
+.tz-btn .tz-label{font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;letter-spacing:.1em;color:var(--fog);padding:2px 0;transition:color .15s}
+.tz-btn.active .tz-label{color:var(--sail)}
+.tz-btn:hover .tz-label{color:var(--paper)}
+.tz-btn .tz-time{font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--fog);opacity:.65;padding-bottom:5px;letter-spacing:.04em}
+.tz-btn.active .tz-time{opacity:1;color:var(--sail)}
