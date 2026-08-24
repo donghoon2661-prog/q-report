@@ -373,7 +373,7 @@ function schTableHTML(s) {
     return `<div class="sch-hl">${log.map(e =>
       `<div class="sch-he"><div class="sch-hdot"></div><div>` +
       `<div class="sch-hv">${fmtFn(e.from)}</div>` +
-      `<div class="sch-hw">${toKST(e.at)} 변경</div></div></div>`
+      `<div class="sch-hw">${fmtDT(e.at)} detected</div></div></div>`
     ).join("")}</div>`;
   }
 
@@ -403,7 +403,7 @@ function schTableHTML(s) {
     const vlog = log.map(e => {
       return `<div class="sch-he"><div class="sch-hdot"></div><div>` +
              `<div class="sch-hv">${e.from}</div>` +
-             `<div class="sch-hw">${toKST(e.at)} 변경</div></div></div>`;
+             `<div class="sch-hw">${fmtDT(e.at)} detected</div></div></div>`;
     }).join("");
     return `<div class="sch-cv${cls}">${cur}</div>${vlog ? `<div class="sch-hl">${vlog}</div>` : ""}`;
   }
