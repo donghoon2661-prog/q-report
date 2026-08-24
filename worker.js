@@ -1132,7 +1132,16 @@ if (!one) return json({ error: "Failed to fetch booking after 10 session attempt
           base.ok = base.shipments.filter(x => !x.staleItem).length;
           base.mapOk = base.shipments.filter(x => x.route).length;
           await env.OQC.put("shipments", JSON.stringify(base));
-          one.savedToData = true;
+          /* put 직후 get으로 실제 저장 여부 검증 */
+          const verify = await env.OQC.get("shipments");
+          const verifyData = JSON.parse(verify || "null");
+          const verifyFound = verifyData?.shipments?.find(x => x.booking === bkg);
+          if (verifyFound && !verifyFound.staleItem) {
+            one.savedToData = true;
+          } else {
+            one.savedToData = false;
+            one.saveWarn = "KV put succeeded but verify read returned stale/missing";
+          }
 
           /* 스케줄 이력에도 첫 관측을 남긴다 */
           let hist = {};
