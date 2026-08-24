@@ -744,7 +744,8 @@ async function collectSchedule(env, forceBkgs = null, sharedBudget = null) {
     slice = forceBkgs.filter(b => !discharged.has(b));
     cursor = null; partial = false;
   } else {
-    ({ slice, cursor, partial } = await pickSlice(env, list));
+    // 크론 실행 시 전체 부킹 재수집
+    slice = list; cursor = 0; partial = false;
   }
 
   const activeSlice = slice.filter(b => !discharged.has(b));
@@ -813,10 +814,14 @@ async function collectSchedule(env, forceBkgs = null, sharedBudget = null) {
     item.scheduleCheckedAt = nowStr;  // 스케줄 수집 전용 시각 (mapAt과 구분)
   }
   const carried = [];
+  const STALE_MS = 12 * 3600 * 1000;
   for (const bkg of pending) {                       // 조회 실패 → 직전 값 유지
     const old = prevMap.get(bkg);
     if (old) {
-      const carriedItem = { ...old, staleItem: true, staleSince: old.scheduleCheckedAt || old.checkedAt || (prev && prev.updated) || null , scheduleError: errMap.get(bkg)};
+      const lastOkStr = old.scheduleCheckedAt || old.checkedAt || null;
+      const lastOkMs = lastOkStr ? Date.parse(lastOkStr.replace(" ","T").replace(/Z$/,"")+"Z") : 0;
+      const isStale = !lastOkMs || (Date.now() - lastOkMs) > STALE_MS;
+      const carriedItem = { ...old, ...(isStale ? { staleItem: true, staleSince: lastOkStr } : {}), scheduleError: errMap.get(bkg)};
       /* 이전 이벤트 기반으로 actual 플래그 재계산 — status 폴백 덕분에 etaActual도 복원됨 */
       Object.assign(carriedItem, computeActualFlags(carriedItem));
       out.set(bkg, carriedItem);
@@ -961,7 +966,7 @@ async function collectMaps(env, forceBkg = []) {
   const byBkg = new Map(saved.shipments.map(s => [s.booking, s]));
   const forceSet = new Set(forceBkg.map(b => b.trim().toUpperCase()));
   let pending = saved.shipments
-    .filter(s => s.container && !s.etaActual && (forceSet.has(s.booking) || !s.route || s.mapError || !mapFresh(s)))
+    .filter(s => s.container && !s.etaActual && (forceSet.has(s.booking) || !s.route || s.mapError || true))
     .map(s => s.booking)
     .slice(0, MAX_PER_RUN);
   if (!pending.length) return { ...saved, mapNote: "보충할 지도 없음" };
