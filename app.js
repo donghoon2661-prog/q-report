@@ -658,19 +658,19 @@ function applyRoleRestrictions(){
 
   (function initWorldClocks(){
     function tick(){
+      /* 데스크탑 시계 갱신 */
       for(const c of TZ_CLOCKS){
         const el = document.getElementById(c.id);
         if(el){ const r=getTzTime(c.zone,c.abbr); el.textContent=r.time; }
         const lblEl = document.getElementById(c.id+'-abbr');
         if(lblEl){ const r=getTzTime(c.zone,c.abbr); lblEl.textContent=r.abbr; }
       }
+      /* 모바일 상단 표시 갱신 (_mobTz 기준) */
       const mob = TZ_CLOCKS.find(c=>c.key===_mobTz);
       if(mob){
         const r = getTzTime(mob.zone, mob.abbr);
-        const tEl = document.getElementById('tz-mob-time');
-        const aEl = document.getElementById('tz-mob-abbr');
-        if(tEl) tEl.textContent = r.time;
-        if(aEl) aEl.textContent = r.abbr;
+        const dispEl = document.getElementById('tz-mob-display');
+        if(dispEl) dispEl.textContent = r.time + ' ' + r.abbr;
       }
     }
     tick();
