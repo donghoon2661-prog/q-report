@@ -479,10 +479,12 @@ function alertBanner(d){
 function stampText(d){
   const lr = document.getElementById("lane-refresh");
   if(lr) lr.textContent = CRON_KST.length + "× / DAY";
+  const tzAbbr = typeof getTzAbbr === 'function' ? getTzAbbr(_curTz) : 'KST';
+  const cronLabel = CRON_LABEL.replace('KST', tzAbbr);
   document.getElementById("stamp").innerHTML =
     `HMM retrieved ${toKST(d.updated)} · ${ago(d.updated)}` +
     (d.stale ? `<span class="warn"> · no new HMM events</span>` : "") +
-    `<br><span class="dim2">next update in ${nextRun()} · ${CRON_KST.length}× daily (${CRON_LABEL})</span>`;
+    `<br><span class="dim2">next update in ${nextRun()} · ${CRON_KST.length}× daily (${cronLabel})</span>`;
 }
 
 /* ---------- 렌더링 ---------- */
@@ -627,16 +629,30 @@ function applyRoleRestrictions(){
   const betaTab = document.getElementById('tab-beta');
   if(betaTab) betaTab.style.display = isAdmin ? '' : 'none';
   if(mobileSysBtn) mobileSysBtn.hidden = !isAdmin;
-  const kstClock = document.getElementById('kst-clock');
-  if(kstClock && isAdmin){
-    kstClock.style.display = '';
-    (function kstTick(){
-      const d = new Date(new Date().toLocaleString('en-US',{timeZone:'Asia/Seoul'}));
-      const p = n => String(n).padStart(2,'0');
-      kstClock.textContent = `${p(d.getHours())}:${p(d.getMinutes())}:${p(d.getSeconds())} (KST)`;
-      setTimeout(kstTick, 1000);
-    })();
-  }
+  /* TZ 버튼 초기화 */
+  (function initTzButtons(){
+    const saved = typeof _curTz !== 'undefined' ? _curTz : 'KR';
+    document.querySelectorAll('.tz-btn').forEach(b=>b.classList.remove('active'));
+    const activeBtn = document.getElementById('tz-btn-'+saved);
+    if(activeBtn) activeBtn.classList.add('active');
+
+    function updateTzClocks(){
+      for(const key of ['KR','MY','US']){
+        const el = document.getElementById('tz-time-'+key);
+        if(!el) continue;
+        const cfg = TZ_CONFIG[key];
+        const t = new Intl.DateTimeFormat('en-US',{
+          timeZone:cfg.zone, hour:'2-digit', minute:'2-digit', hour12:false
+        }).format(new Date());
+        const abbr = cfg.abbr || new Intl.DateTimeFormat('en-US',{
+          timeZone:cfg.zone, timeZoneName:'short'
+        }).formatToParts(new Date()).find(p=>p.type==='timeZoneName')?.value||'';
+        el.textContent = t.replace('24:','00:')+' '+abbr;
+      }
+    }
+    updateTzClocks();
+    setInterval(updateTzClocks, 30000);
+  })();
   if(backBtn)    backBtn.style.display    = restricted ? 'none' : '';
   if(qbackBtn)   qbackBtn.style.display   = restricted ? 'none' : '';
   const addbar = document.querySelector('.addbar');
