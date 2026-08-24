@@ -748,6 +748,8 @@ function setTzMobile(key){
   document.querySelectorAll('.tz-mob-btn').forEach(b=>b.classList.remove('active'));
   const btn = document.getElementById('tzm-'+key);
   if(btn) btn.classList.add('active');
+  const dispEl = document.getElementById('tz-mob-display');
+  if(dispEl) dispEl.style.display = 'inline-block';
 }
 
 (function initWorldClocks(){
