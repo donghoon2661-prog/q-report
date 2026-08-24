@@ -627,6 +627,16 @@ function applyRoleRestrictions(){
   const betaTab = document.getElementById('tab-beta');
   if(betaTab) betaTab.style.display = isAdmin ? '' : 'none';
   if(mobileSysBtn) mobileSysBtn.hidden = !isAdmin;
+  const kstClock = document.getElementById('kst-clock');
+  if(kstClock && isAdmin){
+    kstClock.style.display = '';
+    (function kstTick(){
+      const d = new Date(new Date().toLocaleString('en-US',{timeZone:'Asia/Seoul'}));
+      const p = n => String(n).padStart(2,'0');
+      kstClock.textContent = `${p(d.getHours())}:${p(d.getMinutes())}:${p(d.getSeconds())} (KST)`;
+      setTimeout(kstTick, 1000);
+    })();
+  }
   if(backBtn)    backBtn.style.display    = restricted ? 'none' : '';
   if(qbackBtn)   qbackBtn.style.display   = restricted ? 'none' : '';
   const addbar = document.querySelector('.addbar');
