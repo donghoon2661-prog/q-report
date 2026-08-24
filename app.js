@@ -628,54 +628,6 @@ function applyRoleRestrictions(){
   const betaTab = document.getElementById('tab-beta');
   if(betaTab) betaTab.style.display = isAdmin ? '' : 'none';
   if(mobileSysBtn) mobileSysBtn.hidden = !isAdmin;
-  /* 세계 시계 (초 포함, 1초 갱신) */
-  const TZ_CLOCKS = [
-    { key:'KR', id:'tz-time-KR', zone:'Asia/Seoul',          abbr:'KST' },
-    { key:'MY', id:'tz-time-MY', zone:'Asia/Kuala_Lumpur',   abbr:'MYT' },
-    { key:'US', id:'tz-time-US', zone:'America/Los_Angeles', abbr:null  }
-  ];
-  let _mobTz = 'KR';
-
-  function getTzTime(zone, abbr){
-    const now = new Date();
-    const parts = new Intl.DateTimeFormat('en-US',{
-      timeZone:zone, hour:'2-digit', minute:'2-digit', second:'2-digit', hour12:false
-    }).formatToParts(now);
-    const get = t => parts.find(p=>p.type===t)?.value||'00';
-    let hh = get('hour'); if(hh==='24') hh='00';
-    const a = abbr || new Intl.DateTimeFormat('en-US',{
-      timeZone:zone, timeZoneName:'short'
-    }).formatToParts(now).find(p=>p.type==='timeZoneName')?.value||'';
-    return { time:`${hh}:${get('minute')}:${get('second')}`, abbr:a };
-  }
-
-  function setTzMobile(key){
-    _mobTz = key;
-    document.querySelectorAll('.tz-mob-btn').forEach(b=>b.classList.remove('active'));
-    const btn = document.getElementById('tzm-'+key);
-    if(btn) btn.classList.add('active');
-  }
-
-  (function initWorldClocks(){
-    function tick(){
-      /* 데스크탑 시계 갱신 */
-      for(const c of TZ_CLOCKS){
-        const el = document.getElementById(c.id);
-        if(el){ const r=getTzTime(c.zone,c.abbr); el.textContent=r.time; }
-        const lblEl = document.getElementById(c.id+'-abbr');
-        if(lblEl){ const r=getTzTime(c.zone,c.abbr); lblEl.textContent=r.abbr; }
-      }
-      /* 모바일 상단 표시 갱신 (_mobTz 기준) */
-      const mob = TZ_CLOCKS.find(c=>c.key===_mobTz);
-      if(mob){
-        const r = getTzTime(mob.zone, mob.abbr);
-        const dispEl = document.getElementById('tz-mob-display');
-        if(dispEl) dispEl.textContent = r.time + ' ' + r.abbr;
-      }
-    }
-    tick();
-    setInterval(tick, 1000);
-  })();
   if(backBtn)    backBtn.style.display    = restricted ? 'none' : '';
   if(qbackBtn)   qbackBtn.style.display   = restricted ? 'none' : '';
   const addbar = document.querySelector('.addbar');
@@ -770,3 +722,49 @@ document.addEventListener("DOMContentLoaded",()=>{
   if(ts && (Date.now()-ts) < AUTH_TTL_MS){ proceedAfterUnlock(); }
 })();
 
+/* ===== 세계 시계 (전역) ===== */
+const TZ_CLOCKS = [
+  { key:'KR', id:'tz-time-KR', zone:'Asia/Seoul',          abbr:'KST' },
+  { key:'MY', id:'tz-time-MY', zone:'Asia/Kuala_Lumpur',   abbr:'MYT' },
+  { key:'US', id:'tz-time-US', zone:'America/Los_Angeles', abbr:null  }
+];
+let _mobTz = 'KR';
+
+function getTzTime(zone, abbr){
+  const now = new Date();
+  const parts = new Intl.DateTimeFormat('en-US',{
+    timeZone:zone, hour:'2-digit', minute:'2-digit', second:'2-digit', hour12:false
+  }).formatToParts(now);
+  const get = t => parts.find(p=>p.type===t)?.value||'00';
+  let hh = get('hour'); if(hh==='24') hh='00';
+  const a = abbr || new Intl.DateTimeFormat('en-US',{
+    timeZone:zone, timeZoneName:'short'
+  }).formatToParts(now).find(p=>p.type==='timeZoneName')?.value||'';
+  return { time:`${hh}:${get('minute')}:${get('second')}`, abbr:a };
+}
+
+function setTzMobile(key){
+  _mobTz = key;
+  document.querySelectorAll('.tz-mob-btn').forEach(b=>b.classList.remove('active'));
+  const btn = document.getElementById('tzm-'+key);
+  if(btn) btn.classList.add('active');
+}
+
+(function initWorldClocks(){
+  function tick(){
+    for(const c of TZ_CLOCKS){
+      const el = document.getElementById(c.id);
+      if(el){ const r=getTzTime(c.zone,c.abbr); el.textContent=r.time; }
+      const lblEl = document.getElementById(c.id+'-abbr');
+      if(lblEl){ const r=getTzTime(c.zone,c.abbr); lblEl.textContent=r.abbr; }
+    }
+    const mob = TZ_CLOCKS.find(c=>c.key===_mobTz);
+    if(mob){
+      const r = getTzTime(mob.zone, mob.abbr);
+      const dispEl = document.getElementById('tz-mob-display');
+      if(dispEl) dispEl.textContent = r.time + ' ' + r.abbr;
+    }
+  }
+  tick();
+  setInterval(tick, 1000);
+})();
