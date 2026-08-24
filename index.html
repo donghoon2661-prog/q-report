@@ -59,7 +59,23 @@
     <h1 id="ship-title" title="Click to reload data">SHIPMENT STATUS</h1>
     <div class="stamp" id="stamp"></div>
     <span class="spacer"></span>
-    <span id="kst-clock" style="display:none;font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:600;color:#e8e8e8;letter-spacing:.03em;white-space:nowrap"></span>
+    <div class="tz-group" id="tz-group">
+      <button class="tz-btn active" id="tz-btn-KR" onclick="setTz('KR')">
+        <span class="tz-flag">🇰🇷</span>
+        <span class="tz-label">KR</span>
+        <span class="tz-time" id="tz-time-KR">--:--</span>
+      </button>
+      <button class="tz-btn" id="tz-btn-MY" onclick="setTz('MY')">
+        <span class="tz-flag">🇲🇾</span>
+        <span class="tz-label">MY</span>
+        <span class="tz-time" id="tz-time-MY">--:--</span>
+      </button>
+      <button class="tz-btn" id="tz-btn-US" onclick="setTz('US')">
+        <span class="tz-flag">🇺🇸</span>
+        <span class="tz-label">US</span>
+        <span class="tz-time" id="tz-time-US">--:--</span>
+      </button>
+    </div>
     <span class="brand"><span class="l1">KOSSAN</span><span class="l2">SHIPMENT CONTROL</span></span>
   </div>
   <div class="addbar">
