@@ -479,12 +479,10 @@ function alertBanner(d){
 function stampText(d){
   const lr = document.getElementById("lane-refresh");
   if(lr) lr.textContent = CRON_KST.length + "× / DAY";
-  const tzAbbr = typeof getTzAbbr === 'function' ? getTzAbbr(_curTz) : 'KST';
-  const cronLabel = CRON_LABEL.replace('KST', tzAbbr);
   document.getElementById("stamp").innerHTML =
     `HMM retrieved ${toKST(d.updated)} · ${ago(d.updated)}` +
     (d.stale ? `<span class="warn"> · no new HMM events</span>` : "") +
-    `<br><span class="dim2">next update in ${nextRun()} · ${CRON_KST.length}× daily (${cronLabel})</span>`;
+    `<br><span class="dim2">next update in ${nextRun()} · ${CRON_KST.length}× daily (${CRON_LABEL})</span>`;
 }
 
 /* ---------- 렌더링 ---------- */
@@ -629,29 +627,33 @@ function applyRoleRestrictions(){
   const betaTab = document.getElementById('tab-beta');
   if(betaTab) betaTab.style.display = isAdmin ? '' : 'none';
   if(mobileSysBtn) mobileSysBtn.hidden = !isAdmin;
-  /* TZ 버튼 초기화 */
-  (function initTzButtons(){
-    const saved = typeof _curTz !== 'undefined' ? _curTz : 'KR';
-    document.querySelectorAll('.tz-btn').forEach(b=>b.classList.remove('active'));
-    const activeBtn = document.getElementById('tz-btn-'+saved);
-    if(activeBtn) activeBtn.classList.add('active');
-
-    function updateTzClocks(){
-      for(const key of ['KR','MY','US']){
-        const el = document.getElementById('tz-time-'+key);
+  /* 세계 시계 (초 포함, 1초 갱신) */
+  (function initWorldClocks(){
+    const CLOCKS = [
+      { id:'tz-time-KR', zone:'Asia/Seoul',          abbr:'KST' },
+      { id:'tz-time-MY', zone:'Asia/Kuala_Lumpur',   abbr:'MYT' },
+      { id:'tz-time-US', zone:'America/Los_Angeles', abbr:null  }
+    ];
+    function tick(){
+      for(const c of CLOCKS){
+        const el = document.getElementById(c.id);
         if(!el) continue;
-        const cfg = TZ_CONFIG[key];
-        const t = new Intl.DateTimeFormat('en-US',{
-          timeZone:cfg.zone, hour:'2-digit', minute:'2-digit', hour12:false
-        }).format(new Date());
-        const abbr = cfg.abbr || new Intl.DateTimeFormat('en-US',{
-          timeZone:cfg.zone, timeZoneName:'short'
-        }).formatToParts(new Date()).find(p=>p.type==='timeZoneName')?.value||'';
-        el.textContent = t.replace('24:','00:')+' '+abbr;
+        const now = new Date();
+        const parts = new Intl.DateTimeFormat('en-US',{
+          timeZone:c.zone, hour:'2-digit', minute:'2-digit', second:'2-digit', hour12:false
+        }).formatToParts(now);
+        const get = t => parts.find(p=>p.type===t)?.value||'00';
+        let hh = get('hour'); if(hh==='24') hh='00';
+        const abbr = c.abbr || new Intl.DateTimeFormat('en-US',{
+          timeZone:c.zone, timeZoneName:'short'
+        }).formatToParts(now).find(p=>p.type==='timeZoneName')?.value||'';
+        el.textContent = `${hh}:${get('minute')}:${get('second')}`;
+        const lblEl = document.getElementById(c.id+'-abbr');
+        if(lblEl) lblEl.textContent = abbr;
       }
     }
-    updateTzClocks();
-    setInterval(updateTzClocks, 30000);
+    tick();
+    setInterval(tick, 1000);
   })();
   if(backBtn)    backBtn.style.display    = restricted ? 'none' : '';
   if(qbackBtn)   qbackBtn.style.display   = restricted ? 'none' : '';
