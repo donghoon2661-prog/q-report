@@ -607,7 +607,19 @@ function stampText(d){
 
 /* ---------- 렌더링 ---------- */
 let CUR=null;
+/* KV 전파 지연 우회: /lookup·/collect 응답을 임시 캐시.
+   render()가 /data 오래된 값으로 호출돼도 캐시의 신선한 값이 항상 이긴다. */
+const _localLookupCache = {};
+
 function render(data){
+  /* _localLookupCache 오버라이드: checkedAt 기준으로 더 최신 값으로 교체 */
+  if(Object.keys(_localLookupCache).length){
+    const tsOf = x => Date.parse(String(x.checkedAt||"").replace(" ","T").replace(/Z?$/,"Z"))||0;
+    (data.shipments||[]).forEach((s,i)=>{
+      const ov = _localLookupCache[s.booking];
+      if(ov && tsOf(ov) > tsOf(s)) data.shipments[i] = ov;
+    });
+  }
   const seen = new Map();
   (data.shipments||[]).forEach(s=>{
     s.booking = String(s.booking||"").trim().toUpperCase();
@@ -672,7 +684,6 @@ function setView(v){
     setTimeout(()=>{
       const panel = document.getElementById('side');
       if(!panel) return;
-      // h3 태그가 있으면 이미 vessel 선택된 것 — skip
       if(panel.querySelector('h3')) return;
       if(!CUR || !CUR.shipments) return;
       const active = CUR.shipments.filter(s => !s.etaActual && s.eta);
