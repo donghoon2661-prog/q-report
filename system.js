@@ -218,6 +218,7 @@ async function sysRetry(bkg, btn){
       const idx = CUR.shipments.findIndex(s => s.booking === bkg);
       if(idx >= 0) CUR.shipments[idx] = fresh;
       else CUR.shipments.push(fresh);
+      _localLookupCache[bkg] = fresh; // render()가 오래된 /data로 호출돼도 이 값이 이김
       render(CUR);
     }
   } catch(e){
@@ -312,8 +313,24 @@ async function sysMapRefreshOne(bkg, btn){
       }
     }
 
-    /* 전체 데이터 갱신 */
-    fetch(source(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(d=>{ if(d) render(d); });
+    /* KV 전파 지연 우회: item의 map 필드만 CUR에 병합 후 render (/data 재fetch 제거) */
+    if(CUR && CUR.shipments && item){
+      const idx2 = CUR.shipments.findIndex(s => s.booking === bkg);
+      if(idx2 >= 0){
+        const merged = Object.assign({}, CUR.shipments[idx2], {
+          route: item.route,
+          mapAt: item.mapAt,
+          mapError: item.mapError || null,
+          names: item.names,
+          idx: item.idx,
+          ratio: item.ratio,
+          routeSynth: item.routeSynth,
+        });
+        CUR.shipments[idx2] = merged;
+        _localLookupCache[bkg] = merged;
+      }
+      render(CUR);
+    }
   } catch(e){
     btn.disabled=false;
     btn.textContent=orig;
