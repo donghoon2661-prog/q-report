@@ -9,7 +9,7 @@
   const LOGS = window.__DEVLOGS__ = [];
 
   function ts() {
-    return new Date().toISOString().replace('T', ' ').slice(0, 23);
+    return new Date(Date.now() + 9 * 3600000).toISOString().replace('T', ' ').slice(0, 23) + ' KST';
   }
 
   /* ── 패널에 실시간 행 추가 ── */
