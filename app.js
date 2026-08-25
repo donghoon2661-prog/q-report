@@ -791,10 +791,24 @@ function proceedAfterUnlock(){
     setTimeout(()=>{ map&&map.invalidateSize(); document.getElementById('ship').scrollIntoView({block:'start'}); },80);
   } else { show("menu"); }
   setView('map');
-  Promise.all([
-    loadPO(), loadHistory(),
-    fetch(source(),{cache:"no-store"}).then(r=>r.ok?r.json():Promise.reject()).catch(()=>FALLBACK)
-  ]).then(([,,data])=>render(data));
+  Promise.all([loadPO(), loadHistory()]).catch(()=>{});
+  fetchAndRender(0);
+}
+function fetchAndRender(attempt){
+  fetch(source(),{cache:"no-store"})
+    .then(r=>r.ok?r.json():Promise.reject(new Error('HTTP '+r.status)))
+    .then(data=>{ console.log('[fetchAndRender] success attempt='+attempt); render(data); })
+    .catch(e=>{
+      console.warn('[fetchAndRender] attempt='+attempt+' failed:',e&&(e.message||e));
+      if(attempt<5){
+        const delay = Math.min(10000*(attempt+1), 30000);
+        console.log('[fetchAndRender] retry in '+delay+'ms');
+        setTimeout(()=>fetchAndRender(attempt+1), delay);
+      } else {
+        console.error('[fetchAndRender] all retries failed, using FALLBACK');
+        render(FALLBACK);
+      }
+    });
 }
 
 function unlock(){
