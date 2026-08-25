@@ -1,101 +1,5 @@
 /* ===== app.js — 렌더링 · 스케줄 · 표 · 카드 · 인증 · 라우팅 ===== */
 
-/* ====================================================================
-   DEVLOG — 임시 디버그 수집 블록 (작업 완료 후 이 블록 전체 삭제)
-   수집 범위: Console(log/info/warn/error) · Network(fetch/XHR) · JS오류
-   ==================================================================== */
-(function(){
-  const LOGS = window.__DEVLOGS__ = [];
-
-  function ts(){ return new Date().toISOString().replace('T',' ').slice(0,23); }
-
-  function push(entry){
-    LOGS.push(entry);
-    // SYSTEM 탭 패널이 열려 있으면 실시간으로 행 추가
-    const tbody = document.getElementById('devlog-tbody');
-    if(tbody) tbody.insertAdjacentHTML('afterbegin', devlogRow(entry));
-  }
-
-  /* ── Console 인터셉터 ── */
-  ['log','info','warn','error'].forEach(level=>{
-    const orig = console[level].bind(console);
-    console[level] = function(...args){
-      orig(...args);
-      push({ time:ts(), cat:'CONSOLE', level:level.toUpperCase(),
-             msg: args.map(a=>{ try{ return typeof a==='object'?JSON.stringify(a):String(a); }catch(_){return String(a);} }).join(' ') });
-    };
-  });
-
-  /* ── JS 전역 에러 ── */
-  window.addEventListener('error', e=>{
-    push({ time:ts(), cat:'JS', level:'ERROR',
-           msg: `${e.message} @ ${e.filename}:${e.lineno}` });
-  });
-  window.addEventListener('unhandledrejection', e=>{
-    push({ time:ts(), cat:'JS', level:'UNHANDLED',
-           msg: String(e.reason?.message || e.reason || 'Promise rejected') });
-  });
-
-  /* ── Fetch 인터셉터 ── */
-  const origFetch = window.fetch;
-  window.fetch = async function(input, init){
-    const url = typeof input==='string' ? input : (input.url||String(input));
-    const method = (init?.method || (input.method) || 'GET').toUpperCase();
-    const t0 = Date.now();
-    try{
-      const res = await origFetch(input, init);
-      push({ time:ts(), cat:'NETWORK', level: res.ok?'OK':'WARN',
-             msg: `${method} ${url} → ${res.status} (${Date.now()-t0}ms)` });
-      return res;
-    } catch(e){
-      push({ time:ts(), cat:'NETWORK', level:'ERROR',
-             msg: `${method} ${url} → FAILED (${Date.now()-t0}ms) ${e.message}` });
-      throw e;
-    }
-  };
-
-  /* ── XHR 인터셉터 ── */
-  const OrigXHR = window.XMLHttpRequest;
-  window.XMLHttpRequest = function(){
-    const xhr = new OrigXHR();
-    let _method='', _url='', _t0=0;
-    const origOpen = xhr.open.bind(xhr);
-    xhr.open = function(method, url, ...rest){
-      _method=method.toUpperCase(); _url=url;
-      return origOpen(method, url, ...rest);
-    };
-    const origSend = xhr.send.bind(xhr);
-    xhr.send = function(...args){
-      _t0 = Date.now();
-      xhr.addEventListener('loadend', ()=>{
-        const ms = Date.now()-_t0;
-        const lvl = xhr.status===0?'ERROR': xhr.status<400?'OK':'WARN';
-        push({ time:ts(), cat:'NETWORK', level:lvl,
-               msg: `${_method} ${_url} → ${xhr.status||'ERR'} (${ms}ms)` });
-      });
-      return origSend(...args);
-    };
-    return xhr;
-  };
-  // XHR static 멤버 복사
-  Object.keys(OrigXHR).forEach(k=>{ try{ window.XMLHttpRequest[k]=OrigXHR[k]; }catch(_){} });
-  window.XMLHttpRequest.prototype = OrigXHR.prototype;
-
-})();
-
-/* devlogRow — system.js의 renderDevlog()에서도 사용 */
-function devlogRow(e){
-  const cls = e.level==='ERROR'||e.level==='UNHANDLED'?'dl-error'
-             :e.level==='WARN'?'dl-warn'
-             :e.cat==='NETWORK'&&e.level==='OK'?'dl-net'
-             :'dl-info';
-  const safe = String(e.msg).replace(/</g,'&lt;').replace(/>/g,'&gt;');
-  return `<tr class="${cls}"><td class="dl-time">${e.time.slice(11)}</td><td class="dl-cat">${e.cat}</td><td class="dl-lv">${e.level}</td><td class="dl-msg">${safe}</td></tr>`;
-}
-/* ====================================================================
-   DEVLOG 블록 끝
-   ==================================================================== */
-
 /* ---------- 원 스케줄 병기 ---------- */
 const ACTUAL_FLAG = { polDep:"polDepActual", tsArr:"tsArrActual", tsDep:"tsDepActual", eta:"etaActual" };
 
@@ -151,12 +55,91 @@ function showSide(s,L2){
   const log = (HIST[s.booking]||[]).slice().reverse();
   const FL = {vessel:"VESSEL", voyage:"VOYAGE", polDep:"PKG ETD", tsDep:"SIN ETD", eta:"LA ETB", destEta:"DEST ETA"};
   const shortV = v => /^\d{4}-\d\d-\d\dT/.test(v||"") ? fmtDT(v) : v;
+  // 변경 횟수별 색상 로직
+  // - 12h 이내 변경: 색상 유지
+  // - 12h 초과 늦어짐: 단계 올라감 (노란→주황→빨간)
+  // - 12h 초과 빨라짐: 첫 변경=초록, 이후 색상 변화 없음
+  const TWELVE_H = 12 * 60 * 60 * 1000;
+  const toMs = v => v && /^\d{4}-\d\d-\d\dT/.test(v) ? new Date(v).getTime() : null;
+  const delayColor = n => n >= 3 ? '#ef4444' : n === 2 ? '#f97316' : n === 1 ? '#f6c90e' : null;
+
+  // 값 배열로부터 색상 배열 계산
+  // vals: [{v: isoString}] 순서대로
+  function calcChainColors(vals) {
+    const colors = []; // 각 값의 색상 (첫번째 최초값 제외)
+    let delayCount = 0;
+    let hasEarlied = false; // 빨라진 적 있는지
+    for (let i = 1; i < vals.length; i++) {
+      const prevMs = toMs(vals[i-1].v);
+      const curMs = toMs(vals[i].v);
+      if (prevMs === null || curMs === null) { colors.push(null); continue; }
+      const diff = curMs - prevMs;
+      if (Math.abs(diff) <= TWELVE_H) {
+        // 12h 이내: 색상 유지 (이전 색상과 동일)
+        colors.push(colors.length ? colors[colors.length-1] : null);
+      } else if (diff > 0) {
+        // 12h 초과 늦어짐
+        delayCount++;
+        colors.push(delayColor(delayCount));
+      } else {
+        // 12h 초과 빨라짐
+        if (!hasEarlied && delayCount === 0) {
+          hasEarlied = true;
+          colors.push('#4caf8a'); // 첫 변경이고 늦어진 적 없으면 초록
+        } else {
+          // 빨라지더라도 색상 변화 없음 (이전 색상 유지)
+          colors.push(colors.length ? colors[colors.length-1] : null);
+        }
+      }
+    }
+    return colors;
+  }
+
+  const changeLegend = `<div style="display:flex;gap:14px;font-size:10px;margin-bottom:10px;flex-wrap:wrap">
+    <span style="color:#4caf8a">■ earlier (&gt;12h)</span>
+    <span style="color:#f6c90e">■ 1 delay (&gt;12h)</span>
+    <span style="color:#f97316">■ 2 delays</span>
+    <span style="color:#ef4444">■ 3+ delays</span>
+    <span style="color:var(--fog)">■ &lt;12h change</span>
+  </div>`;
   const histHTML = log.length
-    ? `<div class="schist"><div class="sh-h">SCHEDULE CHANGES</div>` + log.map(e=>{
+    ? `<div class="schist"><div class="sh-h">SCHEDULE CHANGES</div>${changeLegend}` + log.map(e=>{
         if(e.first) return `<div class="sh"><span class="st">${toKST(e.at)}</span>`
           + `<span class="sc dim">first seen · SIN ETD ${fmtDT(e.tsDep)} · LA ETB ${fmtDT(e.eta)}</span></div>`;
         return `<div class="sh"><span class="st">${toKST(e.at)}</span><span class="sc">`
-          + (e.changes||[]).map(c=>`${FL[c.field]||c.label} <s>${shortV(c.from)}</s> → <b>${shortV(c.to)}</b>`).join("<br>")
+          + (e.changes||[]).map(c=>{
+              const field = FL[c.field]||c.label;
+              const eIdx = log.indexOf(e);
+              const prevChanges = [];
+              for(let pi = log.length-1; pi > eIdx; pi--){
+                const prevE = log[pi];
+                if(prevE.first) continue;
+                const prevC = (prevE.changes||[]).find(x=>x.field===c.field);
+                if(prevC) prevChanges.push(prevC);
+              }
+              // 전체 값 배열 구성 (시간순: 최초값 → ... → 현재값)
+              const allVals = [];
+              if(prevChanges.length){
+                allVals.push({ v: prevChanges[prevChanges.length-1].from });
+                for(let ci=prevChanges.length-1;ci>=0;ci--) allVals.push({ v: prevChanges[ci].to });
+              } else {
+                allVals.push({ v: c.from });
+              }
+              allVals.push({ v: c.to });
+
+              const colors = calcChainColors(allVals);
+
+              let chain = `<s style="color:var(--fog)">${shortV(allVals[0].v)}</s>`;
+              for(let vi=1;vi<allVals.length;vi++){
+                const col = colors[vi-1] || 'var(--fog)';
+                const isLast = vi === allVals.length-1;
+                const val = shortV(allVals[vi].v);
+                chain += isLast
+                  ? ` → <b style="color:${col}">${val}</b>`
+                  : ` → <s style="color:${col}">${val}</s>`;
+              }
+              return `${field} ${chain}`;
+            }).join("<br>")
           + `</span></div>`;
       }).join("") + `</div>`
     : `<div class="schist"><div class="sh-h">SCHEDULE CHANGES</div>
@@ -172,7 +155,7 @@ function showSide(s,L2){
     ? `<dt>CHECKED</dt><dd>${toKST(s.checkedAt)} · ${ago(s.checkedAt)}${s.staleItem?' <b class="warn">(retry pending)</b>':''}</dd>` : "";
 
   document.getElementById('side').innerHTML=`
-    <h3>${s.vessel} ${s.voyage}</h3>
+    <h3>${s.vessel} ${s.voyage}${phaseBadge(s,L2)}</h3>
     <div class="sb">${s.booking} · ${s.svc} · ${s.cntrQty||(s.containers&&s.containers.length)||"—"} CNTR${s.cntrType?" "+s.cntrType:""}</div>
     <dl>
       ${geo}
@@ -198,9 +181,23 @@ function select(s,i,pan){
 
 /* ---------- 변동 로그 ---------- */
 const SIGNAL_DAYS = 5;
+
+function phaseBadge(s, L2) {
+  if (!L2) return "";
+  if (s.etaActual) return `<span class="ph done">ARRIVED</span>`;
+  if (L2.atPort) {
+    const cur = L2.names[L2.i] || "";
+    const ts  = (s.ts || "").toUpperCase();
+    if (ts && cur.toUpperCase().includes(ts.slice(0,3)))
+      return `<span class="ph dock">AT T/S PORT</span>`;
+    return `<span class="ph dock">BERTHED</span>`;
+  }
+  return `<span class="ph sail">AT SEA</span>`;
+}
 const GAP_REMARK = `<p class="gapremark">The <b>!</b> mark appears when the LA ETB has moved
   against the original plan, and disappears automatically ${SIGNAL_DAYS} days after the change was
-  detected. Click the number box at any time to see the full change log.</p>`;
+  detected. Click the number box at any time to see the full change log.</p>
+<p class="gapremark">All dates and times are local dates and times.</p>`;
 
 function etaChangeLog(booking){
   const plan = POETA[booking] || null;
@@ -317,9 +314,10 @@ function rowsHTML(list){
   return list.map((s,i)=>{
     const etaActTag  = actTag(!!s.etaActual);
     const destActTag = s.destEta ? actTag(!!s.etaActual) : "";
+    const L2 = locate(s);
     return `
     <tr data-i="${i}">
-      <td><span class="nm">${s.vessel}</span><span class="vy">${s.voyage}</span>
+      <td><span class="nm">${s.vessel}</span><span class="vy">${s.voyage}</span>${phaseBadge(s,L2)}
           <span class="bk">${s.booking} · ${s.cntrQty||"—"} CNTR${s.staleItem?" · STALE":""}</span></td>
       <td data-l="PKG ETD"><span class="dt">${fmtDT(s.polDep)}</span><span class="est">${actTag(!!s.polDepActual)}</span></td>
       <td data-l="SIN ETD"><span class="dt">${fmtDT(s.tsDep)}</span><span class="est">${actTag(!!s.tsDepActual)}</span></td>
@@ -353,6 +351,110 @@ function buildTable(data){
 }
 
 /* ---------- 카드 ---------- */
+/* ---------- Shipment Schedule 테이블 ---------- */
+function schTableHTML(s) {
+  const hist = HIST[s.booking] || [];
+
+  /* 필드별 변경 이력 추출 */
+  function fieldHist(field) {
+    const entries = [];
+    for (const e of hist) {
+      if (!Array.isArray(e.changes)) continue;
+      const c = e.changes.find(x => x.field === field);
+      if (c) entries.push({ at: e.at, from: c.from });
+    }
+    return entries.reverse(); /* 최신순 */
+  }
+
+  /* 이력 HTML — 취소선 + 감지일 */
+  function histHTML(field, fmtFn) {
+    const log = fieldHist(field);
+    if (!log.length) return "";
+    return `<div class="sch-hl">${log.map(e =>
+      `<div class="sch-he"><div class="sch-hdot"></div><div>` +
+      `<div class="sch-hv">${fmtFn(e.from)}</div>` +
+      `<div class="sch-hw">${fmtDT(e.at)} detected</div></div></div>`
+    ).join("")}</div>`;
+  }
+
+  /* 현재값 셀 */
+  function cv(val, field, fmtFn, actualFlag) {
+    if (!val) return `<div class="sch-na">—</div>`;
+    const changed = fieldHist(field).length > 0;
+    const actual  = actualFlag ? !!s[actualFlag] : false;
+    const cls     = actual ? "" : (changed ? " sch-changed" : "");
+    const actBadge = actual ? ` <span class="sch-act">ACT</span>` : "";
+    return `<div class="sch-cv${cls}">${fmtFn(val)}${actBadge}</div>${histHTML(field, fmtFn)}`;
+  }
+
+  /* 터미널 — 이력 없음(신규 파싱), 단순 표시 */
+  const terms = s.terminals || [];
+  function term(idx) {
+    return terms[idx] ? `<div class="sch-cv">${terms[idx]}</div>` : `<div class="sch-na">—</div>`;
+  }
+
+  /* 피더/모선 vessel 이력 */
+  function vesselCV(field, voyField) {
+    const cur = s[field];
+    if (!cur) return `<div class="sch-na">—</div>`;
+    const log = fieldHist(field);
+    const changed = log.length > 0;
+    const cls = changed ? " sch-changed" : "";
+    const vlog = log.map(e => {
+      return `<div class="sch-he"><div class="sch-hdot"></div><div>` +
+             `<div class="sch-hv">${e.from}</div>` +
+             `<div class="sch-hw">${fmtDT(e.at)} detected</div></div></div>`;
+    }).join("");
+    return `<div class="sch-cv${cls}">${cur}</div>${vlog ? `<div class="sch-hl">${vlog}</div>` : ""}`;
+  }
+
+  return `<div class="sch-wrap">
+    <div class="sch-label">SHIPMENT SCHEDULE</div>
+    <table class="sch-tbl">
+      <thead><tr>
+        <th></th><th>Origin</th><th>Loading Port</th><th>T/S Port</th><th>Discharging Port</th>
+      </tr></thead>
+      <tbody>
+        <tr>
+          <td>Location</td>
+          <td><div class="sch-cv">${s.origin||"—"}</div></td>
+          <td><div class="sch-cv">${s.pol||"—"}</div></td>
+          <td><div class="sch-cv">${s.ts||"—"}</div></td>
+          <td><div class="sch-cv">${s.pod||"—"}</div></td>
+        </tr>
+        <tr>
+          <td>Terminal</td>
+          <td>${term(0)}</td>
+          <td>${term(1)}</td>
+          <td>${term(2)}</td>
+          <td>${term(3)}</td>
+        </tr>
+        <tr>
+          <td>Vessel</td>
+          <td><div class="sch-na">—</div></td>
+          <td>${vesselCV("feeder","feeder")}</td>
+          <td>${vesselCV("vessel","voyage")}</td>
+          <td><div class="sch-na">—</div></td>
+        </tr>
+        <tr>
+          <td>Arrival (ETB)</td>
+          <td><div class="sch-na">—</div></td>
+          <td>${cv(s.tsArr,"tsArr",fmtDT,"tsArrActual")}</td>
+          <td>${cv(s.tsArr,"tsArr",fmtDT,"tsArrActual")}</td>
+          <td>${cv(s.eta,"eta",fmtDT,"etaActual")}</td>
+        </tr>
+        <tr>
+          <td>Departure</td>
+          <td>${cv(s.polDep,"polDep",fmtDT,"polDepActual")}</td>
+          <td>${cv(s.polDep,"polDep",fmtDT,"polDepActual")}</td>
+          <td>${cv(s.tsDep,"tsDep",fmtDT,"tsDepActual")}</td>
+          <td><div class="sch-na">—</div></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>`;
+}
+
 function cardHTML(s){
   const L2 = locate(s);
   const pre = s.preShipment ? `<span class="dtag pre">NOT SHIPPED</span>` : "";
@@ -383,6 +485,7 @@ function cardHTML(s){
       <span class="tag ${cls}">${phase}</span>${stale}${pre}${rolloverHTML(s)}${delayHTML(s)}</div>
     <div class="card-bd">
       ${railHTML}
+      ${schTableHTML(s)}
       <div class="grid">
         <div class="f"><label>PKG ETD</label><span>${fmtDT(s.polDep)}</span></div>
         <div class="f"><label>SIN ETA</label><span>${fmtDT(s.tsArr)}</span></div>
@@ -499,13 +602,29 @@ function stampText(d){
   document.getElementById("stamp").innerHTML =
     `HMM retrieved ${toKST(d.updated)} · ${ago(d.updated)}` +
     (d.stale ? `<span class="warn"> · no new HMM events</span>` : "") +
-    `<span class="dim2"> · next update in ${nextRun()}</span>` +
-    `<span class="dim2"> · ${CRON_KST.length}× daily (${CRON_LABEL})</span>`;
+    `<br><span class="dim2">next update in ${nextRun()} · ${CRON_KST.length}× daily (${CRON_LABEL})</span>`;
 }
 
 /* ---------- 렌더링 ---------- */
 let CUR=null;
+/* KV 전파 지연 우회: /lookup·/collect 응답을 임시 캐시.
+   render()가 /data 오래된 값으로 호출돼도 캐시의 신선한 값이 항상 이긴다. */
+const _localLookupCache = {};
+
 function render(data){
+  /* 디버그: 호출 스택 + 데이터 상태 추적 */
+  const _caller = new Error().stack.split('\n').slice(1,3).join(' | ');
+  console.log('[render] called from:', _caller);
+  console.log('[render] cache keys:', Object.keys(_localLookupCache));
+  (data.shipments||[]).slice(0,6).forEach(s=>console.log(`[render]  data bkg=${s.booking} checkedAt=${s.checkedAt} scheduleCheckedAt=${s.scheduleCheckedAt}`));
+  /* _localLookupCache 오버라이드: checkedAt 기준으로 더 최신 값으로 교체 */
+  if(Object.keys(_localLookupCache).length){
+    const tsOf = x => Date.parse(String(x.checkedAt||"").replace(" ","T").replace(/Z?$/,"Z"))||0;
+    (data.shipments||[]).forEach((s,i)=>{
+      const ov = _localLookupCache[s.booking];
+      if(ov && tsOf(ov) > tsOf(s)) data.shipments[i] = ov;
+    });
+  }
   const seen = new Map();
   (data.shipments||[]).forEach(s=>{
     s.booking = String(s.booking||"").trim().toUpperCase();
@@ -522,7 +641,7 @@ function render(data){
   const dropped = before - data.shipments.length;
   CUR=data; stampText(data);
   document.getElementById("n-bkg").textContent=data.shipments.length;
-  document.getElementById("n-eta").textContent=fmtD(data.shipments.map(s=>s.eta).sort()[0]);
+  document.getElementById("n-eta").textContent=fmtD(data.shipments.filter(s=>!s.etaActual).map(s=>s.eta).sort()[0]);
   document.getElementById("cardlist").innerHTML=data.shipments.map(cardHTML).join("");
   if(dropped) document.getElementById("rstatus").innerHTML=`Removed <b>${dropped}</b> shipment(s) that arrived over 7 days ago.`;
   const safe = (fn,label)=>{ try{ fn(); }catch(e){ console.error(label,e); const el=document.getElementById("rstatus"); if(el) el.innerHTML += `<div class="warn">${label} failed — ${e.message||e}</div>`; } };
@@ -561,11 +680,29 @@ function setView(v){
   document.getElementById('cards').style.display    = v==='list'?'block':'none';
   document.getElementById('history').style.display  = v==='history'?'block':'none';
   document.getElementById('system').style.display   = v==='system'?'block':'none';
+  document.getElementById('beta').style.display     = v==='beta'?'block':'none';
   const laneEl = document.querySelector('.lane');
-  if(laneEl) laneEl.style.display = (v==='history'||v==='system') ? 'none' : 'flex';
-  if(v==='map'&&map) setTimeout(()=>map.invalidateSize(),60);
+  if(laneEl) laneEl.style.display = (v==='history'||v==='system'||v==='beta') ? 'none' : 'flex';
+  if(v==='map'&&map) {
+    setTimeout(()=>map.invalidateSize(),60);
+    /* MAP 첫 진입 시 ETA 가장 빠른 vessel 자동 표시 */
+    setTimeout(()=>{
+      const panel = document.getElementById('side');
+      if(!panel) return;
+      // h3 태그가 있으면 이미 vessel 선택된 것 — skip
+      if(panel.querySelector('h3')) return;
+      if(!CUR || !CUR.shipments) return;
+      const active = CUR.shipments.filter(s => !s.etaActual && s.eta);
+      if(!active.length) return;
+      active.sort((a,b)=>new Date(a.eta)-new Date(b.eta));
+      const s = active[0];
+      const i = CUR.shipments.indexOf(s);
+      if(i>=0) { select(s, i, true); if(typeof showPO==='function') showPO(s, i); }
+    }, 200);
+  }
   if(v==='history') renderHistoryMonths().catch(e=>console.error("History",e));
   if(v==='system') renderSystemTab();
+  if(v==='beta') renderBetaTab();
 }
 function show(v){
   if(v==="ship" && ACCESS_ROLE==="qc") return;
@@ -611,6 +748,7 @@ function applyRoleRestrictions(){
   const qualTile  = document.querySelector('.tile[data-go="quality"]');
   const updateBtn  = document.getElementById('update-btn');
   const restoreBtn = document.getElementById('restore-btn');
+  const forceReloadBtn = document.getElementById('force-reload-btn');
   const backBtn    = document.getElementById('back');
   const qbackBtn   = document.getElementById('qback');
   const restricted = (ACCESS_ROLE === 'eta' || ACCESS_ROLE === 'qc');
@@ -619,9 +757,12 @@ function applyRoleRestrictions(){
   if(ACCESS_ROLE === 'qc'  && shipTile) shipTile.style.display = 'none';
   if(updateBtn)  updateBtn.style.display  = isAdmin ? '' : 'none';
   if(restoreBtn) restoreBtn.style.display = isAdmin ? '' : 'none';
+  if(forceReloadBtn) forceReloadBtn.style.display = isAdmin ? '' : 'none';
   const sysTab = document.getElementById('tab-system');
   const mobileSysBtn = document.getElementById('mobile-system-btn');
   if(sysTab) sysTab.style.display = isAdmin ? '' : 'none';
+  const betaTab = document.getElementById('tab-beta');
+  if(betaTab) betaTab.style.display = isAdmin ? '' : 'none';
   if(mobileSysBtn) mobileSysBtn.hidden = !isAdmin;
   if(backBtn)    backBtn.style.display    = restricted ? 'none' : '';
   if(qbackBtn)   qbackBtn.style.display   = restricted ? 'none' : '';
@@ -650,10 +791,24 @@ function proceedAfterUnlock(){
     setTimeout(()=>{ map&&map.invalidateSize(); document.getElementById('ship').scrollIntoView({block:'start'}); },80);
   } else { show("menu"); }
   setView('map');
-  Promise.all([
-    loadPO(), loadHistory(),
-    fetch(source(),{cache:"no-store"}).then(r=>r.ok?r.json():Promise.reject()).catch(()=>FALLBACK)
-  ]).then(([,,data])=>render(data));
+  Promise.all([loadPO(), loadHistory()]).catch(()=>{});
+  fetchAndRender(0);
+}
+function fetchAndRender(attempt){
+  fetch(source(),{cache:"no-store"})
+    .then(r=>r.ok?r.json():Promise.reject(new Error('HTTP '+r.status)))
+    .then(data=>{ console.log('[fetchAndRender] success attempt='+attempt); render(data); })
+    .catch(e=>{
+      console.warn('[fetchAndRender] attempt='+attempt+' failed:',e&&(e.message||e));
+      if(attempt<5){
+        const delay = Math.min(10000*(attempt+1), 30000);
+        console.log('[fetchAndRender] retry in '+delay+'ms');
+        setTimeout(()=>fetchAndRender(attempt+1), delay);
+      } else {
+        console.error('[fetchAndRender] all retries failed, using FALLBACK');
+        render(FALLBACK);
+      }
+    });
 }
 
 function unlock(){
@@ -687,9 +842,22 @@ document.querySelectorAll(".tab").forEach(t=>t.addEventListener("click",()=>setV
 document.querySelectorAll(".ship-tabbar button").forEach(t=>t.addEventListener("click",()=>setView(t.dataset.view)));
 document.getElementById("update-btn").addEventListener("click",showChangelog);
 document.getElementById("restore-btn").addEventListener("click",showRestoreModal);
+document.getElementById("force-reload-btn").addEventListener("click", function(){
+  if('caches' in window){
+    caches.keys().then(names => Promise.all(names.map(n => caches.delete(n)))).then(() => location.reload(true));
+  } else {
+    location.reload(true);
+  }
+});
 
 document.addEventListener("DOMContentLoaded",()=>{
   initTheme();
+  /* 모바일: #side 패널 터치 스크롤이 Leaflet 지도로 전파되지 않도록 차단 */
+  const sideEl = document.getElementById("side");
+  if(sideEl){
+    sideEl.addEventListener("touchmove", e => { e.stopPropagation(); }, { passive: true });
+    sideEl.addEventListener("wheel",     e => { e.stopPropagation(); }, { passive: true });
+  }
   const sw = document.getElementById("themesw");
   if(sw) sw.addEventListener("click", ()=> applyTheme(THEME === "light" ? "dark" : "light"));
   const qb=document.getElementById("qback");
@@ -702,4 +870,53 @@ document.addEventListener("DOMContentLoaded",()=>{
   let ts = null;
   try{ ts = parseInt(localStorage.getItem(AUTH_KEY)||"0",10); }catch(_){}
   if(ts && (Date.now()-ts) < AUTH_TTL_MS){ proceedAfterUnlock(); }
+})();
+
+/* ===== 세계 시계 (전역) ===== */
+const TZ_CLOCKS = [
+  { key:'KR', id:'tz-time-KR', zone:'Asia/Seoul',          abbr:'KST' },
+  { key:'MY', id:'tz-time-MY', zone:'Asia/Kuala_Lumpur',   abbr:'MYT' },
+  { key:'US', id:'tz-time-US', zone:'America/Los_Angeles', abbr:null  }
+];
+let _mobTz = 'KR';
+
+function getTzTime(zone, abbr){
+  const now = new Date();
+  const parts = new Intl.DateTimeFormat('en-US',{
+    timeZone:zone, hour:'2-digit', minute:'2-digit', second:'2-digit', hour12:false
+  }).formatToParts(now);
+  const get = t => parts.find(p=>p.type===t)?.value||'00';
+  let hh = get('hour'); if(hh==='24') hh='00';
+  const a = abbr || new Intl.DateTimeFormat('en-US',{
+    timeZone:zone, timeZoneName:'short'
+  }).formatToParts(now).find(p=>p.type==='timeZoneName')?.value||'';
+  return { time:`${hh}:${get('minute')}:${get('second')}`, abbr:a };
+}
+
+function setTzMobile(key){
+  _mobTz = key;
+  document.querySelectorAll('.tz-mob-btn').forEach(b=>b.classList.remove('active'));
+  const btn = document.getElementById('tzm-'+key);
+  if(btn) btn.classList.add('active');
+  const dispEl = document.getElementById('tz-mob-display');
+  if(dispEl) dispEl.style.display = 'inline-block';
+}
+
+(function initWorldClocks(){
+  function tick(){
+    for(const c of TZ_CLOCKS){
+      const el = document.getElementById(c.id);
+      if(el){ const r=getTzTime(c.zone,c.abbr); el.textContent=r.time; }
+      const lblEl = document.getElementById(c.id+'-abbr');
+      if(lblEl){ const r=getTzTime(c.zone,c.abbr); lblEl.textContent=r.abbr; }
+    }
+    const mob = TZ_CLOCKS.find(c=>c.key===_mobTz);
+    if(mob){
+      const r = getTzTime(mob.zone, mob.abbr);
+      const dispEl = document.getElementById('tz-mob-display');
+      if(dispEl) dispEl.textContent = r.time + ' ' + r.abbr;
+    }
+  }
+  tick();
+  setInterval(tick, 1000);
 })();
