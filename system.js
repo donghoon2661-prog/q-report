@@ -4,6 +4,8 @@ function renderSystemTab(){
   const el = document.getElementById('sys-content');
   if(!el) return;
   const d = CUR;
+  /* 디버그 */ console.log('[renderSystemTab] CUR shipments checkedAt:');
+  (d&&d.shipments||[]).forEach(s=>console.log(`  bkg=${s.booking} checkedAt=${s.checkedAt} scheduleCheckedAt=${s.scheduleCheckedAt} mapAt=${s.mapAt}`));
   if(!d || !d.shipments){ el.innerHTML = `<div class="sys-err">No data loaded yet.</div>`; return; }
 
   function nextCron(){
@@ -216,9 +218,10 @@ async function sysRetry(bkg, btn){
       const fresh = Object.assign({}, res);
       delete fresh.savedToData; delete fresh.saveWarn; delete fresh.added;
       const idx = CUR.shipments.findIndex(s => s.booking === bkg);
+      console.log(`[sysRetry] bkg=${bkg} idx=${idx} fresh.checkedAt=${fresh.checkedAt} fresh.scheduleCheckedAt=${fresh.scheduleCheckedAt}`);
       if(idx >= 0) CUR.shipments[idx] = fresh;
       else CUR.shipments.push(fresh);
-      _localLookupCache[bkg] = fresh; // render()가 오래된 /data로 호출돼도 이 값이 이김
+      try{ _localLookupCache[bkg] = fresh; console.log('[sysRetry] cache set ok'); }catch(ce){ console.error('[sysRetry] cache error:', ce); }
       render(CUR);
     }
   } catch(e){
