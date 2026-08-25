@@ -952,6 +952,8 @@ async function collectSchedule(env, forceBkgs = null, sharedBudget = null) {
     budget
   };
   await env.OQC.put("shipments", JSON.stringify(payload));
+  /* 개별 ship:{bkg} key도 동기화 — /data에서 병합 시 최신 Cron 결과 반영 */
+  await Promise.all(shipments.map(s => env.OQC.put("ship:" + s.booking, JSON.stringify(s)).catch(() => {})));
   return payload;
 }
 
@@ -1028,6 +1030,8 @@ async function collectMaps(env, forceBkg = []) {
   base.sessionsUsedMaps = sessionsUsed;
   base.budgetUsedMaps = budget.used;
   await env.OQC.put("shipments", JSON.stringify(base));
+  /* 개별 ship:{bkg} key도 동기화 */
+  await Promise.all(base.shipments.map(s => env.OQC.put("ship:" + s.booking, JSON.stringify(s)).catch(() => {})));
   return base;
 }
 
@@ -1050,11 +1054,31 @@ export default {
 
     if (url.pathname === "/data") {
       const v = await env.OQC.get("shipments");
-      if (v) return new Response(v, { headers: JH });
-      let lastrun = null;
-      try { lastrun = JSON.parse((await env.OQC.get("lastrun")) || "null"); } catch (_) {}
-      return json({ error: "No data collected yet.", lastrun,
-        hint: lastrun ? "check lastrun.error" : "Cron has not run yet." }, 404);
+      if (!v) {
+        let lastrun = null;
+        try { lastrun = JSON.parse((await env.OQC.get("lastrun")) || "null"); } catch (_) {}
+        return json({ error: "No data collected yet.", lastrun,
+          hint: lastrun ? "check lastrun.error" : "Cron has not run yet." }, 404);
+      }
+      const data = JSON.parse(v);
+      /* 개별 ship:{bkg} key로 저장된 최신값으로 덮어씌워 race condition 없는 최신 상태 반영 */
+      if (data && Array.isArray(data.shipments)) {
+        for (let i = 0; i < data.shipments.length; i++) {
+          const bkg = data.shipments[i].booking;
+          if (!bkg) continue;
+          try {
+            const indiv = await env.OQC.get("ship:" + bkg);
+            if (indiv) {
+              const parsed = JSON.parse(indiv);
+              /* 개별 key가 더 최신인 경우만 덮어씀 */
+              const baseAt = data.shipments[i].scheduleCheckedAt || data.shipments[i].checkedAt || "";
+              const indivAt = parsed.scheduleCheckedAt || parsed.checkedAt || "";
+              if (indivAt >= baseAt) data.shipments[i] = parsed;
+            }
+          } catch (_) {}
+        }
+      }
+      return new Response(JSON.stringify(data), { headers: JH });
     }
 
     if (url.pathname === "/lookup") {
@@ -1120,26 +1144,13 @@ if (!one) return json({ error: "Failed to fetch booking after 10 session attempt
           } catch (_) {}
         }
         try {
-          /* race condition 방지: put 직전에 최신 KV를 다시 읽어서 병합
-             동시에 여러 /lookup이 실행돼도 각자가 직전 상태를 기준으로 병합하므로
-             나중에 저장되는 쪽이 앞선 저장을 덮어쓰지 않는다 */
-          const latest = await env.OQC.get("shipments");
-          const latestData = latest ? JSON.parse(latest) : null;
-          const base = (latestData && Array.isArray(latestData.shipments))
-            ? latestData
-            : { updated: one.checkedAt, source: "hmm21.com Track & Trace",
-                shipments: [], tracked: known.length, ok: 0, mapOk: 0 };
-          const i = base.shipments.findIndex(x => x.booking === bkg);
-          if (i >= 0) base.shipments[i] = one; else base.shipments.push(one);
-          base.tracked = known.length;
-          base.ok = base.shipments.filter(x => !x.staleItem).length;
-          base.mapOk = base.shipments.filter(x => x.route).length;
-          await env.OQC.put("shipments", JSON.stringify(base));
+          /* 개별 ship:{bkg} key에 저장 — race condition 원천 차단
+             동시에 여러 /lookup이 실행돼도 각자 다른 key에 쓰므로 충돌 없음 */
+          await env.OQC.put("ship:" + bkg, JSON.stringify(one));
           /* put 직후 get으로 실제 저장 여부 검증 */
-          const verify = await env.OQC.get("shipments");
-          const verifyData = JSON.parse(verify || "null");
-          const verifyFound = verifyData?.shipments?.find(x => x.booking === bkg);
-          if (verifyFound && !verifyFound.staleItem) {
+          const verify = await env.OQC.get("ship:" + bkg);
+          const verifyData = verify ? JSON.parse(verify) : null;
+          if (verifyData && !verifyData.staleItem) {
             one.savedToData = true;
           } else {
             one.savedToData = false;
