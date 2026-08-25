@@ -134,6 +134,9 @@ function renderSystemTab(){
 
   el.innerHTML = html;
 
+  /* DEVLOG 패널 (devlog.js 로드된 경우에만 — 임시 디버그) */
+  if (typeof window.__renderDevlogPanel__ === 'function') window.__renderDevlogPanel__(el);
+
   /* 에러 로그 비동기 로드 */
   (async ()=>{
     try{
