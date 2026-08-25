@@ -1001,34 +1001,34 @@ async function collectMaps(env, forceBkg = []) {
     pending = stillFailing;
   }
 
-  /* Race condition 방지 — 저장 직전 최신 KV를 다시 읽어서
-     다른 요청이 이미 성공시킨 부킹의 route/mapAt은 보존 */
-  const latest = await getSaved(env);
-  if (latest && latest.shipments) {
-    const latestMap = new Map(latest.shipments.map(s => [s.booking, s]));
-    for (const item of saved.shipments) {
-      const fresh = latestMap.get(item.booking);
-      if (!fresh) continue;
-      /* 현재 수집에서 실패했지만 최신 KV에 route가 있으면 보존 */
-      if (!item.route && fresh.route) {
-        item.route = fresh.route;
-        item.names = fresh.names;
-        item.namedPorts = fresh.namedPorts;
-        item.idx = fresh.idx;
-        item.ratio = fresh.ratio;
-        item.mapAt = fresh.mapAt;
-        delete item.mapError;
-      }
+  /* Race condition 방지 — 저장 직전 최신 KV를 다시 읽어서 완전 병합
+     동시에 여러 MAP REFRESH가 실행돼도 서로의 결과를 덮어쓰지 않는다 */
+  const latestRaw = await env.OQC.get("shipments");
+  const latest = latestRaw ? JSON.parse(latestRaw) : null;
+  const base = (latest && Array.isArray(latest.shipments)) ? latest : saved;
+  const baseMap = new Map(base.shipments.map(s => [s.booking, s]));
+
+  /* 이번 수집 결과를 최신 KV 위에 병합 */
+  for (const item of saved.shipments) {
+    const cur = baseMap.get(item.booking);
+    if (!cur) { base.shipments.push(item); continue; }
+    /* 이번에 성공한 부킹은 최신 결과로 덮어씀 */
+    if (item.route) {
+      Object.assign(cur, item);
+    } else if (!cur.route && item.mapError) {
+      /* 둘 다 route 없으면 mapError만 업데이트 */
+      cur.mapError = item.mapError;
     }
+    /* cur에 route 있고 이번 실패면 → 기존 route 유지 (건드리지 않음) */
   }
 
-  saved.mapUpdated = new Date().toISOString().slice(0, 16).replace("T", " ") + "Z";
-  saved.mapOk = saved.shipments.filter(s => s.route).length;
-  saved.mapErrors = errors;
-  saved.sessionsUsedMaps = sessionsUsed;
-  saved.budgetUsedMaps = budget.used;
-  await env.OQC.put("shipments", JSON.stringify(saved));
-  return saved;
+  base.mapUpdated = new Date().toISOString().slice(0, 16).replace("T", " ") + "Z";
+  base.mapOk = base.shipments.filter(s => s.route).length;
+  base.mapErrors = errors;
+  base.sessionsUsedMaps = sessionsUsed;
+  base.budgetUsedMaps = budget.used;
+  await env.OQC.put("shipments", JSON.stringify(base));
+  return base;
 }
 
 /* ---------- 라우팅 ---------- */
