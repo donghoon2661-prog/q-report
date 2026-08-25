@@ -109,7 +109,7 @@ function renderSystemTab(){
             : `<button class="sys-map-refresh" data-bkg="${s.booking}" style="font-size:10px;padding:2px 7px;border:1px solid #F2C14E;color:#F2C14E;background:none">REFRESH</button>`}
         </div>
       </span>
-    </div>`;}).join('')}
+    </div>`; }).join('')}
   </div>`;
 
   if(d.errors && d.errors.length){
@@ -211,10 +211,14 @@ async function sysRetry(bkg, btn){
           ? `<span class="sys-bad" style="font-size:10px">${res.saveWarn}</span>` : '';
       }
     }
-    if(res.savedToData){
-      setTimeout(()=>{
-        fetch(source(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(d=>{ if(d){ render(d); } });
-      }, 1000);
+    if(res.savedToData && CUR && CUR.shipments){
+      // KV 전파 지연을 우회: /data 재fetch 없이 /lookup 응답값으로 직접 CUR 업데이트 후 render
+      const fresh = Object.assign({}, res);
+      delete fresh.savedToData; delete fresh.saveWarn; delete fresh.added;
+      const idx = CUR.shipments.findIndex(s => s.booking === bkg);
+      if(idx >= 0) CUR.shipments[idx] = fresh;
+      else CUR.shipments.push(fresh);
+      render(CUR);
     }
   } catch(e){
     if(btn){ btn.disabled=false; btn.textContent='RETRY'; }
@@ -448,4 +452,3 @@ async function showRestoreModal(){
     }
   });
 }
-
