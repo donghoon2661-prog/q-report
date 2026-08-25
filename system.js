@@ -215,9 +215,11 @@ async function sysRetry(bkg, btn){
     }
     if(res.savedToData && CUR && CUR.shipments){
       // KV 전파 지연을 우회: /data 재fetch 없이 /lookup 응답값으로 직접 CUR 업데이트 후 render
-      const fresh = Object.assign({}, res);
-      delete fresh.savedToData; delete fresh.saveWarn; delete fresh.added;
       const idx = CUR.shipments.findIndex(s => s.booking === bkg);
+      // 기존 map 필드(mapAt, route 등) 보존 후 /lookup 응답으로 덮어씌움
+      const existing = idx >= 0 ? CUR.shipments[idx] : {};
+      const fresh = Object.assign({}, existing, res);
+      delete fresh.savedToData; delete fresh.saveWarn; delete fresh.added;
       console.log(`[sysRetry] bkg=${bkg} idx=${idx} fresh.checkedAt=${fresh.checkedAt} fresh.scheduleCheckedAt=${fresh.scheduleCheckedAt}`);
       if(idx >= 0) CUR.shipments[idx] = fresh;
       else CUR.shipments.push(fresh);
