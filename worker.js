@@ -1403,6 +1403,7 @@ if (!one) return json({ error: "Failed to fetch booking after 10 session attempt
       catch (e) { out.sessionError = String(e.message || e); }
       out.budgetUsed = budget.used;
       try { out.lastrun = JSON.parse((await env.OQC.get("lastrun")) || "null"); } catch (_) {}
+      try { out.sessionLog = await env.OQC.get("sessionLog"); } catch (_) {}
       return json(out);
     }
 
