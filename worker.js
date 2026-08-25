@@ -1120,10 +1120,13 @@ if (!one) return json({ error: "Failed to fetch booking after 10 session attempt
           } catch (_) {}
         }
         try {
-          const saved = await getSaved(env);
-          /* saved가 null이거나 shipments 배열이 없으면 최소한의 구조로 새로 만든다 */
-          const base = (saved && Array.isArray(saved.shipments))
-            ? saved
+          /* race condition 방지: put 직전에 최신 KV를 다시 읽어서 병합
+             동시에 여러 /lookup이 실행돼도 각자가 직전 상태를 기준으로 병합하므로
+             나중에 저장되는 쪽이 앞선 저장을 덮어쓰지 않는다 */
+          const latest = await env.OQC.get("shipments");
+          const latestData = latest ? JSON.parse(latest) : null;
+          const base = (latestData && Array.isArray(latestData.shipments))
+            ? latestData
             : { updated: one.checkedAt, source: "hmm21.com Track & Trace",
                 shipments: [], tracked: known.length, ok: 0, mapOk: 0 };
           const i = base.shipments.findIndex(x => x.booking === bkg);
