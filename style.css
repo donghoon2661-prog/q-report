@@ -74,7 +74,7 @@ html[data-theme="light"] .tile:hover{background:#F0F5F8;border-color:#0F2430}
   font-size:13px;letter-spacing:.16em;color:var(--fog)}
 .btn:hover{color:var(--paper);border-color:var(--fog)}
 .topbar h1{font-family:'Barlow Condensed';font-weight:700;font-size:26px;letter-spacing:.06em;margin:0}
-.stamp{font-family:'IBM Plex Mono';font-size:11px;color:var(--fog);line-height:1.7;min-width:260px;max-width:320px}
+.stamp{font-family:'IBM Plex Mono';font-size:11px;color:var(--fog);line-height:1.7;flex:1}
 .topbar .spacer{flex:1}.topbar .brand{font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.14em;
   color:var(--sail);text-align:right;line-height:1.5;white-space:nowrap}
 .topbar .brand .l1{display:block;opacity:.6}
@@ -120,7 +120,6 @@ html[data-theme="light"] .tile:hover{background:#F0F5F8;border-color:#0F2430}
 .gapbang:hover{color:#FF6B6B}
 @keyframes bang{0%,100%{opacity:1}50%{opacity:.35}}
 .gapremark{margin:10px 2px 0;font-size:11px;line-height:1.6;color:var(--fog);opacity:.85}
-.local-time-note{font-size:11px;line-height:1.6;color:var(--fog);opacity:.85;margin:8px 0 4px}
 .gapremark b{color:#E5484D}
 #gaplog{position:fixed;inset:0;background:rgba(4,12,18,.72);z-index:60;
   display:flex;align-items:center;justify-content:center;padding:20px}
@@ -278,11 +277,11 @@ dd .dim{opacity:.65}
 .leaflet-control-attribution a{color:var(--fog)!important}
 /* 지도와 같은 높이로 고정하고, 내용이 길면 패널 안에서만 스크롤한다 */
 #side{border:1px solid var(--line);background:var(--hull);padding:18px;
-  height:560px;overflow-y:auto;overscroll-behavior:contain;touch-action:pan-y}
+  height:560px;overflow-y:auto;overscroll-behavior:contain}
 #side::-webkit-scrollbar{width:8px}
 #side::-webkit-scrollbar-thumb{background:var(--line);border-radius:4px}
 #side::-webkit-scrollbar-track{background:transparent}
-#side h3{font-family:'Barlow Condensed';font-size:20px;margin:0 0 4px;display:flex;align-items:center;flex-wrap:wrap;gap:6px}
+#side h3{font-family:'Barlow Condensed';font-size:20px;margin:0 0 4px}
 #side .sb{font-family:'IBM Plex Mono';font-size:12px;color:var(--fog);margin-bottom:14px}
 #side dl{margin:0;display:grid;grid-template-columns:auto 1fr;gap:7px 12px;font-size:12.5px}
 #side dt{font-family:'IBM Plex Mono';font-size:10px;letter-spacing:.1em;color:var(--fog);padding-top:2px}
@@ -322,32 +321,9 @@ dd .dim{opacity:.65}
 .pct{position:absolute;right:0;top:-6px;font-family:'IBM Plex Mono';font-size:11px;color:var(--sail)}
 .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px 18px;padding-top:16px;border-top:1px solid var(--line-soft)}
 .f label{display:block;font-family:'IBM Plex Mono';font-size:10px;letter-spacing:.14em;color:var(--fog);margin-bottom:5px}
-.f span{font-size:14px;font-weight:500;color:var(--paper)}
+.f span{font-size:14px;font-weight:500}
 .f span.na{color:#4E6B7D;font-weight:400}
 .note{margin-top:14px;font-size:12.5px;color:var(--fog);line-height:1.6}
-/* ── phase badge ── */
-.ph{display:inline-block;font-family:'IBM Plex Mono';font-size:9px;letter-spacing:.06em;padding:2px 6px;border-radius:2px;white-space:nowrap;border:1px solid;vertical-align:middle;margin-left:6px;position:relative;top:-1px}
-.ph.sail{border-color:var(--sail);color:var(--sail)}
-.ph.dock{border-color:var(--dock);color:var(--dock)}
-.ph.done{border-color:var(--fog);color:var(--fog)}
-/* ── Shipment Schedule table ── */
-.sch-wrap{margin:0 0 18px;border-top:1px solid var(--line-soft);padding-top:16px}
-.sch-label{font-family:'IBM Plex Mono';font-size:10px;letter-spacing:.14em;color:var(--fog);margin-bottom:8px}
-.sch-tbl{width:100%;border-collapse:collapse;font-size:11px;table-layout:fixed}
-.sch-tbl th{font-family:'IBM Plex Mono';font-size:9px;letter-spacing:.1em;color:var(--fog);text-align:center;padding:5px 4px;background:var(--ink);border:1px solid var(--line);text-transform:uppercase}
-.sch-tbl th:first-child{width:78px;text-align:left;padding-left:8px}
-.sch-tbl td{border:1px solid var(--line);padding:6px 5px 5px;vertical-align:top;text-align:center}
-.sch-tbl td:first-child{font-family:'IBM Plex Mono';font-size:9px;letter-spacing:.08em;color:var(--fog);text-align:left;padding-left:8px;background:var(--ink);text-transform:uppercase;white-space:nowrap}
-.sch-cv{font-family:'IBM Plex Mono';font-size:10.5px;line-height:1.4;color:var(--paper);display:flex;align-items:baseline;justify-content:center;gap:4px;flex-wrap:wrap}
-.sch-tbl td:first-child .sch-cv,.sch-tbl td:first-child .sch-na{justify-content:flex-start}
-.sch-changed{color:var(--buoy)}
-.sch-na{font-family:'IBM Plex Mono';font-size:10.5px;color:var(--fog)}
-.sch-act{font-family:'IBM Plex Mono';font-size:8px;letter-spacing:.06em;padding:1px 4px;border:1px solid var(--sail);color:var(--sail);border-radius:2px;line-height:1.4;flex-shrink:0}
-.sch-hl{margin-top:4px;display:flex;flex-direction:column;gap:3px;align-items:center}
-.sch-he{display:flex;align-items:flex-start;gap:3px;font-family:'IBM Plex Mono';font-size:9px;line-height:1.4}
-.sch-hdot{width:4px;height:4px;border-radius:50%;background:var(--buoy);flex-shrink:0;margin-top:3px}
-.sch-hv{color:var(--fog);text-decoration:line-through}
-.sch-hw{font-size:8px;color:var(--fog);opacity:.65;margin-top:1px}
 
 
 #menu[hidden]{display:none!important}
@@ -369,14 +345,6 @@ dd .dim{opacity:.65}
   #map{height:200px}
   #mapwrap{gap:10px;grid-template-columns:1fr!important}
   #side{padding:14px;order:-1}          /* 정보 패널을 지도 위로 */
-  #side{margin-right:20px}
-  #side dl{grid-template-columns:auto 1fr;min-width:0}
-  #side dl *{min-width:0;overflow-wrap:break-word;word-break:break-word}
-  .tsdwell{font-size:11px}
-  .tsdwell .dtag{display:inline-block;margin-top:4px}
-  #side dl{grid-template-columns:1fr}
-  #side dt{padding-top:6px;border-top:1px solid rgba(255,255,255,0.04)}
-  #side dt:first-of-type{border-top:none}
   #side:empty{display:none}
   .addbar input{width:100%}
   .tabs{display:none}                   /* 상단 탭 대신 하단 탭바 사용 */
@@ -605,13 +573,6 @@ html[data-theme="light"] #qview td.near{background:rgba(154,107,18,.08)}
   font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.14em;
   padding:6px 12px;cursor:pointer}
 #restore-btn:hover{background:var(--buoy);color:var(--ink)}
-
-/* FORCE RELOAD 버튼 — RESTORE 버튼 왼쪽 */
-#force-reload-btn{position:fixed;right:195px;bottom:16px;z-index:5;
-  background:none;border:1px solid var(--buoy);color:var(--buoy);
-  font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.14em;
-  padding:6px 12px;cursor:pointer}
-#force-reload-btn:hover{background:var(--buoy);color:var(--ink)}
 #restore-modal{position:fixed;inset:0;background:rgba(4,12,18,.72);z-index:60;
   display:flex;align-items:center;justify-content:center;padding:20px}
 #restore-modal[hidden]{display:none}
@@ -652,27 +613,20 @@ html[data-theme="light"] #qview td.near{background:rgba(154,107,18,.08)}
 .sys-bkg5{display:grid;grid-template-columns:140px 1fr 1fr 1fr auto;gap:8px;padding:7px 0;
   border-bottom:1px solid var(--hair);font-size:11px;align-items:center;font-family:'IBM Plex Mono',monospace}
 .sys-bkg5:last-child{border-bottom:0}
-.sys-bkg3{display:grid;grid-template-columns:160px 1fr 1fr;gap:12px;padding:9px 0;
-  border-bottom:1px solid var(--hair);font-size:11px;align-items:start;font-family:'IBM Plex Mono',monospace}
-.sys-bkg3:last-child{border-bottom:0}
 .sys-legend{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--fog);
   margin-bottom:6px;display:flex;flex-wrap:wrap;gap:4px 0;line-height:2}
 .sys-stale{display:inline-block;padding:1px 6px;border-radius:3px;font-size:10px;
   background:var(--warn-bg);color:var(--warn)}
-.sys-err{border:1px solid rgba(229,72,77,.3);background:rgba(229,72,77,.06);border-radius:6px;padding:10px 14px;margin-bottom:8px}
-.err-row{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:baseline;padding:3px 0;border-bottom:1px solid rgba(229,72,77,.1);font-size:11px;font-family:'IBM Plex Mono',monospace}
-.err-row:last-child{border-bottom:none}
-.err-msg{color:#e5484d;word-break:break-all}
-.err-time{color:rgba(229,72,77,.6);white-space:nowrap;font-size:10px;font-variant-numeric:tabular-nums}
+.sys-err{background:rgba(229,72,77,.08);border:1px solid rgba(229,72,77,.3);
   padding:10px 12px;margin-top:8px;font-size:11px;color:#E5484D;
   font-family:'IBM Plex Mono',monospace;line-height:1.7}
-.sys-retry{background:none;border:1px solid #F2C14E;color:#F2C14E;
+.sys-retry{background:none;border:1px solid var(--warn-line);color:var(--warn);
   font-family:'IBM Plex Mono',monospace;font-size:10px;padding:3px 8px;cursor:pointer;white-space:nowrap}
-.sys-retry:hover{background:var(--surface-1)}
+.sys-retry:hover{background:var(--warn-bg)}
 .sys-retry:disabled{opacity:.4;cursor:default}
-.sys-retry-all{background:none;border:1px solid #F2C14E;color:#F2C14E;
+.sys-retry-all{background:none;border:1px solid var(--warn-line);color:var(--warn);
   font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:.1em;padding:4px 10px;cursor:pointer}
-.sys-retry-all:hover{background:var(--surface-1)}
+.sys-retry-all:hover{background:var(--warn-bg)}
 .sys-ok{color:var(--sail)} .sys-warn{color:var(--dock)} .sys-bad{color:var(--buoy)} .sys-dim{color:var(--fog)}
 
 /* 모바일 SYSTEM 버튼 — 로그아웃 왼쪽에 나란히, 모바일에서만 표시 */
@@ -686,36 +640,16 @@ html[data-theme="light"] #qview td.near{background:rgba(154,107,18,.08)}
   #mobile-system-btn:not([hidden]){display:block}
 }
 
-/* ===== TREND 탭 ===== */
-.trend-section { margin-bottom: 36px; }
-.trend-section-title { font-size: 11px; letter-spacing: .08em; color: var(--fog); margin-bottom: 14px; text-transform: uppercase; }
-.trend-chart-wrap { display: flex; flex-direction: column; gap: 10px; }
-.trend-leg-row { display: flex; align-items: center; gap: 10px; }
-.trend-leg-label { width: 110px; font-size: 11px; color: var(--fog); flex-shrink: 0; }
-.trend-leg-bar-wrap { flex: 1; background: rgba(255,255,255,0.05); border-radius: 2px; height: 10px; overflow: hidden; }
-.trend-leg-bar { height: 100%; border-radius: 2px; transition: width .4s ease; }
-.trend-leg-val { width: 48px; text-align: right; font-size: 12px; font-family: monospace; flex-shrink: 0; }
-
-/* ===== BETA 탭 네비게이션 ===== */
-.beta-nav { display:flex; gap:6px; margin-bottom:24px; border-bottom:1px solid rgba(255,255,255,0.08); padding-bottom:12px; }
-.beta-nav-btn { background:none; border:1px solid rgba(255,255,255,0.15); color:var(--fog); font-family:var(--mono); font-size:11px; letter-spacing:.08em; padding:4px 14px; border-radius:3px; cursor:pointer; transition:all .15s; }
-.beta-nav-btn.on { border-color:var(--sail); color:var(--sail); }
-.beta-nav-btn:hover:not(.on) { border-color:rgba(255,255,255,0.3); color:#fff; }
-
-/* ===== TZ 세계 시계 ===== */
-.tz-group{display:flex;gap:0;border:1px solid var(--line)}
-.tz-clock{display:flex;flex-direction:column;align-items:center;padding:5px 10px;border-right:1px solid var(--line)}
-.tz-clock:last-child{border-right:none}
-.tz-clock .tz-time{font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:600;color:var(--paper);letter-spacing:.04em;line-height:1.3}
-.tz-clock .tz-abbr{font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--fog);letter-spacing:.08em;line-height:1.4}
-/* 모바일에서 데스크탑 시계 숨김 */
-@media(max-width:760px){.tz-group{display:none}}
-/* 모바일 TZ 버튼 바 */
-.tz-mobile-bar{display:none}
-.tz-mob-display{display:none}
-@media(max-width:760px){
-  .tz-mobile-bar{display:flex;align-items:center;gap:6px;padding:6px 0 8px;border-bottom:1px solid var(--line-soft);margin-bottom:4px}
-  .tz-mob-btn{background:none;border:1px solid var(--line);color:var(--fog);font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;letter-spacing:.1em;padding:3px 10px;cursor:pointer}
-  .tz-mob-btn.active{border-color:var(--sail);color:var(--sail);background:var(--hull)}
-  .tz-mob-display{display:inline-block;font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:600;color:var(--paper);letter-spacing:.03em;white-space:nowrap}
-}
+/* ── DEVLOG 임시 디버그 스타일 (작업 완료 후 삭제) ── */
+#devlog-table tr { border-bottom: 1px solid rgba(30,58,76,.5); }
+#devlog-table tr:hover { background: rgba(255,255,255,.03); }
+.dl-time { color: #5A7A8A; white-space: nowrap; padding: 4px 8px; }
+.dl-cat  { color: #8AA4B5; white-space: nowrap; padding: 4px 8px; }
+.dl-lv   { white-space: nowrap; padding: 4px 8px; font-weight: 600; }
+.dl-msg  { padding: 4px 8px; word-break: break-all; color: #B8CDD8; }
+.dl-error .dl-lv, .dl-error .dl-msg { color: #FF6B6B; }
+.dl-warn  .dl-lv  { color: #F2C14E; }
+.dl-warn  .dl-msg { color: #E0C97A; }
+.dl-net   .dl-lv  { color: #3FD0A6; }
+.dl-info  .dl-lv  { color: #5A7A8A; }
+/* ── DEVLOG 스타일 끝 ── */
