@@ -612,6 +612,11 @@ let CUR=null;
 const _localLookupCache = {};
 
 function render(data){
+  /* 디버그: 호출 스택 + 데이터 상태 추적 */
+  const _caller = new Error().stack.split('\n').slice(1,3).join(' | ');
+  console.log('[render] called from:', _caller);
+  console.log('[render] cache keys:', Object.keys(_localLookupCache));
+  (data.shipments||[]).slice(0,6).forEach(s=>console.log(`[render]  data bkg=${s.booking} checkedAt=${s.checkedAt} scheduleCheckedAt=${s.scheduleCheckedAt}`));
   /* _localLookupCache 오버라이드: checkedAt 기준으로 더 최신 값으로 교체 */
   if(Object.keys(_localLookupCache).length){
     const tsOf = x => Date.parse(String(x.checkedAt||"").replace(" ","T").replace(/Z?$/,"Z"))||0;
@@ -684,6 +689,7 @@ function setView(v){
     setTimeout(()=>{
       const panel = document.getElementById('side');
       if(!panel) return;
+      // h3 태그가 있으면 이미 vessel 선택된 것 — skip
       if(panel.querySelector('h3')) return;
       if(!CUR || !CUR.shipments) return;
       const active = CUR.shipments.filter(s => !s.etaActual && s.eta);
