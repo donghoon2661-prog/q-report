@@ -876,7 +876,7 @@ document.addEventListener("DOMContentLoaded",()=>{
 const TZ_CLOCKS = [
   { key:'KR', id:'tz-time-KR', zone:'Asia/Seoul',          abbr:'KST' },
   { key:'MY', id:'tz-time-MY', zone:'Asia/Kuala_Lumpur',   abbr:'MYT' },
-  { key:'US', id:'tz-time-US', zone:'America/Los_Angeles', abbr:null  }
+  { key:'US', id:'tz-time-US', zone:'UTC',                 abbr:'UTC' }
 ];
 let _mobTz = 'KR';
 
