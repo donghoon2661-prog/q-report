@@ -274,6 +274,7 @@ async function renderErrorLogContent() {
         bookingMap[l.booking].success = true;
         bookingMap[l.booking].lastOk = l.time ? `${l.date} ${l.time}` : null;
         bookingMap[l.booking].attemptsToSuccess = bookingMap[l.booking].attempts;
+        bookingMap[l.booking].successLoc = l.loc || null;
       }
     }
 
@@ -288,6 +289,7 @@ async function renderErrorLogContent() {
             <th style="text-align:left;padding:5px 8px">BOOKING</th>
             <th style="text-align:right;padding:5px 8px">총 시도</th>
             <th style="text-align:right;padding:5px 8px">성공까지</th>
+            <th style="text-align:right;padding:5px 8px">성공 엣지</th>
             <th style="text-align:right;padding:5px 8px">마지막 성공</th>
           </tr></thead>
           <tbody>${summaryRows.map(([bkg, v]) => `
@@ -296,6 +298,9 @@ async function renderErrorLogContent() {
               <td style="padding:5px 8px;text-align:right;color:var(--fog)">${v.attempts}</td>
               <td style="padding:5px 8px;text-align:right;color:${v.success ? '#4caf8a' : 'var(--buoy)'}">
                 ${v.success ? v.attemptsToSuccess + '회' : '미성공'}
+              </td>
+              <td style="padding:5px 8px;text-align:right;color:var(--fog);font-size:10px">
+                ${v.successLoc || '—'}
               </td>
               <td style="padding:5px 8px;text-align:right;color:var(--fog);font-size:10px">
                 ${v.lastOk || '—'}
@@ -313,7 +318,7 @@ async function renderErrorLogContent() {
         ${logs.map(l => {
           const color = l.ok ? '#4caf8a' : 'var(--buoy)';
           const status = l.ok ? '✓' : '✗';
-          const err = (!l.ok && (l.code || l.loc)) ? ` (${[l.code, l.loc].filter(Boolean).join(' · ')})` : '';
+          const err = (!l.ok && (l.code || l.loc)) ? ` (${[l.code, l.loc].filter(Boolean).join(' · ')})` : (l.ok && l.loc ? ` (${l.loc})` : '');
           const tag = l.tag ? `[${l.tag}]` : '[cron]';
           return `<div style="display:flex;gap:8px;padding:4px 0;border-bottom:1px solid rgba(255,255,255,0.04);align-items:center">
             <span style="color:${color};width:12px;flex-shrink:0">${status}</span>
