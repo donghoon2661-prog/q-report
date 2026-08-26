@@ -1099,16 +1099,7 @@ for (let s = 0; s < 10 && !one; s++) {
   try { const _h = await queryBooking(budget, session, bkg, 1); one = parseBooking(_h, bkg); if (budget.lastCfRay) one.successEdge = (budget.lastCfRay.match(/-([A-Z]{3})\b/) || [])[1] || null; } catch (e) { lastErr = String(e.message||e); continue; }
 }
 if (!one) return json({ error: "Failed to fetch booking after 10 session attempts", hint: lastErr }, 502);
-        try {
-          if (one.container) {
-            let mapDone = false;
-            for (let s = 0; s < 10 && !mapDone; s++) {
-              let session;
-              try { session = await openSession(budget); } catch (e) { continue; }
-              try { Object.assign(one, await fetchMap(budget, session, bkg, one.container, 1)); mapDone = true; } catch (e) { if (!one.route) one.mapError = String(e.message || e); }
-            }
-          }
-        } catch (e) { one.mapError = String(e.message || e); }
+        /* /lookup은 스케줄만 조회 — 맵 fetch 제거 (맵은 MAP REFRESH 버튼으로만) */
 
         const known = await getList(env);
         if (!known.includes(bkg)) {
