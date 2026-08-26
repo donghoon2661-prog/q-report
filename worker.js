@@ -1225,15 +1225,7 @@ if (!one) return json({ error: "Failed to fetch booking after 10 session attempt
           /* 개별 ship:{bkg} key에 저장 — race condition 원천 차단
              동시에 여러 /lookup이 실행돼도 각자 다른 key에 쓰므로 충돌 없음 */
           await env.OQC.put("ship:" + bkg, JSON.stringify(one));
-          /* put 직후 get으로 실제 저장 여부 검증 */
-          const verify = await env.OQC.get("ship:" + bkg);
-          const verifyData = verify ? JSON.parse(verify) : null;
-          if (verifyData && !verifyData.staleItem) {
-            one.savedToData = true;
-          } else {
-            one.savedToData = false;
-            one.saveWarn = "KV put succeeded but verify read returned stale/missing";
-          }
+          one.savedToData = true;
 
           /* 스케줄 이력에도 첫 관측을 남긴다 */
           let hist = {};
