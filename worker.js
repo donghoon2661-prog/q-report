@@ -380,7 +380,7 @@ function computeActualFlags(item) {
 /* ---------- 지도 좌표 ---------- */
 async function fetchMap(budget, session, blNo, cntrNo, tries) {
   const r = await hmmFetch(budget,
-    `${MAP_URL}?blNo=${encodeURIComponent(blNo)}&cntrNo=${encodeURIComponent(cntrNo)}`, {
+    `${MAP_URL}?blNo=${encodeURIComponent(blNo)}`, {
     headers: {
       "User-Agent": UA,
       "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
@@ -976,7 +976,7 @@ async function collectMaps(env, forceBkg = []) {
   const byBkg = new Map(saved.shipments.map(s => [s.booking, s]));
   const forceSet = new Set(forceBkg.map(b => b.trim().toUpperCase()));
   let pending = saved.shipments
-    .filter(s => s.container && !s.etaActual && (forceSet.size ? forceSet.has(s.booking) : (!s.route || s.mapError || !mapFresh(s))))
+    .filter(s => !s.etaActual && (forceSet.size ? forceSet.has(s.booking) : (!s.route || s.mapError || !mapFresh(s))))
     .map(s => s.booking)
     .slice(0, MAX_PER_RUN);
   if (!pending.length) return { ...saved, mapNote: "보충할 지도 없음" };
