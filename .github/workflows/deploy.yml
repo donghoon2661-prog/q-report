@@ -16,7 +16,7 @@ jobs:
 
       - name: Deploy to Cloudflare Workers
         run: |
-          METADATA='{"main_module":"worker.js"}'
+          METADATA='{"main_module":"worker.js","bindings":[{"type":"kv_namespace","name":"OQC","namespace_id":"34312881efa04162bc037d499cc42c36"}]}'
           RESPONSE=$(curl -s -X PUT "https://api.cloudflare.com/client/v4/accounts/${{ secrets.CF_ACCOUNT_ID }}/workers/scripts/kossan-oqc" \
             -H "Authorization: Bearer ${{ secrets.CF_API_TOKEN }}" \
             -F "metadata=$METADATA;type=application/json" \
