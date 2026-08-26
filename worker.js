@@ -1491,7 +1491,7 @@ if (!one) return json({ error: "Failed to fetch booking after 10 session attempt
           hasCsrf: /name="_csrf"/.test(body)
         });
       } catch (e) { out.fetchError = String(e.message || e); }
-      try { out.session = !!(await openSession(budget)).csrf; }
+      try { const sess = await openSession(budget); out.session = !!sess.csrf; out.sessionCookie = sess.cookie; }
       catch (e) { out.sessionError = String(e.message || e); }
       out.budgetUsed = budget.used;
       try { out.lastrun = JSON.parse((await env.OQC.get("lastrun")) || "null"); } catch (_) {}
