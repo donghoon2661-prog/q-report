@@ -888,10 +888,12 @@ async function collectSchedule(env, forceBkgs = null, sharedBudget = null) {
       const indiv = indivRaw ? (() => { try { return JSON.parse(indivRaw); } catch(_) { return null; } })() : null;
       const indivAt = indiv ? (indiv.scheduleCheckedAt || indiv.checkedAt || null) : null;
       const baseAt = old.scheduleCheckedAt || old.checkedAt || null;
-      const lastOkStr = (indivAt && (!baseAt || indivAt > baseAt)) ? indivAt : baseAt;
+      const useIndiv = indivAt && (!baseAt || indivAt > baseAt);
+      const best = useIndiv ? { ...old, ...indiv } : old;
+      const lastOkStr = useIndiv ? indivAt : baseAt;
       const lastOkMs = lastOkStr ? Date.parse(lastOkStr.replace(" ","T").replace(/Z$/,"")+"Z") : 0;
       const isStale = !lastOkMs || (Date.now() - lastOkMs) > STALE_MS;
-      const carriedItem = { ...old, ...(isStale ? { staleItem: true, staleSince: lastOkStr } : {}), scheduleError: errMap.get(bkg)};
+      const carriedItem = { ...best, ...(isStale ? { staleItem: true, staleSince: lastOkStr } : {}), scheduleError: errMap.get(bkg)};
       /* 이전 이벤트 기반으로 actual 플래그 재계산 — status 폴백 덕분에 etaActual도 복원됨 */
       Object.assign(carriedItem, computeActualFlags(carriedItem));
       out.set(bkg, carriedItem);
