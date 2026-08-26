@@ -381,7 +381,7 @@ function computeActualFlags(item) {
 /* ---------- 지도 좌표 ---------- */
 async function fetchMap(budget, session, blNo, cntrNo, tries) {
   const r = await hmmFetch(budget,
-    `${MAP_URL}?blNo=${encodeURIComponent(blNo)}`, {
+    `${MAP_URL}?blNo=${encodeURIComponent(blNo)}&cntrNo=${encodeURIComponent(cntrNo)}`, {
     headers: {
       "User-Agent": UA,
       "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
