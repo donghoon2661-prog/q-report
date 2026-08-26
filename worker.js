@@ -1160,7 +1160,7 @@ export default {
               /* 개별 key가 더 최신인 경우만 덮어씀 */
               const baseAt = data.shipments[i].scheduleCheckedAt || data.shipments[i].checkedAt || "";
               const indivAt = parsed.scheduleCheckedAt || parsed.checkedAt || "";
-              if (indivAt >= baseAt) data.shipments[i] = parsed;
+              if (indivAt >= baseAt || (parsed.mapAt && parsed.mapAt > (data.shipments[i].mapAt || ""))) data.shipments[i] = parsed;
             }
           } catch (_) {}
         }
