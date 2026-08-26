@@ -703,6 +703,67 @@ async function notifyIfNeeded(env, payload) {
   return { sent: res.ok ? targets.length : 0, bookings: targets.map(s => s.booking), ...res };
 }
 
+/* 도착 완료 메일 — etaActual이 처음 true가 된 부킹에 1회만 발송 */
+function arrivalMailBody(list, updated) {
+  const esc = v => String(v == null ? "" : v).replace(/[&<>]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" }[c]));
+  const delayStr = s => {
+    if (typeof s.delayDays !== "number") return "-";
+    if (s.delayDays === 0) return "<span style='color:#2E7D32;font-weight:600'>On time</span>";
+    return `<span style='color:${s.delayDays > 0 ? "#C8402F" : "#2E7D32"};font-weight:600'>${s.delayDays > 0 ? "+" : ""}${s.delayDays}d</span>`;
+  };
+  const row = s => `
+    <tr>
+      <td style="padding:8px 10px;border-bottom:1px solid #ddd"><b>${esc(s.booking)}</b><br>
+        <span style="color:#666;font-size:12px">${esc(s.vessel)} ${esc(s.voyage || "")}</span></td>
+      <td style="padding:8px 10px;border-bottom:1px solid #ddd">${esc(s.planEta || "-")}</td>
+      <td style="padding:8px 10px;border-bottom:1px solid #ddd">${esc((s.eta || "").slice(0, 10))}</td>
+      <td style="padding:8px 10px;border-bottom:1px solid #ddd">${delayStr(s)}</td>
+      <td style="padding:8px 10px;border-bottom:1px solid #ddd;font-size:12px;color:#555">
+        ${esc(s.pol || "")} → ${esc(s.ts || "-")} → ${esc(s.pod || "")}</td>
+    </tr>`;
+  return `<div style="font-family:system-ui,'Malgun Gothic',sans-serif;color:#222">
+    <h2 style="margin:0 0 4px">✅ HMM Shipment Arrived</h2>
+    <p style="margin:0 0 14px;color:#666;font-size:13px">Detected at ${esc(updated)}</p>
+    <table style="border-collapse:collapse;font-size:13px;width:100%">
+      <tr style="background:#f2f5f7">
+        <th style="padding:8px 10px;text-align:left">Booking / Vessel</th>
+        <th style="padding:8px 10px;text-align:left">Plan ETA</th>
+        <th style="padding:8px 10px;text-align:left">Actual ETA</th>
+        <th style="padding:8px 10px;text-align:left">Delay</th>
+        <th style="padding:8px 10px;text-align:left">Route</th>
+      </tr>
+      ${list.map(row).join("")}
+    </table>
+    <p style="margin:16px 0 0;font-size:12px;color:#888">This notification is sent once per booking upon arrival confirmation.</p>
+  </div>`;
+}
+
+async function notifyArrivalIfNeeded(env, payload) {
+  const shipments = payload.shipments || [];
+  const targets = shipments.filter(s => !s.staleItem && s.etaActual && !s.arrivalMailSent);
+  if (!targets.length) return { sent: 0 };
+
+  const subject = `[Arrived] HMM Shipment Arrived — ${targets.length} booking(s): ${targets.map(s => s.booking).join(", ")}`;
+  const res = await sendMail(env, subject, arrivalMailBody(targets, payload.updated));
+
+  if (res.ok) {
+    /* arrivalMailSent 플래그를 KV shipments에 반영 */
+    try {
+      const raw = await env.OQC.get("shipments");
+      if (raw) {
+        const saved = JSON.parse(raw);
+        const sentSet = new Set(targets.map(s => s.booking));
+        if (saved && saved.shipments) {
+          saved.shipments.forEach(s => { if (sentSet.has(s.booking)) s.arrivalMailSent = true; });
+          await env.OQC.put("shipments", JSON.stringify(saved));
+        }
+      }
+    } catch (_) {}
+  }
+
+  return { sent: res.ok ? targets.length : 0, bookings: targets.map(s => s.booking), ...res };
+}
+
 /* ---------- 부킹 목록 ---------- */
 async function getList(env) {
   try {
@@ -857,6 +918,9 @@ async function collectSchedule(env, forceBkgs = null, sharedBudget = null) {
     if (prevSnap && prevSnap.delaySnapshotDone) {
       item.delaySnapshotDone = true;             // 저장 완료 여부 승계
       item.delayCompletedAt = prevSnap.delayCompletedAt || null;  // 완료 시각도 같이 승계
+    }
+    if (prevSnap && prevSnap.arrivalMailSent) {
+      item.arrivalMailSent = true;               // 도착 메일 발송 여부 승계 (ratchet)
     }
     const ro = detectRollover(item);
     if (ro) {
@@ -1550,6 +1614,7 @@ if (!one) return json({ error: "Failed to fetch booking after 10 session attempt
             /* 알림 메일 */
             const saved = await getSaved(env);
             if (saved) await notifyIfNeeded(env, saved).catch(() => {});
+            if (saved) await notifyArrivalIfNeeded(env, saved).catch(() => {});
           }
           return env.OQC.put("lastrun", JSON.stringify({
             at: stampNow(), trigger, cron: evt.cron, ok: true,
