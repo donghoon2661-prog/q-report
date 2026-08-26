@@ -1,5 +1,6 @@
 /**
  * Kossan OQC — HMM Track & Trace 수집 Worker  (rev.6)
+ * [auto-deploy via GitHub Actions]
  *
  * GET  /data              KV의 최신 수집분. 없으면 lastrun과 함께 404.
  * GET  /lookup?bkg=       새 부킹번호 즉시 조회 + 추적 목록 자동 등록
