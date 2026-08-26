@@ -1082,7 +1082,7 @@ async function collectMaps(env, forceBkg = []) {
       } catch (e) {
         stillFailing.push(bkg);
         /* 기존 route가 있으면 mapError 쓰지 않음 — ok 상태 유지 */
-        if (!item.route) item.mapError = String(e.message || e);
+        item.mapError = String(e.message || e);
         if (round === MAX_SESSIONS - 1) errors.push(String(e.message || e));
       }
       await sleep(2000);
