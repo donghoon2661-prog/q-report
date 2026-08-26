@@ -16,10 +16,12 @@ jobs:
 
       - name: Deploy to Cloudflare Workers
         run: |
-          curl -s -X PUT "https://api.cloudflare.com/client/v4/accounts/${{ secrets.CF_ACCOUNT_ID }}/workers/scripts/kossan-oqc" \
+          METADATA='{"main_module":"worker.js"}'
+          RESPONSE=$(curl -s -X PUT "https://api.cloudflare.com/client/v4/accounts/${{ secrets.CF_ACCOUNT_ID }}/workers/scripts/kossan-oqc" \
             -H "Authorization: Bearer ${{ secrets.CF_API_TOKEN }}" \
-            -H "Content-Type: application/javascript" \
-            --data-binary @worker.js | python3 -c "
+            -F "metadata=$METADATA;type=application/json" \
+            -F "worker.js=@worker.js;type=application/javascript+module")
+          echo "$RESPONSE" | python3 -c "
           import sys, json
           d = json.load(sys.stdin)
           if d.get('success'):
