@@ -821,7 +821,12 @@ async function collectSchedule(env, forceBkgs = null, sharedBudget = null) {
   for (const bkg of pending) {                       // 조회 실패 → 직전 값 유지
     const old = prevMap.get(bkg);
     if (old) {
-      const lastOkStr = old.scheduleCheckedAt || old.checkedAt || null;
+      /* ship:{bkg} 개별 KV도 확인 — /lookup(REFRESH) 결과가 더 최신일 수 있음 */
+      const indivRaw = await env.OQC.get("ship:" + bkg).catch(() => null);
+      const indiv = indivRaw ? (() => { try { return JSON.parse(indivRaw); } catch(_) { return null; } })() : null;
+      const indivAt = indiv ? (indiv.scheduleCheckedAt || indiv.checkedAt || null) : null;
+      const baseAt = old.scheduleCheckedAt || old.checkedAt || null;
+      const lastOkStr = (indivAt && (!baseAt || indivAt > baseAt)) ? indivAt : baseAt;
       const lastOkMs = lastOkStr ? Date.parse(lastOkStr.replace(" ","T").replace(/Z$/,"")+"Z") : 0;
       const isStale = !lastOkMs || (Date.now() - lastOkMs) > STALE_MS;
       const carriedItem = { ...old, ...(isStale ? { staleItem: true, staleSince: lastOkStr } : {}), scheduleError: errMap.get(bkg)};
