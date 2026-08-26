@@ -1077,6 +1077,8 @@ async function collectMaps(env, forceBkg = []) {
       const item = byBkg.get(bkg);
       if (!item || budget.left < 3) { stillFailing.push(bkg); continue; }
       try {
+        /* trackMap.do 접근 전 부킹 조회로 세션에 컨텍스트 생성 */
+        try { await queryBooking(budget, session, bkg, 1); } catch (_) {}
         Object.assign(item, await fetchMap(budget, session, bkg, item.container, TRIES_PER_ITEM));
         delete item.mapError;
       } catch (e) {
