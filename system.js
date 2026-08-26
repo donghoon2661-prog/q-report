@@ -223,6 +223,12 @@ async function sysRetry(bkg, btn){
       const existing = idx >= 0 ? CUR.shipments[idx] : {};
       const fresh = Object.assign({}, existing, res);
       delete fresh.savedToData; delete fresh.saveWarn; delete fresh.added;
+      delete fresh.staleItem;
+      /* 스케줄 리프레시는 맵에 영향 없음 — 기존 맵 데이터 보존 */
+      fresh.route = existing.route;
+      fresh.mapAt = existing.mapAt;
+      fresh.mapError = existing.mapError;
+      fresh.pos = existing.pos;
       console.log(`[sysRetry] bkg=${bkg} idx=${idx} fresh.checkedAt=${fresh.checkedAt} fresh.scheduleCheckedAt=${fresh.scheduleCheckedAt}`);
       if(idx >= 0) CUR.shipments[idx] = fresh;
       else CUR.shipments.push(fresh);
