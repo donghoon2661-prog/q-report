@@ -973,6 +973,23 @@ async function collectMaps(env, forceBkg = []) {
 
   const budget = newBudget();
   const errors = [];
+  /* ship:{bkg} 개별 KV의 route/mapAt을 saved에 병합 — 스케줄 cron이 route 없는 데이터를
+     shipments KV에 덮어써도 맵 수집 시 최신 route를 보존하기 위함 */
+  await Promise.all(saved.shipments.map(async s => {
+    try {
+      const indivRaw = await env.OQC.get('ship:' + s.booking);
+      if (!indivRaw) return;
+      const indiv = JSON.parse(indivRaw);
+      if (indiv.route && (!s.route || (indiv.mapAt && (!s.mapAt || indiv.mapAt > s.mapAt)))) {
+        s.route = indiv.route;
+        s.names = indiv.names;
+        s.mapAt = indiv.mapAt;
+        s.idx = indiv.idx;
+        s.ratio = indiv.ratio;
+        delete s.mapError;
+      }
+    } catch(_) {}
+  }));
   const byBkg = new Map(saved.shipments.map(s => [s.booking, s]));
   const forceSet = new Set(forceBkg.map(b => b.trim().toUpperCase()));
   let pending = saved.shipments
