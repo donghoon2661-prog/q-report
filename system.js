@@ -288,7 +288,7 @@ async function sysMapRefreshOne(bkg, btn){
 
     /* 응답에서 해당 부킹의 실제 결과 확인 */
     const item = (res.shipments||[]).find(s=>s.booking===bkg);
-    const mapOk = item && item.route && !item.mapError;
+    const mapOk = item && item.route;  // mapError 있어도 route 있으면 ok
     const mapAt  = item && item.mapAt ? fmtSysTime(item.mapAt) : '—';
     const errMsg = item && item.mapError ? item.mapError : (res.mapErrors||[]).find(e=>e.includes(bkg))||'';
 
