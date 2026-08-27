@@ -1024,8 +1024,24 @@ async function collectSchedule(env, forceBkgs = null, sharedBudget = null) {
     budget
   };
   await env.OQC.put("shipments", JSON.stringify(payload));
-  /* 개별 ship:{bkg} key도 동기화 — /data에서 병합 시 최신 Cron 결과 반영 */
-  await Promise.all(shipments.map(s => env.OQC.put("ship:" + s.booking, JSON.stringify(s)).catch(() => {})));
+  /* 개별 ship:{bkg} key도 동기화 — best 우선 원칙: 기존 ship:{bkg}가 더 최신이면 스케줄 데이터 보존 */
+  await Promise.all(shipments.map(async s => {
+    try {
+      const raw = await env.OQC.get("ship:" + s.booking);
+      if (raw) {
+        const ex = JSON.parse(raw);
+        const exAt = ex.scheduleCheckedAt || ex.checkedAt || "";
+        const sAt  = s.scheduleCheckedAt  || s.checkedAt  || "";
+        if (exAt > sAt) {
+          const MAP_KEYS = ["route","names","mapAt","idx","ratio","namedPorts","mapError"];
+          const mapData = Object.fromEntries(Object.entries(s).filter(([k]) => MAP_KEYS.includes(k)));
+          await env.OQC.put("ship:" + s.booking, JSON.stringify({ ...ex, ...mapData }));
+          return;
+        }
+      }
+      await env.OQC.put("ship:" + s.booking, JSON.stringify(s));
+    } catch(_) {}
+  }));
   return payload;
 }
 
@@ -1119,8 +1135,23 @@ async function collectMaps(env, forceBkg = []) {
   base.sessionsUsedMaps = sessionsUsed;
   base.budgetUsedMaps = budget.used;
   await env.OQC.put("shipments", JSON.stringify(base));
-  /* 개별 ship:{bkg} key도 동기화 */
-  await Promise.all(base.shipments.map(s => env.OQC.put("ship:" + s.booking, JSON.stringify(s)).catch(() => {})));
+  /* 개별 ship:{bkg} key도 동기화 — best 우선 원칙: 스케줄 데이터는 기존 ship:{bkg} 우선 */
+  await Promise.all(base.shipments.map(async s => {
+    try {
+      const raw = await env.OQC.get("ship:" + s.booking);
+      const MAP_KEYS = ["route","names","mapAt","idx","ratio","namedPorts","mapError"];
+      if (raw) {
+        const ex = JSON.parse(raw);
+        const exAt = ex.scheduleCheckedAt || ex.checkedAt || "";
+        const sAt  = s.scheduleCheckedAt  || s.checkedAt  || "";
+        const schedBase = exAt > sAt ? ex : s;
+        const mapData = Object.fromEntries(Object.entries(s).filter(([k]) => MAP_KEYS.includes(k)));
+        await env.OQC.put("ship:" + s.booking, JSON.stringify({ ...schedBase, ...mapData }));
+      } else {
+        await env.OQC.put("ship:" + s.booking, JSON.stringify(s));
+      }
+    } catch(_) {}
+  }));
   return base;
 }
 
