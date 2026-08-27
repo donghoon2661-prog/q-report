@@ -879,7 +879,6 @@ async function collectSchedule(env, forceBkgs = null, sharedBudget = null) {
     item.scheduleCheckedAt = nowStr;  // 스케줄 수집 전용 시각 (mapAt과 구분)
   }
   const carried = [];
-  const STALE_MS = 12 * 3600 * 1000;
   for (const bkg of pending) {                       // 조회 실패 → 직전 값 유지
     const old = prevMap.get(bkg);
     if (old) {
@@ -890,10 +889,8 @@ async function collectSchedule(env, forceBkgs = null, sharedBudget = null) {
       const baseAt = old.scheduleCheckedAt || old.checkedAt || null;
       const useIndiv = indivAt && (!baseAt || indivAt > baseAt);
       const best = useIndiv ? { ...old, ...indiv } : old;
-      const lastOkStr = useIndiv ? indivAt : baseAt;
-      const lastOkMs = lastOkStr ? Date.parse(lastOkStr.replace(" ","T").replace(/Z$/,"")+"Z") : 0;
-      const isStale = !lastOkMs || (Date.now() - lastOkMs) > STALE_MS;
-      const carriedItem = { ...best, ...(isStale ? { staleItem: true, staleSince: lastOkStr } : {}), scheduleError: errMap.get(bkg)};
+      const schedErr = errMap.get(bkg);
+      const carriedItem = { ...best, ...(schedErr ? { staleItem: true } : { staleItem: false }), scheduleError: schedErr || null };
       /* 이전 이벤트 기반으로 actual 플래그 재계산 — status 폴백 덕분에 etaActual도 복원됨 */
       Object.assign(carriedItem, computeActualFlags(carriedItem));
       out.set(bkg, carriedItem);
@@ -1614,45 +1611,77 @@ if (!one) return json({ error: "Failed to fetch booking after 10 session attempt
       paths: ["/data", "/lookup?bkg=", "/bookings", "/po", "/pcloud?code=", "/history", "/alertstate", "/notify-test", "/collect", "/collect?maps=1", "/backup", "/restore", "/raw?bkg=", "/debug"] }, 404);
   },
 
-  /* Cron — 분(minute)으로 일정/지도를 구분한다.
-     일정: 10 23 * * *  /  10 5 * * *  /  10 11 * * *   (KST 08:10 / 14:10 / 20:10)
-     지도: 40 23 * * *  /  40 5 * * *  /  40 11 * * *   (KST 08:40 / 14:40 / 20:40) */
+  /* Cron — 분(minute)으로 종류를 구분한다.
+     일정 수집:   0 *\/3 * * *      (3시간마다 정각, 하루 8회)
+     지도 수집:  10 *\/3 * * *      (3시간마다 10분, 하루 8회)
+     stale retry: 15,45 * * * *   (매 시 15분·45분, 하루 40회) */
   async scheduled(evt, env, ctx) {
-    const isMaps = /^\s*40\s/.test(evt.cron || "");
-    const trigger = isMaps ? "cron-maps" : "cron";
-    ctx.waitUntil(
-      (isMaps ? collectMaps(env) : collectSchedule(env))
-        .then(async p => {
-          if (!isMaps) {
-            const cronErrs = (p.errors || []).map(msg => ({ tag: "cron", msg }));
-            if (cronErrs.length) await appendErrorLog(env, cronErrs);
+    const cron = evt.cron || "";
+    const cronMin = parseInt((cron.match(/^\s*(\d+)/) || [])[1] ?? "99", 10);
+    const isMaps = cronMin === 10;
+    const isStaleRetry = cronMin === 15 || cronMin === 45;
+    const trigger = isMaps ? "cron-maps" : isStaleRetry ? "cron-stale" : "cron";
 
-            /* stale 부킹 재시도 — 남은 subrequest 예산으로 */
-            const staleBkgs = (p.carried || []);
-            if (staleBkgs.length && p.budget && p.budget.left >= 3) {
-              try {
-                const r2 = await collectSchedule(env, staleBkgs, p.budget);
-                const retryErrs = (r2.errors || []).map(msg => ({ tag: "retry-1", msg }));
-                if (retryErrs.length) await appendErrorLog(env, retryErrs);
-              } catch (_) {}
-            }
+    ctx.waitUntil((async () => {
 
-            /* 알림 메일 */
-            const saved = await getSaved(env);
-            if (saved) await notifyIfNeeded(env, saved).catch(() => {});
-            if (saved) await notifyArrivalIfNeeded(env, saved).catch(() => {});
-          }
-          return env.OQC.put("lastrun", JSON.stringify({
-            at: stampNow(), trigger, cron: evt.cron, ok: true,
-            count: p.ok, mapOk: p.mapOk, carried: Array.isArray(p.carried) ? p.carried.length : (p.carried||0),
-            budgetUsed: isMaps ? p.budgetUsedMaps : p.budgetUsed,
-            errors: isMaps ? p.mapErrors : p.errors
-          }));
-        })
-        .catch(e => env.OQC.put("lastrun", JSON.stringify({
-          at: stampNow(), trigger, cron: evt.cron, ok: false, error: String(e.message || e)
-        })))
-    );
+      /* ── stale retry ── */
+      if (isStaleRetry) {
+        /* 최근 15분 이내 전체 수집이 있었으면 skip */
+        const lastrunRaw = await env.OQC.get("lastrun").catch(() => null);
+        const lastrun = lastrunRaw ? (() => { try { return JSON.parse(lastrunRaw); } catch(_) { return {}; } })() : {};
+        if (lastrun.trigger === "cron" && lastrun.at && (Date.now() - new Date(lastrun.at).getTime()) < 15 * 60 * 1000) {
+          return;
+        }
+        const saved = await getSaved(env);
+        if (!saved || !saved.length) return;
+
+        /* 스케줄 실패 부킹 재시도 */
+        const schedFail = saved.filter(s => s.staleItem).map(s => s.booking);
+        if (schedFail.length) {
+          try {
+            const r = await collectSchedule(env, schedFail);
+            const errs = (r.errors || []).map(msg => ({ tag: "cron-stale", msg }));
+            if (errs.length) await appendErrorLog(env, errs);
+          } catch (_) {}
+        }
+
+        /* 지도 실패 부킹 재시도 */
+        const mapFail = saved.filter(s => !s.etaActual && (s.mapError || !s.route || !s.route.length));
+        if (mapFail.length) {
+          try {
+            const forceBkg = mapFail.map(s => s.booking);
+            await collectMaps(env, forceBkg);
+          } catch (_) {}
+        }
+
+        await env.OQC.put("lastrun", JSON.stringify({
+          at: stampNow(), trigger, cron,
+          schedRetry: schedFail.length, mapRetry: mapFail.length
+        }));
+        return;
+      }
+
+      /* ── 일정 수집 또는 지도 수집 ── */
+      const p = await (isMaps ? collectMaps(env) : collectSchedule(env));
+      if (!isMaps) {
+        const cronErrs = (p.errors || []).map(msg => ({ tag: "cron", msg }));
+        if (cronErrs.length) await appendErrorLog(env, cronErrs);
+        /* 알림 메일 */
+        const saved = await getSaved(env);
+        if (saved) await notifyIfNeeded(env, saved).catch(() => {});
+        if (saved) await notifyArrivalIfNeeded(env, saved).catch(() => {});
+      }
+      await env.OQC.put("lastrun", JSON.stringify({
+        at: stampNow(), trigger, cron, ok: true,
+        count: p.ok, mapOk: p.mapOk,
+        carried: Array.isArray(p.carried) ? p.carried.length : (p.carried || 0),
+        budgetUsed: isMaps ? p.budgetUsedMaps : p.budgetUsed,
+        errors: isMaps ? p.mapErrors : p.errors
+      }));
+
+    })().catch(e => env.OQC.put("lastrun", JSON.stringify({
+      at: stampNow(), trigger, cron, ok: false, error: String(e.message || e)
+    }))));
   }
 };
 
