@@ -899,7 +899,12 @@ async function collectSchedule(env, forceBkgs = null, sharedBudget = null) {
   }
   /* 하역 완료로 조회 제외된 부킹 — 이전 값 그대로 승계 (staleItem 없음) */
   for (const bkg of skippedDischarged) {
-    if (prevMap.has(bkg)) out.set(bkg, prevMap.get(bkg));
+    if (prevMap.has(bkg)) {
+      const item = { ...prevMap.get(bkg) };
+      delete item.staleItem;
+      delete item.scheduleError;
+      out.set(bkg, item);
+    }
   }
   for (const bkg of list) {                          // 이번 실행 대상이 아닌 부킹
     if (!out.has(bkg) && prevMap.has(bkg)) out.set(bkg, prevMap.get(bkg));
