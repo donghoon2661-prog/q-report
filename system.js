@@ -32,10 +32,7 @@ function renderSystemTab(){
       <span class="sys-val">${d.source||'—'}</span></div>
     <div class="sys-row"><span class="sys-lbl">RESULT</span>
       <span class="sys-val"><span class="sys-ok">${okCount} ok</span>${failList.length?` · <span class="sys-warn">${failList.length} failed</span>`:''}</span></div>
-    <div class="sys-row"><span class="sys-lbl">SESSIONS USED</span>
-      <span class="sys-val">${d.sessionsUsed||'—'} / 8</span></div>
-    <div class="sys-row"><span class="sys-lbl">BUDGET USED</span>
-      <span class="sys-val">${d.budgetUsed||'—'} / 50 req</span></div>
+
     <div class="sys-row"><span class="sys-lbl">NEXT COLLECTION</span>
       <span class="sys-val sys-dim">${nextCron()}</span></div>
   </div>
@@ -483,5 +480,6 @@ async function showRestoreModal(){
     }
   });
 }
+
 
 
