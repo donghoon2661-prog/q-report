@@ -58,7 +58,7 @@ function renderSystemTab(){
     </div>
     ${d.shipments.map(s=>{
       const hasRoute = !!(s.route && s.route.length);
-      const mapOk = hasRoute;  // mapError 있어도 route 있으면 ok
+      const mapOk = hasRoute && !!s.mapAt;  // route + mapAt 둘 다 있어야 ok
       const schedAt = s.scheduleCheckedAt || s.checkedAt;
       const mapAt   = s.mapAt;
 
