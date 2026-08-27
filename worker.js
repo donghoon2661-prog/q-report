@@ -1192,7 +1192,7 @@ export default {
               /* 스케줄 필드 — scheduleCheckedAt 기준으로 더 최신이면 스케줄 필드만 교체 */
               const baseSchedAt = base.scheduleCheckedAt || base.checkedAt || "";
               const indivSchedAt = parsed.scheduleCheckedAt || parsed.checkedAt || "";
-              if (indivSchedAt > baseSchedAt) {
+              if (indivSchedAt >= baseSchedAt) {
                 const SCHED_FIELDS = ["vessel","voyage","svc","feeder","imo","polDep","tsArr","tsDep","eta","destEta",
                   "legs","pos","last","spDep","spArr","checkedAt","scheduleCheckedAt","scheduleError","staleItem",
                   "polDepActual","tsArrActual","tsDepActual","etaActual","etbLog","vesselLog","delayDays","planEta",
