@@ -12,13 +12,13 @@ function renderSystemTab(){
     const now = new Date();
     const kst = new Date(now.getTime() + 9*3600000);
     const hh = kst.getUTCHours(), mm = kst.getUTCMinutes();
-    const times = [[8,10],[14,10],[20,10]];
+    const times = [[0,0],[3,0],[6,0],[9,0],[12,0],[15,0],[18,0],[21,0]];
     for(const [h,m] of times){
       const diffM = (h*60+m) - (hh*60+mm);
-      if(diffM > 0) return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')} KST · in ${Math.floor(diffM/60)}h ${diffM%60}m`;
+      if(diffM > 0) return `${String(h).padStart(2,'0')}:00 KST · in ${Math.floor(diffM/60)}h ${diffM%60}m`;
     }
-    const diffM = (8*60+10) + (24*60 - hh*60 - mm);
-    return `08:10 KST (tomorrow) · in ${Math.floor(diffM/60)}h ${diffM%60}m`;
+    const diffM = (24*60 - hh*60 - mm);
+    return `00:00 KST (tomorrow) · in ${Math.floor(diffM/60)}h ${diffM%60}m`;
   }
 
   const failList = d.shipments.filter(s=>s.scheduleError);
@@ -483,4 +483,5 @@ async function showRestoreModal(){
     }
   });
 }
+
 
