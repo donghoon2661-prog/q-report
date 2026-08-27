@@ -1194,6 +1194,21 @@ export default {
             }
           } catch (_) {}
         }
+        /* bookings KV에는 있지만 shipments에 없는 신규 부킹 — ship:{bkg} KV에서 추가 */
+        try {
+          const allBookings = await getList(env);
+          const inShipments = new Set(data.shipments.map(s => s.booking));
+          for (const bkg of allBookings) {
+            if (inShipments.has(bkg)) continue;
+            try {
+              const indiv = await env.OQC.get("ship:" + bkg);
+              if (indiv) {
+                const parsed = JSON.parse(indiv);
+                data.shipments.push(parsed);
+              }
+            } catch (_) {}
+          }
+        } catch (_) {}
       }
       return new Response(JSON.stringify(data), { headers: JH });
     }
@@ -1723,4 +1738,5 @@ async function appendSessionLog(env, entries) {
   const combined = [...existing, ...newRows].slice(-200);
   await env.OQC.put("sessionLog", JSON.stringify(combined), { expirationTtl: 14 * 24 * 3600 }).catch(() => {});
 }
+
 
