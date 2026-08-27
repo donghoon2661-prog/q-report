@@ -21,8 +21,8 @@ function renderSystemTab(){
     return `08:10 KST (tomorrow) · in ${Math.floor(diffM/60)}h ${diffM%60}m`;
   }
 
-  const staleList = d.shipments.filter(s=>s.staleItem);
-  const okCount = d.shipments.filter(s=>!s.staleItem).length;
+  const failList = d.shipments.filter(s=>s.scheduleError);
+  const okCount = d.shipments.filter(s=>!s.scheduleError).length;
 
   let html = `
   <div class="sys-card">
@@ -31,7 +31,7 @@ function renderSystemTab(){
     <div class="sys-row"><span class="sys-lbl">SOURCE</span>
       <span class="sys-val">${d.source||'—'}</span></div>
     <div class="sys-row"><span class="sys-lbl">RESULT</span>
-      <span class="sys-val"><span class="sys-ok">${okCount} ok</span>${staleList.length?` · <span class="sys-warn">${staleList.length} stale</span>`:''}</span></div>
+      <span class="sys-val"><span class="sys-ok">${okCount} ok</span>${failList.length?` · <span class="sys-warn">${failList.length} failed</span>`:''}</span></div>
     <div class="sys-row"><span class="sys-lbl">SESSIONS USED</span>
       <span class="sys-val">${d.sessionsUsed||'—'} / 8</span></div>
     <div class="sys-row"><span class="sys-lbl">BUDGET USED</span>
@@ -42,11 +42,11 @@ function renderSystemTab(){
 
   <div class="sys-sec">
     <span>BOOKING STATUS</span>
-    ${staleList.length ? `<button class="sys-retry-all" id="sys-retry-all">RETRY ALL STALE</button>` : ''}
+    ${failList.length ? `<button class="sys-retry-all" id="sys-retry-all">RETRY ALL FAILED</button>` : ''}
   </div>
   <div class="sys-legend">
     <span><span class="sys-ok">ok</span> 스케줄 조회 성공</span>
-    <span style="margin-left:14px"><span class="sys-stale">STALE</span> 조회 실패 — 직전 값 표시 중</span>
+    <span style="margin-left:14px"><span class="sys-warn">failed</span> 조회 실패 — 직전 값 표시 중</span>
     <span style="margin-left:14px">REFRESH: 즉시 재조회 (ok 포함 강제 가능)</span>
     <span style="margin-left:14px">MAP: 항로 좌표만 재조회</span>
   </div>
@@ -67,10 +67,10 @@ function renderSystemTab(){
         ? (s.mapError.match(/cf-ray\s+[\w]+-([A-Z]{2,4})[,)]/i)||[])[1] || ''
         : '';
 
-      const schedErrLoc = s.staleItem && s.scheduleError
+      const schedErrLoc = s.scheduleError
         ? (s.scheduleError.match(/-([A-Z]{3})\b/)||[])[1] || '' : '';
-      const schedStatus = s.staleItem
-        ? `<span class="sys-stale">STALE</span><span class="sys-warn" style="font-size:10px;margin-left:4px">since ${s.staleSince?fmtSysTime(s.staleSince):'—'}</span>${schedErrLoc?` <span style="color:var(--buoy);font-size:10px" title="${(s.scheduleError||'').replace(/"/g,'&quot;')}">· ${schedErrLoc}</span>`:''}`
+      const schedStatus = s.scheduleError
+        ? `<span class="sys-warn">failed</span>${schedErrLoc?` <span style="color:var(--buoy);font-size:10px" title="${(s.scheduleError||'').replace(/"/g,'&quot;')}">· ${schedErrLoc}</span>`:''}`
         : `<span class="sys-ok">ok</span>`;
       const mapStatus = mapOk
         ? `<span style="color:var(--sail)">ok</span>`
@@ -172,7 +172,7 @@ function renderSystemTab(){
   if(retryAllBtn) retryAllBtn.addEventListener('click', async ()=>{
     retryAllBtn.disabled = true;
     retryAllBtn.textContent = '조회중…';
-    for(const s of staleList){
+    for(const s of failList){
       const row = document.getElementById(`sysr-${s.booking}`);
       const btn = row ? row.querySelector('.sys-retry') : null;
       await sysRetry(s.booking, btn);
@@ -223,7 +223,7 @@ async function sysRetry(bkg, btn){
       const existing = idx >= 0 ? CUR.shipments[idx] : {};
       const fresh = Object.assign({}, existing, res);
       delete fresh.savedToData; delete fresh.saveWarn; delete fresh.added;
-      delete fresh.staleItem;
+      delete fresh.staleItem; delete fresh.staleSince;
       /* 스케줄 리프레시는 맵에 영향 없음 — 기존 맵 데이터 보존 */
       fresh.route = existing.route;
       fresh.mapAt = existing.mapAt;
@@ -483,3 +483,4 @@ async function showRestoreModal(){
     }
   });
 }
+
