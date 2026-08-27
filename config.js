@@ -137,8 +137,8 @@ function fmtSysTime(ts){
 }
 
 /* ---------- Cron ---------- */
-const CRON_KST = [8.1667, 14.1667, 20.1667];
-const CRON_LABEL = "08:10 / 14:10 / 20:10 KST";
+const CRON_KST = [0, 3, 6, 9, 12, 15, 18, 21];
+const CRON_LABEL = "00:00 / 03:00 / 06:00 / 09:00 / 12:00 / 15:00 / 18:00 / 21:00 KST";
 const hhmm = f => String(Math.floor(f)).padStart(2,"0")+":"+String(Math.round((f%1)*60)).padStart(2,"0");
 
 function nextRun(){
@@ -181,3 +181,4 @@ function cssVar(name, fb){
   const v = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
   return v || fb;
 }
+
