@@ -1187,10 +1187,26 @@ export default {
             const indiv = await env.OQC.get("ship:" + bkg);
             if (indiv) {
               const parsed = JSON.parse(indiv);
-              /* 개별 key가 더 최신인 경우만 덮어씀 */
-              const baseAt = data.shipments[i].scheduleCheckedAt || data.shipments[i].checkedAt || "";
-              const indivAt = parsed.scheduleCheckedAt || parsed.checkedAt || "";
-              if (indivAt >= baseAt || (parsed.mapAt && parsed.mapAt > (data.shipments[i].mapAt || ""))) data.shipments[i] = parsed;
+              const base = data.shipments[i];
+
+              /* 스케줄 필드 — scheduleCheckedAt 기준으로 더 최신이면 스케줄 필드만 교체 */
+              const baseSchedAt = base.scheduleCheckedAt || base.checkedAt || "";
+              const indivSchedAt = parsed.scheduleCheckedAt || parsed.checkedAt || "";
+              if (indivSchedAt > baseSchedAt) {
+                const SCHED_FIELDS = ["vessel","voyage","svc","feeder","imo","polDep","tsArr","tsDep","eta","destEta",
+                  "legs","pos","last","spDep","spArr","checkedAt","scheduleCheckedAt","scheduleError","staleItem",
+                  "polDepActual","tsArrActual","tsDepActual","etaActual","etbLog","vesselLog","delayDays","planEta",
+                  "rollover","rolloverDays","alert","arrivalMailSent","eventStamp","container","cntrNo"];
+                for (const f of SCHED_FIELDS) if (parsed[f] !== undefined) base[f] = parsed[f];
+              }
+
+              /* 지도 필드 — mapAt 기준으로 더 최신이면 지도 필드만 교체 */
+              const baseMapAt = base.mapAt || "";
+              const indivMapAt = parsed.mapAt || "";
+              if (indivMapAt > baseMapAt) {
+                const MAP_FIELDS = ["route","names","namedPorts","mapAt","mapError","idx","ratio"];
+                for (const f of MAP_FIELDS) if (parsed[f] !== undefined) base[f] = parsed[f];
+              }
             }
           } catch (_) {}
         }
@@ -1723,3 +1739,4 @@ async function appendSessionLog(env, entries) {
   const combined = [...existing, ...newRows].slice(-200);
   await env.OQC.put("sessionLog", JSON.stringify(combined), { expirationTtl: 14 * 24 * 3600 }).catch(() => {});
 }
+
