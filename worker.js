@@ -899,12 +899,7 @@ async function collectSchedule(env, forceBkgs = null, sharedBudget = null) {
   }
   /* 하역 완료로 조회 제외된 부킹 — 이전 값 그대로 승계 (staleItem 없음) */
   for (const bkg of skippedDischarged) {
-    if (prevMap.has(bkg)) {
-      const item = { ...prevMap.get(bkg) };
-      delete item.staleItem;
-      delete item.scheduleError;
-      out.set(bkg, item);
-    }
+    if (prevMap.has(bkg)) out.set(bkg, prevMap.get(bkg));
   }
   for (const bkg of list) {                          // 이번 실행 대상이 아닌 부킹
     if (!out.has(bkg) && prevMap.has(bkg)) out.set(bkg, prevMap.get(bkg));
@@ -1192,26 +1187,10 @@ export default {
             const indiv = await env.OQC.get("ship:" + bkg);
             if (indiv) {
               const parsed = JSON.parse(indiv);
-              const base = data.shipments[i];
-
-              /* 스케줄 필드 — scheduleCheckedAt 기준으로 더 최신이면 스케줄 필드만 교체 */
-              const baseSchedAt = base.scheduleCheckedAt || base.checkedAt || "";
-              const indivSchedAt = parsed.scheduleCheckedAt || parsed.checkedAt || "";
-              if (indivSchedAt >= baseSchedAt) {
-                const SCHED_FIELDS = ["vessel","voyage","svc","feeder","imo","polDep","tsArr","tsDep","eta","destEta",
-                  "legs","pos","last","spDep","spArr","checkedAt","scheduleCheckedAt","scheduleError","staleItem",
-                  "polDepActual","tsArrActual","tsDepActual","etaActual","etbLog","vesselLog","delayDays","planEta",
-                  "rollover","rolloverDays","alert","arrivalMailSent","eventStamp","container","cntrNo"];
-                for (const f of SCHED_FIELDS) if (parsed[f] !== undefined) base[f] = parsed[f];
-              }
-
-              /* 지도 필드 — mapAt 기준으로 더 최신이면 지도 필드만 교체 */
-              const baseMapAt = base.mapAt || "";
-              const indivMapAt = parsed.mapAt || "";
-              if (indivMapAt > baseMapAt) {
-                const MAP_FIELDS = ["route","names","namedPorts","mapAt","mapError","idx","ratio"];
-                for (const f of MAP_FIELDS) if (parsed[f] !== undefined) base[f] = parsed[f];
-              }
+              /* 개별 key가 더 최신인 경우만 덮어씀 */
+              const baseAt = data.shipments[i].scheduleCheckedAt || data.shipments[i].checkedAt || "";
+              const indivAt = parsed.scheduleCheckedAt || parsed.checkedAt || "";
+              if (indivAt >= baseAt || (parsed.mapAt && parsed.mapAt > (data.shipments[i].mapAt || ""))) data.shipments[i] = parsed;
             }
           } catch (_) {}
         }
