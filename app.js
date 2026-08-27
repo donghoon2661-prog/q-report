@@ -602,7 +602,7 @@ function stampText(d){
   document.getElementById("stamp").innerHTML =
     `HMM retrieved ${toKST(d.updated)} · ${ago(d.updated)}` +
     (d.stale ? `<span class="warn"> · no new HMM events</span>` : "") +
-    `<br><span class="dim2">next update in ${nextRun()} · ${CRON_KST.length}× daily (${CRON_LABEL})</span>`;
+    `<br><span class="dim2">next update in ${nextRun()} · ${CRON_KST.length}× daily</span>`;
 }
 
 /* ---------- 렌더링 ---------- */
@@ -920,3 +920,4 @@ function setTzMobile(key){
   tick();
   setInterval(tick, 1000);
 })();
+
