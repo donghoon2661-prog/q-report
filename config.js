@@ -1,7 +1,18 @@
 /* ===== config.js — 상수 · 유틸 · 날짜 포맷 ===== */
 const QUALITY_URL = "quality.html";
-const API = "https://kossan-oqc.dhoqc.workers.dev/data";
+const API_ROOT = "https://kossan-oqc.dhoqc.workers.dev";
+const API = API_ROOT + "/data";
+const HISTORY_API = API_ROOT + "/delayhistory";
+const BOOKINGS_API = API_ROOT + "/bookings";
+const LOOKUP_API = API_ROOT + "/lookup";
+const COLLECT_API = API_ROOT + "/collect";
+const DEBUG_API = API_ROOT + "/debug";
+const SYSTEM_API = API_ROOT + "/lastrun";
 const source = () => API || "shipments.json";
+
+/* Worker와 프론트 공통 지연 기준 */
+const DELAY_WATCH_D = 3;
+const DELAY_ALERT_D = 7;
 
 const FALLBACK = {
   updated:"2026-08-03 10:12",
@@ -154,8 +165,8 @@ function nextRun(){
 
 /* ---------- 테마 타일 ---------- */
 const TILE = {
-  dark : 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',
-  light: 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png'
+  dark : 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png?key=cb1_2f79_1_06b086bcb2b8a0b805a1b0d6',
+  light: 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png?key=cb1_2f79_1_06b086bcb2b8a0b805a1b0d6'
 };
 
 /* ---------- 항구 좌표 (글로벌 인덱스) ---------- */
