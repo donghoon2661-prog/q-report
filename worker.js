@@ -477,6 +477,45 @@ function alertLevel(delay, ro) {
   return "ok";
 }
 
+/* ---------- /lookup + collectSchedule 공통 normalize ----------
+   delay/alert/rollover/actualFlags 판정을 한 곳에서 처리 */
+async function normalizeOne(env, item) {
+  const bkg = item.booking;
+  const nowStr = new Date().toISOString().slice(0, 16).replace("T", " ") + "Z";
+  item.checkedAt = item.checkedAt || nowStr;
+  item.scheduleCheckedAt = item.scheduleCheckedAt || nowStr;
+
+  /* actual 플래그 */
+  Object.assign(item, computeActualFlags(item));
+
+  /* planEta / delayDays / alert */
+  try {
+    const poetaMap = JSON.parse((await env.OQC.get("poeta")) || "{}") || {};
+    const dv = delayVsPlan(item, poetaMap[bkg]);
+    if (dv !== null) { item.planEta = poetaMap[bkg]; item.delayDays = dv; }
+    const ro = detectRollover(item);
+    if (ro) { item.rollover = !!ro.rollover; if (ro.rollover) item.rolloverDays = ro.overdueDays; }
+    const lvl = alertLevel(dv, ro);
+    if (lvl) item.alert = lvl;
+  } catch (e) { console.error("[normalizeOne] delay/alert failed", bkg, String(e)); }
+
+  /* delayHistory 스냅샷 */
+  if (item.etaActual && !item.delaySnapshotDone) {
+    try {
+      let planEta = {}, hist = {};
+      try { planEta = JSON.parse((await env.OQC.get("poeta")) || "{}") || {}; } catch (_) {}
+      try { hist    = JSON.parse((await env.OQC.get("history")) || "{}") || {}; } catch (_) {}
+      const snap = await recordDelaySnapshot(env, item, planEta, hist);
+      if (snap && snap.done) {
+        item.delaySnapshotDone = true;
+        item.delayCompletedAt = snap.completedAt || null;
+      }
+    } catch (e) { console.error("[normalizeOne] delaySnapshot failed", bkg, String(e)); }
+  }
+
+  return item;
+}
+
 /* ---------- POD 하역완료 감지 + delayHistory 백데이터 수집 ----------
    목적: 완료된 부킹의 계획 대비 실제 지연일을 월별로 영구 누적 (통계용 원자재).
    지금은 저장만 한다 — 집계/화면은 차후 별도 작업.
@@ -780,7 +819,44 @@ const getSaved = async env => {
   try { return JSON.parse((await env.OQC.get("shipments")) || "null"); } catch (_) { return null; }
 };
 
-/* ---------- 1단계: 일정 수집 (지도 제외) ---------- */
+/* ---------- bookings 기준 /data 조립 helper ---------- */
+async function readJsonKV(env, key, fallback = null) {
+  try {
+    const raw = await env.OQC.get(key);
+    if (raw === null) return fallback;
+    return JSON.parse(raw);
+  } catch (e) {
+    console.error("[readJsonKV] parse failed", key, String(e));
+    return fallback;
+  }
+}
+
+async function assembleShipments(env) {
+  const list = await getList(env);
+  const saved = await getSaved(env);
+  const savedMap = new Map(
+    ((saved && Array.isArray(saved.shipments)) ? saved.shipments : [])
+      .filter(s => s && s.booking)
+      .map(s => [s.booking, s])
+  );
+
+  const shipments = await Promise.all(list.map(async bkg => {
+    let schedule = null, map = null;
+    try { schedule = await readJsonKV(env, "schedule:" + bkg, null); }
+    catch (e) { console.error("[/data] schedule read failed", bkg, String(e)); }
+    try { map = await readJsonKV(env, "map:" + bkg, null); }
+    catch (e) { console.error("[/data] map read failed", bkg, String(e)); }
+
+    const base = savedMap.get(bkg) || {};
+    const merged = { ...base };
+    if (schedule && typeof schedule === "object") Object.assign(merged, schedule);
+    if (map && typeof map === "object") Object.assign(merged, map);
+    if (!merged.booking) merged.booking = bkg;
+    return merged;
+  }));
+
+  return { saved, shipments: shipments.filter(Boolean) };
+}
 
 /* 커서로 이번 실행에서 처리할 구간을 정한다 (부킹이 MAX_PER_RUN을 넘을 때) */
 async function pickSlice(env, list) {
@@ -844,7 +920,7 @@ async function collectSchedule(env, forceBkgs = null, sharedBudget = null) {
       try {
         const _html = await queryBooking(budget, session, bkg, TRIES_PER_ITEM);
         const _item = parseBooking(_html, bkg);
-        const _loc = budget.lastCfRay ? (budget.lastCfRay.match(/-([A-Z]{3})/) || [])[1] || null : null;
+        const _loc = budget.lastCfRay ? (budget.lastCfRay.match(/-([A-Z]{3})\b/) || [])[1] || null : null;
         if (_loc) _item.successEdge = _loc;
         out.set(bkg, _item);
         sessionLogs.push({ ok: true, booking: bkg, attempt: round + 1, loc: _loc });
@@ -852,7 +928,7 @@ async function collectSchedule(env, forceBkgs = null, sharedBudget = null) {
         stillFailing.push(bkg);
         errMap.set(bkg, String(e.message || e));
         const _code = (String(e.message||e).match(/response\s+(\d{3})/) || [])[1] || null;
-        const _loc = (String(e.message||e).match(/-([A-Z]{3})/) || [])[1] || null;
+        const _loc = (String(e.message||e).match(/-([A-Z]{3})\b/) || [])[1] || null;
         sessionLogs.push({ ok: false, booking: bkg, attempt: round + 1, code: _code, loc: _loc });
         if (round === MAX_SESSIONS - 1 || budget.left < 6)
           errors.push(String(e.message || e));
@@ -885,8 +961,8 @@ async function collectSchedule(env, forceBkgs = null, sharedBudget = null) {
   for (const bkg of pending) {                       // 조회 실패 → 직전 값 유지
     const old = prevMap.get(bkg);
     if (old) {
-      /* ship:{bkg} 개별 KV도 확인 — /lookup(REFRESH) 결과가 더 최신일 수 있음 */
-      const indivRaw = await env.OQC.get("ship:" + bkg).catch(() => null);
+      /* schedule:{bkg} 개별 KV도 확인 — /lookup(REFRESH) 결과가 더 최신일 수 있음 */
+      const indivRaw = await env.OQC.get("schedule:" + bkg).catch(() => null);
       const indiv = indivRaw ? (() => { try { return JSON.parse(indivRaw); } catch(_) { return null; } })() : null;
       const indivAt = indiv ? (indiv.scheduleCheckedAt || indiv.checkedAt || null) : null;
       const baseAt = old.scheduleCheckedAt || old.checkedAt || null;
@@ -1023,25 +1099,21 @@ async function collectSchedule(env, forceBkgs = null, sharedBudget = null) {
     errors,
     budget
   };
-  await env.OQC.put("shipments", JSON.stringify(payload));
-  /* 개별 ship:{bkg} key도 동기화 — best 우선 원칙: 기존 ship:{bkg}가 더 최신이면 스케줄 데이터 보존 */
-  await Promise.all(shipments.map(async s => {
-    try {
-      const raw = await env.OQC.get("ship:" + s.booking);
-      if (raw) {
-        const ex = JSON.parse(raw);
-        const exAt = ex.scheduleCheckedAt || ex.checkedAt || "";
-        const sAt  = s.scheduleCheckedAt  || s.checkedAt  || "";
-        if (exAt > sAt) {
-          const MAP_KEYS = ["route","names","mapAt","idx","ratio","namedPorts","mapError"];
-          const mapData = Object.fromEntries(Object.entries(s).filter(([k]) => MAP_KEYS.includes(k)));
-          await env.OQC.put("ship:" + s.booking, JSON.stringify({ ...ex, ...mapData }));
-          return;
-        }
-      }
-      await env.OQC.put("ship:" + s.booking, JSON.stringify(s));
-    } catch(_) {}
+  const MAP_KEYS = new Set(["route","names","mapAt","idx","ratio","namedPorts","mapError"]);
+  /* schedule:{bkg} 먼저 저장 — 원본 KV 우선 */
+  const scheduleResults = await Promise.allSettled(shipments.map(async s => {
+    const schedData = Object.fromEntries(Object.entries(s).filter(([k]) => !MAP_KEYS.has(k)));
+    await env.OQC.put("schedule:" + s.booking, JSON.stringify(schedData));
   }));
+  scheduleResults.forEach((r, i) => {
+    if (r.status === "rejected") {
+      console.error("[collectSchedule] schedule save failed", shipments[i].booking, String(r.reason));
+      errors.push("schedule save " + shipments[i].booking + ": " + String(r.reason && (r.reason.message || r.reason)));
+    }
+  });
+
+  /* shipments 캐시 저장 — schedule 저장 후 */
+  await env.OQC.put("shipments", JSON.stringify(payload));
   return payload;
 }
 
@@ -1050,36 +1122,34 @@ async function collectSchedule(env, forceBkgs = null, sharedBudget = null) {
    일정 수집과 동일하게 세션 중심으로 실패분을 넘긴다.
    forceBkg: 특정 부킹번호 배열 → mapFresh 무시하고 강제 재조회 */
 async function collectMaps(env, forceBkg = []) {
-  const saved = await getSaved(env);
-  if (!saved || !saved.shipments || !saved.shipments.length)
+  /* assembled.shipments 기준 — bookings + schedule:{bkg} + map:{bkg} 조립 결과 사용
+     collectMaps()는 shipments KV를 읽지도, 쓰지도 않는다.
+     지도 수집 결과는 map:{bkg}에만 저장한다. */
+  const assembled = await assembleShipments(env);
+  const shipments = assembled.shipments;
+  if (!shipments.length)
     throw new Error("No schedule data collected yet. Run /collect first.");
 
   const budget = newBudget();
   const errors = [];
-  /* ship:{bkg} 개별 KV의 route/mapAt을 saved에 병합 — 스케줄 cron이 route 없는 데이터를
-     shipments KV에 덮어써도 맵 수집 시 최신 route를 보존하기 위함 */
-  await Promise.all(saved.shipments.map(async s => {
-    try {
-      const indivRaw = await env.OQC.get('ship:' + s.booking);
-      if (!indivRaw) return;
-      const indiv = JSON.parse(indivRaw);
-      if (indiv.route && (!s.route || (indiv.mapAt && (!s.mapAt || indiv.mapAt > s.mapAt)))) {
-        s.route = indiv.route;
-        s.names = indiv.names;
-        s.mapAt = indiv.mapAt;
-        s.idx = indiv.idx;
-        s.ratio = indiv.ratio;
-        delete s.mapError;
-      }
-    } catch(_) {}
-  }));
-  const byBkg = new Map(saved.shipments.map(s => [s.booking, s]));
   const forceSet = new Set(forceBkg.map(b => b.trim().toUpperCase()));
-  let pending = saved.shipments
-    .filter(s => !s.etaActual && (forceSet.size ? forceSet.has(s.booking) : (!s.route || s.mapError || !mapFresh(s))))
+  const byBkg = new Map(shipments.map(s => [s.booking, s]));
+  const MAP_FIELDS = new Set(["route","names","mapAt","idx","ratio","namedPorts"]);
+  const MAP_FIELDS_SAVE = new Set(["route","names","mapAt","idx","ratio","namedPorts","mapError"]);
+
+  /* 수집 대상: etaActual 아닌 것 중 강제 대상이거나 지도 미보유/만료된 것
+     spDep(Gate In) 없는 부킹은 아직 출발 전이므로 지도 수집 제외 */
+  let pending = shipments
+    .filter(s => !s.etaActual && !!s.spDep && (forceSet.size ? forceSet.has(s.booking) : (!s.route || s.mapError || !mapFresh(s))))
     .map(s => s.booking)
     .slice(0, MAX_PER_RUN);
-  if (!pending.length) return { ...saved, mapNote: "보충할 지도 없음" };
+  if (!pending.length) return {
+    mapNote: "보충할 지도 없음",
+    mapOk: shipments.filter(s => s.route).length,
+    mapErrors: [],
+    sessionsUsedMaps: 0,
+    budgetUsedMaps: 0
+  };
 
   let sessionsUsed = 0;
   for (let round = 0; round < MAX_SESSIONS && pending.length; round++) {
@@ -1095,12 +1165,20 @@ async function collectMaps(env, forceBkg = []) {
       const item = byBkg.get(bkg);
       if (!item || budget.left < 3) { stillFailing.push(bkg); continue; }
       try {
-        Object.assign(item, await fetchMap(budget, session, bkg, item.container, TRIES_PER_ITEM));
+        /* 지도 결과만 item에 반영 — 스케줄/stale 필드는 건드리지 않는다 */
+        const mapResult = await fetchMap(budget, session, bkg, item.container, TRIES_PER_ITEM);
+        for (const key of MAP_FIELDS) {
+          if (Object.prototype.hasOwnProperty.call(mapResult, key)) {
+            item[key] = mapResult[key];
+          }
+        }
         delete item.mapError;
       } catch (e) {
         stillFailing.push(bkg);
         /* 기존 route가 있으면 mapError 쓰지 않음 — ok 상태 유지 */
-        item.mapError = String(e.message || e);
+        if (!item.route) {
+          item.mapError = String(e.message || e);
+        }
         if (round === MAX_SESSIONS - 1) errors.push(String(e.message || e));
       }
       await sleep(2000);
@@ -1108,51 +1186,31 @@ async function collectMaps(env, forceBkg = []) {
     pending = stillFailing;
   }
 
-  /* Race condition 방지 — 저장 직전 최신 KV를 다시 읽어서 완전 병합
-     동시에 여러 MAP REFRESH가 실행돼도 서로의 결과를 덮어쓰지 않는다 */
-  const latestRaw = await env.OQC.get("shipments");
-  const latest = latestRaw ? JSON.parse(latestRaw) : null;
-  const base = (latest && Array.isArray(latest.shipments)) ? latest : saved;
-  const baseMap = new Map(base.shipments.map(s => [s.booking, s]));
-
-  /* 이번 수집 결과를 최신 KV 위에 병합 */
-  for (const item of saved.shipments) {
-    const cur = baseMap.get(item.booking);
-    if (!cur) { base.shipments.push(item); continue; }
-    /* 이번에 성공한 부킹은 최신 결과로 덮어씀 */
-    if (item.route) {
-      Object.assign(cur, item);
-    } else if (!cur.route && item.mapError) {
-      /* 둘 다 route 없으면 mapError만 업데이트 */
-      cur.mapError = item.mapError;
+  /* map:{bkg}만 저장 — shipments KV는 절대 PUT하지 않는다 */
+  const mapWriteTargets = shipments.filter(s => !s.etaActual && (s.route || s.mapError));
+  const mapWriteResults = await Promise.allSettled(
+    mapWriteTargets.map(async s => {
+      const mapData = Object.fromEntries(
+        Object.entries(s).filter(([k]) => MAP_FIELDS_SAVE.has(k) || k === "booking")
+      );
+      await env.OQC.put("map:" + s.booking, JSON.stringify(mapData));
+    })
+  );
+  mapWriteResults.forEach((r, i) => {
+    const bkg = mapWriteTargets[i]?.booking;
+    if (r.status === "rejected") {
+      console.error("[collectMaps] map save failed", bkg, String(r.reason));
+      errors.push("map save " + (bkg||"?") + ": " + String(r.reason && (r.reason.message || r.reason)));
     }
-    /* cur에 route 있고 이번 실패면 → 기존 route 유지 (건드리지 않음) */
-  }
+  });
 
-  base.mapUpdated = new Date().toISOString().slice(0, 16).replace("T", " ") + "Z";
-  base.mapOk = base.shipments.filter(s => s.route).length;
-  base.mapErrors = errors;
-  base.sessionsUsedMaps = sessionsUsed;
-  base.budgetUsedMaps = budget.used;
-  await env.OQC.put("shipments", JSON.stringify(base));
-  /* 개별 ship:{bkg} key도 동기화 — best 우선 원칙: 스케줄 데이터는 기존 ship:{bkg} 우선 */
-  await Promise.all(base.shipments.map(async s => {
-    try {
-      const raw = await env.OQC.get("ship:" + s.booking);
-      const MAP_KEYS = ["route","names","mapAt","idx","ratio","namedPorts","mapError"];
-      if (raw) {
-        const ex = JSON.parse(raw);
-        const exAt = ex.scheduleCheckedAt || ex.checkedAt || "";
-        const sAt  = s.scheduleCheckedAt  || s.checkedAt  || "";
-        const schedBase = exAt > sAt ? ex : s;
-        const mapData = Object.fromEntries(Object.entries(s).filter(([k]) => MAP_KEYS.includes(k)));
-        await env.OQC.put("ship:" + s.booking, JSON.stringify({ ...schedBase, ...mapData }));
-      } else {
-        await env.OQC.put("ship:" + s.booking, JSON.stringify(s));
-      }
-    } catch(_) {}
-  }));
-  return base;
+  return {
+    mapOk: shipments.filter(s => s.route).length,
+    mapErrors: errors,
+    sessionsUsedMaps: sessionsUsed,
+    budgetUsedMaps: budget.used,
+    mapUpdated: new Date().toISOString().slice(0, 16).replace("T", " ") + "Z"
+  };
 }
 
 /* ---------- 라우팅 ---------- */
@@ -1173,46 +1231,21 @@ export default {
     if (req.method === "OPTIONS") return new Response(null, { headers: CORS });
 
     if (url.pathname === "/data") {
-      const v = await env.OQC.get("shipments");
-      if (!v) {
+      const assembled = await assembleShipments(env);
+      const saved = assembled.saved;
+
+      if (!saved && !assembled.shipments.length) {
         let lastrun = null;
-        try { lastrun = JSON.parse((await env.OQC.get("lastrun")) || "null"); } catch (_) {}
+        try { lastrun = await readJsonKV(env, "lastrun", null); } catch (_) {}
         return json({ error: "No data collected yet.", lastrun,
           hint: lastrun ? "check lastrun.error" : "Cron has not run yet." }, 404);
       }
-      const data = JSON.parse(v);
-      /* 개별 ship:{bkg} key로 저장된 최신값으로 덮어씌워 race condition 없는 최신 상태 반영 */
-      if (data && Array.isArray(data.shipments)) {
-        for (let i = 0; i < data.shipments.length; i++) {
-          const bkg = data.shipments[i].booking;
-          if (!bkg) continue;
-          try {
-            const indiv = await env.OQC.get("ship:" + bkg);
-            if (indiv) {
-              const parsed = JSON.parse(indiv);
-              /* 개별 key가 더 최신인 경우만 덮어씀 */
-              const baseAt = data.shipments[i].scheduleCheckedAt || data.shipments[i].checkedAt || "";
-              const indivAt = parsed.scheduleCheckedAt || parsed.checkedAt || "";
-              if (indivAt >= baseAt || (parsed.mapAt && parsed.mapAt > (data.shipments[i].mapAt || ""))) data.shipments[i] = parsed;
-            }
-          } catch (_) {}
-        }
-        /* bookings KV에는 있지만 shipments에 없는 신규 부킹 — ship:{bkg} KV에서 추가 */
-        try {
-          const allBookings = await getList(env);
-          const inShipments = new Set(data.shipments.map(s => s.booking));
-          for (const bkg of allBookings) {
-            if (inShipments.has(bkg)) continue;
-            try {
-              const indiv = await env.OQC.get("ship:" + bkg);
-              if (indiv) {
-                const parsed = JSON.parse(indiv);
-                data.shipments.push(parsed);
-              }
-            } catch (_) {}
-          }
-        } catch (_) {}
-      }
+
+      const data = {
+        ...(saved || {}),
+        shipments: assembled.shipments,
+        tracked: assembled.shipments.length
+      };
       return new Response(JSON.stringify(data), { headers: JH });
     }
 
@@ -1232,47 +1265,19 @@ if (!one) return json({ error: "Failed to fetch booking after 10 session attempt
         /* /lookup은 스케줄만 조회 — 맵 fetch 제거 (맵은 MAP REFRESH 버튼으로만) */
 
         const known = await getList(env);
-        if (!known.includes(bkg)) {
-          known.push(bkg);
-          await env.OQC.put("bookings", JSON.stringify(known));
-          one.added = true;
-        }
+        const isNew = !known.includes(bkg);
 
         /* 다음 Cron을 기다리지 않고 저장분에도 바로 반영한다 */
         const nowStr = new Date().toISOString().slice(0, 16).replace("T", " ") + "Z";
         one.checkedAt = nowStr;
         one.scheduleCheckedAt = nowStr;
-        /* actual 플래그 — collectSchedule과 동일하게 적용 */
-        Object.assign(one, computeActualFlags(one));
-
-        /* planEta / delayDays — poeta KV에서 읽어서 붙임 */
+        /* collectSchedule과 동일한 normalize 경로로 처리 */
+        one = await normalizeOne(env, one);
         try {
-          const poetaRaw = await env.OQC.get("poeta");
-          const poetaMap = poetaRaw ? JSON.parse(poetaRaw) : {};
-          const dv = delayVsPlan(one, poetaMap[bkg]);
-          if (dv !== null) { one.planEta = poetaMap[bkg]; one.delayDays = dv; }
-          const lvl = alertLevel(dv, null);
-          if (lvl) one.alert = lvl;
-        } catch (_) {}
-
-        /* discharge 확인 시 delayHistory 저장 + 삭제 타이머 시작
-           이후 Cron에서 HMM 재조회 없이 3일 유예 후 자동 삭제됨 */
-        if (one.etaActual && !one.delaySnapshotDone) {
-          try {
-            let planEta = {}, hist = {};
-            try { planEta = JSON.parse((await env.OQC.get("poeta")) || "{}") || {}; } catch (_) {}
-            try { hist    = JSON.parse((await env.OQC.get("history")) || "{}") || {}; } catch (_) {}
-            const snap = await recordDelaySnapshot(env, one, planEta, hist);
-            if (snap && snap.done) {
-              one.delaySnapshotDone = true;
-              one.delayCompletedAt = snap.completedAt || null;
-            }
-          } catch (_) {}
-        }
-        try {
-          /* 개별 ship:{bkg} key에 저장 — race condition 원천 차단
-             동시에 여러 /lookup이 실행돼도 각자 다른 key에 쓰므로 충돌 없음 */
-          await env.OQC.put("ship:" + bkg, JSON.stringify(one));
+          /* schedule:{bkg}에 스케줄 필드만 저장 — 지도 필드 제외 */
+          const _MAP_KEYS = new Set(["route","names","mapAt","idx","ratio","namedPorts","mapError"]);
+          const schedOnly = Object.fromEntries(Object.entries(one).filter(([k]) => !_MAP_KEYS.has(k)));
+          await env.OQC.put("schedule:" + bkg, JSON.stringify(schedOnly));
           one.savedToData = true;
 
           /* 스케줄 이력에도 첫 관측을 남긴다 */
@@ -1283,7 +1288,15 @@ if (!one) return json({ error: "Failed to fetch booking after 10 session attempt
                            polDep: one.polDep, tsArr: one.tsArr, tsDep: one.tsDep, eta: one.eta }];
             await env.OQC.put("history", JSON.stringify(hist));
           }
+
+          /* schedule 저장 성공 후 bookings 목록에 등록 */
+          if (isNew) {
+            known.push(bkg);
+            await env.OQC.put("bookings", JSON.stringify(known));
+            one.added = true;
+          }
         } catch (e) {
+          console.error("[/lookup] schedule save failed", bkg, String(e.message || e));
           one.saveWarn = String(e.message || e);   // 조회 결과 자체는 살려서 반환
         }
         return json(one);
@@ -1386,8 +1399,16 @@ if (!one) return json({ error: "Failed to fetch booking after 10 session attempt
         return json({ month, count: arr.length, records: arr });
       }
       /* 월 지정 없으면 존재하는 월 키 목록만 (list 비용 절약) */
-      const list = await env.OQC.list({ prefix: "delayHistory:" });
-      return json({ months: list.keys.map(k => k.name.replace("delayHistory:", "")) });
+      /* cursor pagination — 키가 많아져도 전체 목록 수집 */
+      const allDHKeys = [];
+      let dhCursor = undefined, dhComplete = false;
+      while (!dhComplete) {
+        const dhRes = await env.OQC.list({ prefix: "delayHistory:", ...(dhCursor ? { cursor: dhCursor } : {}) });
+        allDHKeys.push(...dhRes.keys);
+        if (dhRes.list_complete) { dhComplete = true; }
+        else { dhCursor = dhRes.cursor; }
+      }
+      return json({ months: allDHKeys.map(k => k.name.replace("delayHistory:", "")) });
     }
 
     /* --- 지연 백데이터 수동 입력 (사이트 추적 이전에 진행됐던 과거 건 소급 등록용) ---
@@ -1579,11 +1600,18 @@ if (!one) return json({ error: "Failed to fetch booking after 10 session attempt
         const v = await env.OQC.get(k, "text");
         if (v !== null) try { kv[k] = JSON.parse(v); } catch { kv[k] = v; }
       }
-      /* delayHistory:YYYY-MM 키도 수집 */
-      const dhList = await env.OQC.list({ prefix: "delayHistory:" });
-      for (const item of dhList.keys) {
-        const v = await env.OQC.get(item.name, "text");
-        if (v !== null) try { kv[item.name] = JSON.parse(v); } catch { kv[item.name] = v; }
+      /* delayHistory:YYYY-MM, schedule:{bkg}, map:{bkg} 키도 수집 — cursor pagination */
+      for (const prefix of ["delayHistory:", "schedule:", "map:"]) {
+        let bCursor = undefined, bComplete = false;
+        while (!bComplete) {
+          const bRes = await env.OQC.list({ prefix, ...(bCursor ? { cursor: bCursor } : {}) });
+          for (const item of bRes.keys) {
+            const v = await env.OQC.get(item.name, "text");
+            if (v !== null) try { kv[item.name] = JSON.parse(v); } catch { kv[item.name] = v; }
+          }
+          if (bRes.list_complete) { bComplete = true; }
+          else { bCursor = bRes.cursor; }
+        }
       }
       return json({ backupAt: stampNow(), kv });
     }
@@ -1606,23 +1634,24 @@ if (!one) return json({ error: "Failed to fetch booking after 10 session attempt
       const kv = backup.kv || backup; // backupAt 래퍼 있을 수도 없을 수도
 
       /* 복원 대상 키 (shipments는 /collect로 재수집하므로 제외) */
-      const restoreKeys = ["bookings","pomap","poeta","pophoto","history","alertstate","cursor"];
+      const RESTORE_KEYS = ["bookings","pomap","poeta","pophoto","history","alertstate","cursor"];
       const restored = [], skipped = [];
-      for (const k of restoreKeys) {
+      for (const k of RESTORE_KEYS) {
         if (kv[k] !== undefined) {
           await env.OQC.put(k, JSON.stringify(kv[k]));
           restored.push(k);
         } else { skipped.push(k); }
       }
-      /* delayHistory:YYYY-MM 키 복원 */
+      /* delayHistory:YYYY-MM, schedule:{bkg}, map:{bkg} 키 복원 */
       for (const [k, v] of Object.entries(kv)) {
-        if (k.startsWith("delayHistory:")) {
+        if (k.startsWith("delayHistory:") || k.startsWith("schedule:") || k.startsWith("map:")) {
           await env.OQC.put(k, JSON.stringify(v));
           restored.push(k);
         }
       }
       return json({ ok: true, restoredFrom: date, restored, skipped,
-        note: "shipments not restored — run /collect to refresh from HMM" });
+        note: "shipments not restored — run POST /collect to rebuild shipments cache",
+        postRestoreAction: "Run POST /collect after restore to rebuild shipments cache" });
     }
 
     return json({ error: "Not found",
