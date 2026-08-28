@@ -152,7 +152,7 @@ function showSide(s,L2){
     : "";
 
   const chk = s.checkedAt
-    ? `<dt>CHECKED</dt><dd>${toKST(s.checkedAt)} · ${ago(s.checkedAt)}${s.staleItem?' <b class="warn">(retry pending)</b>':''}</dd>` : "";
+    ? `<dt>CHECKED</dt><dd>${toKST(s.checkedAt)} · ${ago(s.checkedAt)}${isStaleVisible(s)?' <b class="warn">(retry pending)</b>':''}</dd>` : "";
 
   document.getElementById('side').innerHTML=`
     <h3>${s.vessel} ${s.voyage}${phaseBadge(s,L2)}</h3>
@@ -182,7 +182,16 @@ function select(s,i,pan){
 /* ---------- 변동 로그 ---------- */
 const SIGNAL_DAYS = 5;
 
+/* STALE 표시 여부 — scheduleCheckedAt 기준 12시간 이내면 숨김 */
+function isStaleVisible(s) {
+  if (!s.staleItem) return false;
+  const at = s.scheduleCheckedAt || s.checkedAt;
+  if (!at) return true;
+  const age = Date.now() - new Date(at.replace(' ','T').replace(/Z$/,'')+'Z').getTime();
+  return age >= 12 * 60 * 60 * 1000;
+}
 function phaseBadge(s, L2) {
+  if (!s.spDep && !s.etaActual) return `<span class="ph book">BOOKED</span>`;
   if (!L2) return "";
   if (s.etaActual) return `<span class="ph done">ARRIVED</span>`;
   if (L2.atPort) {
@@ -267,8 +276,7 @@ function showGapLog(booking){
 }
 
 /* ---------- 배지 ---------- */
-const DELAY_WATCH_D = 4;
-const DELAY_ALERT_D = 7;
+/* DELAY_WATCH_D / DELAY_ALERT_D 는 config.js에서 선언 (3 / 7) */
 function poDelay(s){
   const orig = s.planEta || POETA[s.booking] || s.poEta;
   if(!orig || !s.eta) return null;
@@ -318,7 +326,7 @@ function rowsHTML(list){
     return `
     <tr data-i="${i}">
       <td><span class="nm">${s.vessel}</span><span class="vy">${s.voyage}</span>${phaseBadge(s,L2)}
-          <span class="bk">${s.booking} · ${s.cntrQty||"—"} CNTR${s.staleItem?" · STALE":""}</span></td>
+          <span class="bk">${s.booking} · ${s.cntrQty||"—"} CNTR${isStaleVisible(s)?" · STALE":""}</span></td>
       <td data-l="PKG ETD"><span class="dt">${fmtDT(s.polDep)}</span><span class="est">${actTag(!!s.polDepActual)}</span></td>
       <td data-l="SIN ETD"><span class="dt">${fmtDT(s.tsDep)}</span><span class="est">${actTag(!!s.tsDepActual)}</span></td>
       <td data-l="LA ETB / DEST ETA">
@@ -458,7 +466,7 @@ function schTableHTML(s) {
 function cardHTML(s){
   const L2 = locate(s);
   const pre = s.preShipment ? `<span class="dtag pre">NOT SHIPPED</span>` : "";
-  const stale = s.staleItem ? `<span class="tag t-stale" title="This item's last lookup failed; the previous value is shown">STALE</span>` : "";
+  const stale = isStaleVisible(s) ? `<span class="tag t-stale" title="This item's last lookup failed; the previous value is shown">STALE</span>` : "";
   let railHTML;
   if(!L2){
     railHTML = `<p class="note warn">Position unavailable — HMM map lookup failed. Schedule below is current.</p>`;
@@ -479,7 +487,7 @@ function cardHTML(s){
   const cls = !L2 ? "t-dock" : (L2.atPort ? "t-dock" : "t-sail");
   const phase = L2 ? L2.phase : "No position";
   const po = poSummary(s.booking);
-  return `<article class="card${s.staleItem?" is-stale":""}">
+  return `<article class="card${isStaleVisible(s)?" is-stale":""}">
     <div class="card-hd"><span class="bkg">${s.booking}</span>
       <span class="vsl">${s.vessel} ${s.voyage}</span>
       <span class="tag ${cls}">${phase}</span>${stale}${pre}${rolloverHTML(s)}${delayHTML(s)}</div>
@@ -661,15 +669,23 @@ function refreshData(){
   if(t) t.classList.add("busy");
   const el = document.getElementById("rstatus");
   if(el) el.innerHTML = "Reloading…";
-  Promise.all([
-    loadPO(), loadHistory(),
-    fetch(source(),{cache:"no-store"}).then(r=>r.ok?r.json():Promise.reject())
-  ]).then(([,,data])=>{
-    render(data);
-    if(el) el.innerHTML = `Reloaded — ${toKST(data.updated)}`;
-  }).catch(e=>{
-    if(el) el.innerHTML = `Reload failed — ${e.message||"no response"}`;
-  }).finally(()=>{ refreshing = false; if(t) t.classList.remove("busy"); });
+  const dataPromise = fetch(source(),{cache:"no-store"}).then(r=>r.ok?r.json():Promise.reject(new Error("HTTP "+r.status)));
+  Promise.allSettled([loadPO(), loadHistory(), dataPromise])
+    .then(([poRes, histRes, dataRes])=>{
+      if(dataRes.status !== "fulfilled"){
+        if(el) el.innerHTML = `Reload failed — ${dataRes.reason&&dataRes.reason.message||"no response"}`;
+        return;
+      }
+      const data = dataRes.value;
+      render(data);
+      const warnings = [];
+      if(poRes.status !== "fulfilled") warnings.push("PO");
+      if(histRes.status !== "fulfilled") warnings.push("History");
+      if(el) el.innerHTML = warnings.length
+        ? `Reloaded (partial: ${warnings.join(", ")} unavailable) — ${toKST(data.updated)}`
+        : `Reloaded — ${toKST(data.updated)}`;
+    })
+    .finally(()=>{ refreshing = false; if(t) t.classList.remove("busy"); });
 }
 
 /* ---------- 라우팅 ---------- */
@@ -811,6 +827,8 @@ function fetchAndRender(attempt){
       } else {
         console.error('[fetchAndRender] all retries failed, using FALLBACK');
         render(FALLBACK);
+        const el = document.getElementById("rstatus");
+        if(el) el.innerHTML = `⚠️ OFFLINE SAMPLE DATA — Live API unavailable`;
       }
     });
 }
