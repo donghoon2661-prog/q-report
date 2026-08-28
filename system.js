@@ -4,8 +4,7 @@ function renderSystemTab(){
   const el = document.getElementById('sys-content');
   if(!el) return;
   const d = CUR;
-  /* 디버그 */ console.log('[renderSystemTab] CUR shipments checkedAt:');
-  (d&&d.shipments||[]).forEach(s=>console.log(`  bkg=${s.booking} checkedAt=${s.checkedAt} scheduleCheckedAt=${s.scheduleCheckedAt} mapAt=${s.mapAt}`));
+
   if(!d || !d.shipments){ el.innerHTML = `<div class="sys-err">No data loaded yet.</div>`; return; }
 
   function nextCron(){
@@ -21,8 +20,16 @@ function renderSystemTab(){
     return `00:00 KST (tomorrow) · in ${Math.floor(diffM/60)}h ${diffM%60}m`;
   }
 
-  const failList = d.shipments.filter(s=>s.scheduleError);
-  const okCount = d.shipments.filter(s=>!s.scheduleError).length;
+  /* RESULT 카운트 — scheduleCheckedAt 기준 12시간 이내면 ok, 아니면 failed */
+  const RESULT_OK_MS = 12 * 60 * 60 * 1000;
+  const failList = d.shipments.filter(s => {
+    if (!s.scheduleError) return false;
+    const at = s.scheduleCheckedAt || s.checkedAt;
+    if (!at) return true;
+    const age = Date.now() - new Date(at.replace(' ','T').replace(/Z$/,'')+'Z').getTime();
+    return age >= RESULT_OK_MS;
+  });
+  const okCount = d.shipments.length - failList.length;
 
   let html = `
   <div class="sys-card">
@@ -66,18 +73,36 @@ function renderSystemTab(){
 
       const schedErrLoc = s.scheduleError
         ? (s.scheduleError.match(/-([A-Z]{3})\b/)||[])[1] || '' : '';
-      const schedStatus = s.scheduleError
+      /* scheduleCheckedAt 기준 12시간 이내면 stale이어도 ok로 표시 */
+      const SCHED_OK_MS = 12 * 60 * 60 * 1000;
+      const schedAge = schedAt ? (Date.now() - new Date(schedAt.replace(' ','T').replace(/Z$/,'')+'Z').getTime()) : Infinity;
+      const schedFresh = schedAge < SCHED_OK_MS;
+      const schedStatus = (s.scheduleError && !schedFresh)
         ? `<span class="sys-warn">failed</span>${schedErrLoc?` <span style="color:var(--buoy);font-size:10px" title="${(s.scheduleError||'').replace(/"/g,'&quot;')}">· ${schedErrLoc}</span>`:''}`
         : `<span class="sys-ok">ok</span>`;
-      const mapStatus = mapOk
+      const MAP_OK_MS = 12 * 60 * 60 * 1000;
+      const mapAge = mapAt ? (Date.now() - new Date(mapAt.replace(' ','T').replace(/Z$/,'')+'Z').getTime()) : Infinity;
+      const mapFresh = mapAge < MAP_OK_MS;
+      const notDeparted = !s.spDep && !s.etaActual;
+      const mapStatus = notDeparted
+        ? `<span style="color:var(--fog);font-size:10px">No Map (Not Departed)</span>`
+        : mapOk
         ? `<span style="color:var(--sail)">ok</span>`
         : (s.mapError
           ? (()=>{
-              const region = (s.mapError.match(/cf-ray\s+[\w]+-([A-Z]{2,4})[,)]/i)||[])[1]||'';
-              const m = s.mapError.match(/^(\d{2}:\d{2}:\d{2})\s+(.*)/s);
-              const t = m?m[1]:''; const msg = m?m[2]:s.mapError;
-              return `<span style="color:var(--buoy)">ERR${region?' · '+region:''}</span>
-                <div style="font-size:10px;color:var(--buoy);margin-top:2px;word-break:break-all">${t?t+' ':''}${msg.replace(/</g,'&lt;')}</div>`;
+              /* cf-ray에서 지역코드 추출 — 세션/지도 에러 모두 커버 */
+              const region = (s.mapError.match(/cf-ray\s+[\w]+-([A-Z]{2,4})(?:[,)\s]|$)/i)||[])[1]||'';
+              /* 시간 추출 */
+              const timeM = s.mapError.match(/(\d{2}:\d{2})/);
+              const t = timeM ? timeM[1] : '';
+              /* 에러 종류 판별 */
+              const isSession = /세션/.test(s.mapError);
+              const codeM = s.mapError.match(/response\s+(\d{3})/);
+              const code = codeM ? codeM[1] : '';
+              const errLabel = isSession
+                ? `SESSION ERR${region?' ('+region+')':''}`
+                : `${code||'ERR'}${region?' ('+region+')':''}`;
+              return `<span style="color:var(--buoy)">${errLabel}</span>${t?`<span style="color:var(--fog);font-size:10px;margin-left:6px">${t}</span>`:''}`;
             })()
           : `<span style="color:var(--fog)">—</span>`);
 
@@ -105,6 +130,8 @@ function renderSystemTab(){
         <div style="margin-top:4px">
           ${s.etaActual
             ? `<span style="font-size:10px;color:var(--fog)">도착 완료</span>`
+            : notDeparted
+            ? ``
             : `<button class="sys-map-refresh" data-bkg="${s.booking}" style="font-size:10px;padding:2px 7px;border:1px solid #F2C14E;color:#F2C14E;background:none">REFRESH</button>`}
         </div>
       </span>
@@ -287,7 +314,12 @@ async function sysMapRefreshOne(bkg, btn){
     const item = (res.shipments||[]).find(s=>s.booking===bkg);
     const mapOk = item && item.route;  // mapError 있어도 route 있으면 ok
     const mapAt  = item && item.mapAt ? fmtSysTime(item.mapAt) : '—';
-    const errMsg = item && item.mapError ? item.mapError : (res.mapErrors||[]).find(e=>e.includes(bkg))||'';
+    /* 부킹별 mapError 우선, 없으면 세션 에러(부킹번호 없는 에러) 사용 */
+    const errMsg = item && item.mapError
+      ? item.mapError
+      : (res.mapErrors||[]).find(e=>e.includes(bkg))
+        || (res.mapErrors||[]).find(e=>e.includes('세션'))
+        || '';
 
     /* MAP 셀(3번째 컬럼) 직접 업데이트 */
     if(row){
@@ -304,16 +336,20 @@ async function sysMapRefreshOne(bkg, btn){
               <button class="sys-map-refresh" data-bkg="${bkg}" style="font-size:10px;padding:2px 7px;border:1px solid #F2C14E;color:#F2C14E;background:none">REFRESH</button>
             </div>`;
         } else {
-          const region = (errMsg.match(/cf-ray\s+[\w]+-([A-Z]{2,4})[,)]/i)||[])[1] || '';
-          const errParsed = errMsg.match(/^(\d{2}:\d{2}:\d{2})\s+(.*)/s);
-          const errTime = errParsed ? errParsed[1] : '';
-          const errText = errParsed ? errParsed[2] : errMsg;
+          const region2 = (errMsg.match(/cf-ray\s+[\w]+-([A-Z]{2,4})(?:[,)\s]|$)/i)||[])[1] || '';
+          const timeM2 = errMsg.match(/(\d{2}:\d{2})/);
+          const t2 = timeM2 ? timeM2[1] : '';
+          const isSession2 = /세션/.test(errMsg);
+          const codeM2 = errMsg.match(/response\s+(\d{3})/);
+          const code2 = codeM2 ? codeM2[1] : '';
+          const errLabel2 = isSession2
+            ? `SESSION ERR${region2?' ('+region2+')':''}`
+            : `${code2||'ERR'}${region2?' ('+region2+')':''}`;
           mapCol.innerHTML = `
             <div style="display:flex;align-items:center;gap:6px">
-              <span style="color:var(--buoy)">ERR${region?' · '+region:''}</span>
-              <span class="sys-dim" style="font-size:10px">${mapAt}</span>
+              <span style="color:var(--buoy)">${errLabel2}</span>
+              ${t2?`<span style="color:var(--fog);font-size:10px">${t2}</span>`:''}
             </div>
-            <div style="font-size:10px;color:var(--buoy);margin-top:2px;word-break:break-all">${errTime ? errTime+' ' : ''}${errText.replace(/</g,'&lt;')}</div>
             <div style="margin-top:4px">
               <button class="sys-map-refresh" data-bkg="${bkg}" style="font-size:10px;padding:2px 7px;border:1px solid #F2C14E;color:#F2C14E;background:none">REFRESH</button>
             </div>`;
