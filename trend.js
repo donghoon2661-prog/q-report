@@ -1,20 +1,36 @@
 /* ===== trend.js — BETA 탭 (Admin only) ===== */
 
-const TREND_API = "https://kossan-oqc.dhoqc.workers.dev/delayhistory";
+const TREND_API = (typeof HISTORY_API !== "undefined")
+  ? HISTORY_API
+  : ((typeof API_ROOT !== "undefined" ? API_ROOT : "") + "/delayhistory");
 let trendCache = null;
+let trendCacheAt = 0;
+const TREND_CACHE_TTL = 5 * 60 * 1000; /* 5분 */
 let betaMenu = 'trend';
 
 async function loadTrendData() {
-  if (trendCache) return trendCache;
-  const res = await fetch(TREND_API, { cache: "no-store" }).then(r => r.ok ? r.json() : { months: [] });
-  const months = res.months || [];
-  const all = [];
-  for (const m of months) {
-    const d = await fetch(`${TREND_API}?month=${m}`, { cache: "no-store" }).then(r => r.ok ? r.json() : { records: [] });
-    (d.records || []).forEach(r => all.push(r));
+  if (trendCache && (Date.now() - trendCacheAt) < TREND_CACHE_TTL) return trendCache;
+  try {
+    const res = await fetch(TREND_API, { cache: "no-store" }).then(r => r.ok ? r.json() : { months: [] });
+    const months = res.months || [];
+    const results = await Promise.allSettled(
+      months.map(m =>
+        fetch(`${TREND_API}?month=${m}`, { cache: "no-store" })
+          .then(r => r.ok ? r.json() : Promise.reject(new Error("HTTP " + r.status)))
+      )
+    );
+    const all = [];
+    results.forEach((r, i) => {
+      if (r.status !== "fulfilled") { console.warn("[trend] month load failed:", months[i], r.reason); return; }
+      (r.value.records || []).forEach(x => all.push(x));
+    });
+    trendCache = all;
+    trendCacheAt = Date.now();
+  } catch (e) {
+    console.error("[trend] loadTrendData failed:", e);
+    if (!trendCache) trendCache = [];
   }
-  trendCache = all;
-  return all;
+  return trendCache;
 }
 
 /* ---------- BETA 탭 메인 ---------- */
@@ -240,7 +256,7 @@ async function renderErrorLogContent() {
     </div>`;
 
   try {
-    const API_BASE = typeof API !== 'undefined' ? API.replace('/data','') : 'https://kossan-oqc.dhoqc.workers.dev';
+    const API_BASE = typeof API_ROOT !== 'undefined' ? API_ROOT : (typeof API !== 'undefined' ? API.replace('/data','') : '');
     const key = typeof getKey === 'function' ? await getKey() : null;
     const headers = key ? {'X-Refresh-Key': key} : {};
     const r = await fetch(API_BASE + '/debug', {cache:'no-store', headers});
@@ -341,7 +357,7 @@ async function renderRouteTable() {
   if (!el) return;
 
   try {
-    const r = await fetch(typeof source === 'function' ? source() : 'https://kossan-oqc.dhoqc.workers.dev/data', {cache:'no-store'});
+    const r = await fetch(typeof source === 'function' ? source() : (typeof API !== 'undefined' ? API : ''), {cache:'no-store'});
     const d = await r.json();
     const ships = (d.shipments || []).filter(s => !s.etaActual);
 
