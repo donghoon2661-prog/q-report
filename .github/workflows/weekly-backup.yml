@@ -31,3 +31,42 @@ jobs:
           git diff --cached --quiet && echo "No changes" || \
             git commit -m "chore: daily KV backup $(date -u +'%Y-%m-%d')"
           git push
+
+      - name: Upload to Dropbox
+        env:
+          DROPBOX_TOKEN: ${{ secrets.DROPBOX_TOKEN }}
+        run: |
+          DATE=$(date -u +'%Y-%m-%d')
+          DROPBOX_BASE="/Github backup/Kossan OQC/${DATE}"
+
+          dbx_upload() {
+            local src="$1"
+            local dest="$2"
+            curl -sf -X POST "https://content.dropboxapi.com/2/files/upload" \
+              -H "Authorization: Bearer ${DROPBOX_TOKEN}" \
+              -H "Dropbox-API-Arg: {\"path\": \"${dest}\", \"mode\": \"overwrite\", \"autorename\": false}" \
+              -H "Content-Type: application/octet-stream" \
+              --data-binary "@${src}" \
+              -o /dev/null \
+              && echo "✓ ${dest}" \
+              || echo "✗ FAILED: ${dest}"
+          }
+
+          for f in app.js config.js history.js index.html map.js po.js quality.js style.css system.js trend.js worker.js devlog.js manifest.json; do
+            [ -f "$f" ] && dbx_upload "$f" "${DROPBOX_BASE}/${f}"
+          done
+
+          [ -f "PROJECT_INSTRUCTIONS_v4.md" ] && dbx_upload "PROJECT_INSTRUCTIONS_v4.md" "${DROPBOX_BASE}/PROJECT_INSTRUCTIONS_v4.md"
+          [ -f "COA_FNG-0310-06-16_to_07-11.json" ] && dbx_upload "COA_FNG-0310-06-16_to_07-11.json" "${DROPBOX_BASE}/COA_FNG-0310-06-16_to_07-11.json"
+          [ -f ".github/workflows/deploy.yml" ] && dbx_upload ".github/workflows/deploy.yml" "${DROPBOX_BASE}/.github/workflows/deploy.yml"
+          [ -f ".github/workflows/weekly-backup.yml" ] && dbx_upload ".github/workflows/weekly-backup.yml" "${DROPBOX_BASE}/.github/workflows/weekly-backup.yml"
+
+          for f in backups/*.json; do
+            [ -f "$f" ] && dbx_upload "$f" "${DROPBOX_BASE}/${f}"
+          done
+
+          for f in data/coa/*.json; do
+            [ -f "$f" ] && dbx_upload "$f" "${DROPBOX_BASE}/${f}"
+          done
+
+          echo "Dropbox upload complete: ${DROPBOX_BASE}"
