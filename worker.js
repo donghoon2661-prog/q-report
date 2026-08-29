@@ -359,6 +359,18 @@ function parseBooking(html, bkg) {
 /* ---------- 이벤트 기반 actual 플래그 계산 ----------
    각 날짜 필드가 실제 HMM 이벤트로 확인됐는지 여부를 boolean으로 반환.
    시간이 지났다는 이유만으로 actual 처리하지 않는다. */
+/* POD 하역 완료 판정 — 스케줄 수집 종료 기준
+   etaActual(BERTHING/ARRIVAL 포함)과 달리 DISCHARG+POD 이벤트가 실제로 있을 때만 true */
+function hasPodDischarged(s) {
+  const pod = String(s.pod || "").toUpperCase().trim();
+  if (!pod) return false;
+  return (s.events || []).some(e => {
+    const status = String(e.status || "").toUpperCase();
+    const loc    = String(e.loc    || "").toUpperCase().trim();
+    return status.includes("DISCHARG") && loc === pod;
+  });
+}
+
 function computeActualFlags(item) {
   const evs = (item.events || []).map(e => (e.status || "").toUpperCase());
   const hasEv = (...kw) => evs.some(st => kw.every(k => st.includes(k)));
@@ -879,7 +891,7 @@ async function collectSchedule(env, forceBkgs = null, sharedBudget = null) {
   const prev = await getSaved(env);
   const prevMap = new Map((prev && prev.shipments || []).map(s => [s.booking, s]));
   const discharged = new Set(
-    [...prevMap.values()].filter(s => s.etaActual).map(s => s.booking)
+    [...prevMap.values()].filter(hasPodDischarged).map(s => s.booking)
   );
 
   /* forceBkgs: stale 재시도 모드 — 지정 부킹만, cursor 이동 없음 */
