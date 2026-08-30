@@ -383,7 +383,7 @@ function computeActualFlags(item) {
      다시 false로 롤백하지 않는다. 기존 true를 OR로 보존. */
   return {
     polDepActual: !!item.polDepActual || hasEv("DEPARTURE", "POL") || hasEv("FEEDER LOADING", "POL") || hasEv("FEEDER DEPARTURE"),
-    tsArrActual:  !!item.tsArrActual  || hasEv("ARRIVAL", "T/S") || hasEv("FEEDER ARRIVAL", "T/S"),
+    tsArrActual:  !!item.tsArrActual  || hasEv("ARRIVAL", "T/S") || hasEv("FEEDER ARRIVAL", "T/S") || hasEv("FEEDER DISCHARGED", "T/S"),
     tsDepActual:  !!item.tsDepActual  || hasEv("DEPARTURE", "T/S"),
     etaActual:    !!item.etaActual    || hasEv("DISCHARG", "POD")
                                       || hasCur("DISCHARG", "POD"),
