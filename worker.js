@@ -1724,20 +1724,34 @@ if (!one) return json({ error: "Failed to fetch booking after 10 session attempt
 
       /* ── 일정 수집 또는 지도 수집 ── */
       const p = await (isMaps ? collectMaps(env) : collectSchedule(env));
+      let notifyResult = {}, notifyError = null;
+      let arrivalResult = {}, arrivalError = null;
       if (!isMaps) {
         const cronErrs = (p.errors || []).map(msg => ({ tag: "cron", msg }));
         if (cronErrs.length) await appendErrorLog(env, cronErrs);
         /* 알림 메일 */
         const saved = await getSaved(env);
-        if (saved) await notifyIfNeeded(env, saved).catch(() => {});
-        if (saved) await notifyArrivalIfNeeded(env, saved).catch(() => {});
+        if (saved) {
+          try { notifyResult = await notifyIfNeeded(env, saved); }
+          catch (e) { notifyError = String(e?.message || e); }
+          try { arrivalResult = await notifyArrivalIfNeeded(env, saved); }
+          catch (e) { arrivalError = String(e?.message || e); }
+        }
       }
       await env.OQC.put("lastrun", JSON.stringify({
         at: stampNow(), trigger, cron, ok: true,
         count: p.ok, mapOk: p.mapOk,
         carried: Array.isArray(p.carried) ? p.carried.length : (p.carried || 0),
         budgetUsed: isMaps ? p.budgetUsedMaps : p.budgetUsed,
-        errors: isMaps ? p.mapErrors : p.errors
+        errors: isMaps ? p.mapErrors : p.errors,
+        ...(isMaps ? {} : {
+          mailSent: notifyResult?.sent ?? 0,
+          mailBookings: notifyResult?.bookings ?? [],
+          mailError: notifyError,
+          arrivalSent: arrivalResult?.sent ?? 0,
+          arrivalBookings: arrivalResult?.bookings ?? [],
+          arrivalError: arrivalError
+        })
       }));
 
     })().catch(e => env.OQC.put("lastrun", JSON.stringify({
