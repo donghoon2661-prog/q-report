@@ -91,7 +91,22 @@ function monthStats(data, keys){
     const avg = delays.length ? delays.reduce((a,b)=>a+b,0)/delays.length : null;
     const max = delays.length ? Math.max(...delays) : null;
     const {m,y} = histMonthLabel(k);
-    return { key:k, label:`${m} ${y}`, vessels:recs.length, avg, max };
+
+    /* AVG TRANSIT 계산
+       startDate = polDepActualDate || polDep
+       endDate   = podBerthingAt    || actualEta */
+    const transits = recs.map(r => {
+      const from = r.polDepActualDate || r.polDep || null;
+      const to   = r.podBerthingAt    || r.actualEta || null;
+      if (!from || !to) return null;
+      const s = new Date(from), e = new Date(to);
+      if (isNaN(s) || isNaN(e)) return null;
+      const d = Math.round((e - s) / 86400000);
+      return d >= 0 ? d : null;
+    }).filter(d => d !== null);
+    const avgTransit = transits.length ? transits.reduce((a,b)=>a+b,0)/transits.length : null;
+
+    return { key:k, label:`${m} ${y}`, vessels:recs.length, avg, max, avgTransit };
   });
 }
 
@@ -100,6 +115,7 @@ function renderHistorySummary(data, keys){
   const tbody = document.getElementById("hist-stats-tbody");
   tbody.innerHTML = stats.map((s,i)=>`<tr data-idx="${i}">
       <td>${s.label}</td><td>${s.vessels}</td>
+      <td>${s.avgTransit===null?"—":s.avgTransit.toFixed(1)+"d"}</td>
       <td>${s.avg===null?"—":s.avg.toFixed(1)+"d"}</td>
       <td>${s.max===null?"—":s.max+"d"}</td>
     </tr>`).join("");
@@ -123,7 +139,7 @@ function renderHistorySummary(data, keys){
           title: items => stats[items[0].dataIndex].label,
           label: item => {
             const s = stats[item.dataIndex];
-            return [`Vessels: ${s.vessels}`,`Avg delay: ${s.avg===null?"—":s.avg.toFixed(1)+"d"}`,`Max delay: ${s.max===null?"—":s.max+"d"}`];
+            return [`Vessels: ${s.vessels}`,`Avg transit: ${s.avgTransit===null?"—":s.avgTransit.toFixed(1)+"d"}`,`Avg delay: ${s.avg===null?"—":s.avg.toFixed(1)+"d"}`,`Max delay: ${s.max===null?"—":s.max+"d"}`];
           }
         }}
       },
@@ -156,16 +172,35 @@ function renderHistoryDetail(monthKey){
   document.getElementById("hist-monthtitle").textContent = `${m} ${y}`;
   document.getElementById("hist-monthmeta").textContent = `ETD basis · ${recs.length} shipment${recs.length===1?"":"s"}`;
 
+  /* TRANSIT 계산 헬퍼
+     startDate = polDepActualDate(Actual Loading Port Departure) || polDep(계획)
+     endDate   = podBerthingAt(Actual Discharging Port Arrival)  || actualEta(계획 fallback)
+     음수 / NaN / 유효하지 않은 날짜 → "—" 표시 */
+  const transitDays = (from, to) => {
+    if (!from || !to) return null;
+    const s = new Date(from), e = new Date(to);
+    if (isNaN(s.getTime()) || isNaN(e.getTime())) return null;
+    const d = Math.round((e - s) / 86400000);
+    return d >= 0 ? d : null;
+  };
+
   const tbody = document.getElementById("hist-tbody");
   tbody.innerHTML = recs.map((r,i)=>{
     const dwell = (r.legBreakdown||[]).find(l=>l.label==="T/S Departure ETD");
     const dwellTxt = dwell && dwell.note ? dwell.note.split("d vs")[0]+"d" : "—";
+
+    const startDate = r.polDepActualDate || r.polDep || null;
+    const endDate   = r.podBerthingAt    || r.actualEta || null;
+    const transit   = transitDays(startDate, endDate);
+    const transitTxt = transit !== null ? `${transit}d` : "—";
+
     return `<tr>
       <td><span class="vname">${r.vessel||"—"}</span><span class="vbkg">${r.booking}</span></td>
       <td class="route">${(r.pol||"").split(",")[0]||"—"} &rarr; ${(r.pod||"").split(",")[0]||"—"}</td>
       <td>${histShortDate(r.polDep)} <span class="plandate">(${histShortDate(r.polDep)})</span></td>
       <td class="dwell">${dwellTxt}</td>
       <td>${histShortDate(r.actualEta)} <span class="plandate">(${histShortDate(r.planEta)})</span></td>
+      <td class="transit-cell">${transitTxt}</td>
       <td><span class="hist-badge ${histBadgeClass(r.delayDays)}" data-idx="${i}">${histBadgeLabel(r.delayDays)}</span></td>
     </tr>`;
   }).join("");
