@@ -794,7 +794,7 @@ function fmtEta(d) {
 }
 
 /* HTML 생성 */
-function buildWeeklyHtml(shipments, now) {
+function buildWeeklyHtml(shipments, now, isTest = false) {
   const range = weekRange(now);
   const { week1, week2, label } = range;
 
@@ -932,6 +932,7 @@ function buildWeeklyHtml(shipments, now) {
   <!-- 바디 -->
   <tr>
     <td style="padding:28px 32px;background:#ffffff">
+      ${isTest ? `<div style="background:#FEF9C3;border:1px solid #FDE047;border-radius:6px;padding:12px 16px;margin-bottom:20px;font-size:12px;color:#854D0E;line-height:1.6"><strong>[TEST EMAIL]</strong> This is a test email. Starting this week, the Weekly Shipment Report will be sent automatically every Sunday at 8:00 PM Los Angeles time.</div>` : ''}
       ${holSection}
       <div style="font-size:11px;font-weight:bold;color:#9CA3AF;letter-spacing:1px;text-transform:uppercase;margin-bottom:12px">2-WEEK SCHEDULE</div>
       <table width="100%" cellpadding="0" cellspacing="0" border="1" style="width:100%;border-collapse:collapse;border:1px solid #E5E7EB;margin-bottom:24px;table-layout:fixed">
@@ -961,14 +962,14 @@ function buildWeeklyHtml(shipments, now) {
 }
 
 
-async function sendWeeklyEmail(env) {
+async function sendWeeklyEmail(env, isTest = false) {
   if (!env.RESEND_KEY || !env.ALERT_TO_WEEKLY) return { skipped: "RESEND_KEY 또는 ALERT_TO_WEEKLY 미설정" };
 
   const saved = await getSaved(env);
   if (!saved || !Array.isArray(saved.shipments)) return { skipped: "shipments 없음" };
 
   const now = new Date();
-  const html = buildWeeklyHtml(saved.shipments, now);
+  const html = buildWeeklyHtml(saved.shipments, now, isTest);
 
   const la = toLA(now);
   const mon = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][la.getUTCMonth()];
@@ -1822,8 +1823,8 @@ if (!one) return json({ error: "Failed to fetch booking after 10 session attempt
     }
     if (url.pathname === "/weekly-test") {
       if (!auth(req, env)) return json({ error: "Authentication failed" }, 401);
-      const r = await sendWeeklyEmail(env);
-      return json({ to: env.ALERT_TO || null, ...r });
+      const r = await sendWeeklyEmail(env, true);
+      return json({ to: env.ALERT_TO_WEEKLY || env.ALERT_TO || null, ...r });
     }
     if (url.pathname === "/delaylog") {
       const bkg = url.searchParams.get("bkg");
