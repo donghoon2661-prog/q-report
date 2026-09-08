@@ -2180,5 +2180,3 @@ async function appendSessionLog(env, entries) {
   const combined = [...existing, ...newRows].slice(-200);
   await env.OQC.put("sessionLog", JSON.stringify(combined), { expirationTtl: 14 * 24 * 3600 }).catch(() => {});
 }
-
-
