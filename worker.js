@@ -962,8 +962,7 @@ function buildWeeklyHtml(shipments, now) {
 
 
 async function sendWeeklyEmail(env) {
-  const weeklyTo = env.ALERT_TO_WEEKLY || env.ALERT_TO;
-  if (!env.RESEND_KEY || !weeklyTo) return { skipped: "RESEND_KEY 또는 ALERT_TO_WEEKLY 미설정" };
+  if (!env.RESEND_KEY || !env.ALERT_TO_WEEKLY) return { skipped: "RESEND_KEY 또는 ALERT_TO_WEEKLY 미설정" };
 
   const saved = await getSaved(env);
   if (!saved || !Array.isArray(saved.shipments)) return { skipped: "shipments 없음" };
@@ -971,26 +970,34 @@ async function sendWeeklyEmail(env) {
   const now = new Date();
   const html = buildWeeklyHtml(saved.shipments, now);
 
-  const range = weekRange(now);
   const la = toLA(now);
   const mon = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][la.getUTCMonth()];
   const subject = `Weekly Shipment Schedule — ${mon} ${la.getUTCDate()}, ${la.getUTCFullYear()}`;
 
-  return await sendMail(env, subject, html, weeklyTo);
+  return await sendMail(env, subject, html, {
+    to:  env.ALERT_TO_WEEKLY,
+    cc:  env.ALERT_CC_WEEKLY  || null,
+    bcc: env.ALERT_BCC_WEEKLY || null
+  });
 }
 
 
 /* ---------- 이메일 알림 ----------
    Cloudflare Workers는 자체 발송 기능이 없어 Resend HTTP API를 쓴다.
    설정: secret RESEND_KEY, var ALERT_TO(쉼표 구분 가능), var ALERT_FROM(선택) */
-async function sendMail(env, subject, html, toOverride = null) {
-  if (!env.RESEND_KEY || (!env.ALERT_TO && !toOverride)) return { skipped: "RESEND_KEY 또는 ALERT_TO 미설정" };
-  const to = String(toOverride || env.ALERT_TO).split(",").map(x => x.trim()).filter(Boolean);
+async function sendMail(env, subject, html, recipients = null) {
+  const to = recipients?.to
+    ? String(recipients.to).split(",").map(x => x.trim()).filter(Boolean)
+    : String(env.ALERT_TO || "").split(",").map(x => x.trim()).filter(Boolean);
+  if (!env.RESEND_KEY || !to.length) return { skipped: "RESEND_KEY 또는 ALERT_TO 미설정" };
   const from = env.ALERT_FROM || "Kossan OQC <onboarding@resend.dev>";
+  const body = { from, to, subject, html };
+  if (recipients?.cc) body.cc = String(recipients.cc).split(",").map(x => x.trim()).filter(Boolean);
+  if (recipients?.bcc) body.bcc = String(recipients.bcc).split(",").map(x => x.trim()).filter(Boolean);
   const r = await fetch("https://api.resend.com/emails", {
     method: "POST",
     headers: { "Authorization": "Bearer " + env.RESEND_KEY, "Content-Type": "application/json" },
-    body: JSON.stringify({ from, to, subject, html })
+    body: JSON.stringify(body)
   });
   if (!r.ok) return { error: "Mail send failed " + r.status + " " + (await r.text()).slice(0, 200) };
   return { ok: true };
