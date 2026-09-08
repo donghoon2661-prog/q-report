@@ -962,7 +962,8 @@ function buildWeeklyHtml(shipments, now) {
 
 
 async function sendWeeklyEmail(env) {
-  if (!env.RESEND_KEY || !env.ALERT_TO) return { skipped: "RESEND_KEY 또는 ALERT_TO 미설정" };
+  const weeklyTo = env.ALERT_TO_WEEKLY || env.ALERT_TO;
+  if (!env.RESEND_KEY || !weeklyTo) return { skipped: "RESEND_KEY 또는 ALERT_TO_WEEKLY 미설정" };
 
   const saved = await getSaved(env);
   if (!saved || !Array.isArray(saved.shipments)) return { skipped: "shipments 없음" };
@@ -975,16 +976,16 @@ async function sendWeeklyEmail(env) {
   const mon = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][la.getUTCMonth()];
   const subject = `Weekly Shipment Schedule — ${mon} ${la.getUTCDate()}, ${la.getUTCFullYear()}`;
 
-  return await sendMail(env, subject, html);
+  return await sendMail(env, subject, html, weeklyTo);
 }
 
 
 /* ---------- 이메일 알림 ----------
    Cloudflare Workers는 자체 발송 기능이 없어 Resend HTTP API를 쓴다.
    설정: secret RESEND_KEY, var ALERT_TO(쉼표 구분 가능), var ALERT_FROM(선택) */
-async function sendMail(env, subject, html) {
-  if (!env.RESEND_KEY || !env.ALERT_TO) return { skipped: "RESEND_KEY 또는 ALERT_TO 미설정" };
-  const to = String(env.ALERT_TO).split(",").map(x => x.trim()).filter(Boolean);
+async function sendMail(env, subject, html, toOverride = null) {
+  if (!env.RESEND_KEY || (!env.ALERT_TO && !toOverride)) return { skipped: "RESEND_KEY 또는 ALERT_TO 미설정" };
+  const to = String(toOverride || env.ALERT_TO).split(",").map(x => x.trim()).filter(Boolean);
   const from = env.ALERT_FROM || "Kossan OQC <onboarding@resend.dev>";
   const r = await fetch("https://api.resend.com/emails", {
     method: "POST",
