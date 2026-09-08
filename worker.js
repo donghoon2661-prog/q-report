@@ -920,7 +920,7 @@ function buildWeeklyHtml(shipments, now) {
 <title>Weekly Shipment Schedule</title>
 </head>
 <body style="margin:0;padding:32px 16px;background:#F3F4F6;font-family:Arial,Helvetica,sans-serif">
-<table width="600" cellpadding="0" cellspacing="0" border="0" align="center" style="width:600px;max-width:600px;margin:0 auto;border-radius:12px;overflow:hidden;background:#ffffff">
+<table width="100%" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:600px;margin:0 auto;border-radius:12px;overflow:hidden;background:#ffffff">
   <!-- 헤더 -->
   <tr>
     <td style="background:#07141C;padding:24px 32px">
