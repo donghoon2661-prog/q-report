@@ -821,10 +821,10 @@ function buildWeeklyHtml(shipments, now, isTest = false) {
   /* 달력 셀 생성 — 완전 인라인 스타일 */
   function calCell(d, isWeek2) {
     const ds = dateStr(d);
-    const la = toLA(d);
-    const dn = la.getUTCDate();
-    const isSun = la.getUTCDay() === 0;
+    const dn = d.getUTCDate();
+    const isSun = d.getUTCDay() === 0;
     const hol = US_HOLIDAYS_WEEKLY[ds];
+    const isHoliday = !!hol;
 
     const chips = [...week1Ships, ...week2Ships].filter(s => {
       const ed = getEtaDate(s);
@@ -841,7 +841,7 @@ function buildWeeklyHtml(shipments, now, isTest = false) {
       return `<div style="padding:2px 5px;border-radius:3px;font-size:9px;font-weight:bold;line-height:1.4;background:${bg};color:${col};margin-bottom:2px;overflow:hidden">${esc(vesName)}${suffix}</div>`;
     }).join('');
 
-    const dnColor = isSun ? '#DC2626' : '#374151';
+    const dnColor = (isSun || isHoliday) ? '#DC2626' : '#374151';
     return `<td width="14%" style="width:14%;vertical-align:top;padding:6px 5px;border-right:1px solid #E5E7EB;${borderTop}">
       <div style="font-size:12px;font-weight:bold;color:${dnColor};margin-bottom:2px">${dn}</div>
       ${hol ? `<div style="font-size:9px;color:#9CA3AF;line-height:1.3;margin-bottom:2px">&#127482;&#127480; ${esc(hol)}</div>` : ''}
