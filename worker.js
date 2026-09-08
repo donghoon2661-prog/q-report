@@ -953,7 +953,7 @@ function buildWeeklyHtml(shipments, now, isTest = false) {
   <!-- 푸터 -->
   <tr>
     <td style="padding:16px 32px;background:#F9FAFB;border-top:1px solid #F3F4F6;font-size:11px;color:#9CA3AF;text-align:center;line-height:1.6">
-      Intelligence Team Notice &nbsp;&middot;&nbsp; Auto-generated every Sunday 19:00 LA time &nbsp;&middot;&nbsp; Do not reply
+      Intelligence Team Notice &nbsp;&middot;&nbsp; Auto-generated every Sunday 19:00 PST / 20:00 PDT &nbsp;&middot;&nbsp; Do not reply
     </td>
   </tr>
 </table>
