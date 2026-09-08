@@ -1,3 +1,61 @@
+/* ── PS3 / PS5 고정 항로 좌표
+   출처: HMM Tracking Map 실제 항로 기반
+   PS3: PKG → SIN → VUNG TAU → YANTIAN → 대만동쪽 → 일본근해 → 태평양 → LA
+   PS5: PKG → SIN → VUNG TAU → HAI PHONG → 중국해안 → 대만해협 → 일본근해 → 태평양 → LA ── */
+const ROUTE_PS3 = [
+  [2.937, 101.301],   /* PORT KLANG */
+  [1.251, 103.727],   /* SINGAPORE */
+  [10.33, 107.07],    /* BA RIA VUNG TAU */
+  [16.0,  111.5],     /* 남중국해 */
+  [22.28, 114.17],    /* YANTIAN, SHENZHEN */
+  [24.0,  119.5],     /* 대만 동쪽 */
+  [28.0,  130.0],     /* 일본 규슈 남쪽 */
+  [35.0,  141.0],     /* 일본 근해 */
+  [40.0,  155.0],     /* 북태평양 진입 */
+  [47.0,  175.0],     /* 북태평양 중간 */
+  [47.0, -170.0],     /* 날짜변경선 통과 */
+  [43.0, -150.0],     /* 태평양 동부 */
+  [36.0, -130.0],     /* LA 접근 */
+  [33.76, -118.27],   /* LOS ANGELES */
+];
+
+const ROUTE_PS5 = [
+  [2.937, 101.301],   /* PORT KLANG */
+  [1.251, 103.727],   /* SINGAPORE */
+  [10.33, 107.07],    /* BA RIA VUNG TAU */
+  [16.5,  107.5],     /* 베트남 해안 북상 */
+  [20.93, 107.08],    /* HAI PHONG */
+  [21.5,  108.5],     /* 통킹만 */
+  [22.5,  113.5],     /* 중국 광둥 해안 */
+  [24.0,  118.0],     /* 대만 해협 */
+  [26.0,  121.5],     /* 대만 북쪽 */
+  [30.0,  130.0],     /* 일본 규슈 */
+  [35.0,  141.0],     /* 일본 근해 */
+  [40.0,  155.0],     /* 북태평양 진입 */
+  [47.0,  175.0],     /* 북태평양 중간 */
+  [47.0, -170.0],     /* 날짜변경선 통과 */
+  [43.0, -150.0],     /* 태평양 동부 */
+  [36.0, -130.0],     /* LA 접근 */
+  [33.76, -118.27],   /* LOS ANGELES */
+];
+
+/* 노선 판별: svc 우선, 없으면 names 기반 추정
+   반환: { svc: 'PS3'|'PS5'|null, inferred: true|false } */
+function detectService(s) {
+  if (s.svc === 'PS3' || s.svc === 'PS5') return { svc: s.svc, inferred: false };
+  const names = Array.isArray(s.names) ? s.names.join(',').toUpperCase() : '';
+  if (names.includes('HAI PHONG')) return { svc: 'PS5', inferred: true };
+  if (names.includes('YANTIAN'))   return { svc: 'PS3', inferred: true };
+  return { svc: null, inferred: false };
+}
+
+/* 노선별 항로 좌표 반환 (경도 래핑 포함) */
+function getServiceRoute(svc) {
+  const r = svc === 'PS3' ? ROUTE_PS3 : svc === 'PS5' ? ROUTE_PS5 : null;
+  if (!r) return null;
+  return r.map(p => p[1] < -30 ? [p[0], p[1] + 360] : p);
+}
+
 /* ===== map.js — 지도 · 좌표 · 위치 계산 ===== */
 
 /* ---------- 안전한 timestamp 파싱 ----------
@@ -95,8 +153,69 @@ function locate(s){
   const pos = [a[0] + (b[0]-a[0])*f, a[1] + (b[1]-a[1])*f];
   const atPort = f < 0.01;
   const done = i + f, total = Math.max(1, r.length - 1);
-  return { pos, i, f, names: nm, from: nm[i], to: nm[i+1],
-    phase: atPort ? `${nm[i]} — berthed` : `${nm[i]} → ${nm[i+1]}`, atPort, pct: done / total };
+
+  /* 이벤트 기반 displayPosition 오버라이드 */
+  const disp = getDisplayCoord(s); // null 또는 { coord: [lat,lng], loc: string }
+  const c = disp ? disp.coord : null;
+  const finalPos    = c ? [c[0], c[1] < -30 ? c[1] + 360 : c[1]] : pos;
+  const finalAtPort = c ? true : atPort;
+  const finalPhase  = c
+    ? `${disp.loc} — berthed`
+    : (atPort ? `${nm[i]} — berthed` : `${nm[i]} → ${nm[i+1]}`);
+
+  return { pos: finalPos, i, f, names: nm, from: nm[i], to: nm[i+1],
+    phase: finalPhase, atPort: finalAtPort, pct: done / total };
+}
+
+/* ---------- displayPosition: 이벤트 기반 지도 표시 위치 ----------
+   원본 routePoints는 변경하지 않고 표시 위치만 별도 계산.
+   events를 최신→과거 순으로 탐색하여:
+   - IGNORE  → 건너뜀
+   - ANCHOR  → PORT_COORDS[statusLoc] (없으면 routePoints fallback)
+   - TRANSIT → routePoints
+   위 세 분류 중 어느 것도 없으면 routePoints 사용 */
+
+const PORT_COORDS = {
+  "PORT KLANG,MALAYSIA": [3.0007, 101.3925],   // Westports
+  "SINGAPORE":           [1.2630, 103.7960],   // Pasir Panjang
+  "LOS ANGELES, CA":     [33.7395, -118.2620], // LA항
+};
+
+const EV_ANCHOR = new Set([
+  "Feeder Loading at POL",
+  "Feeder Arrival at T/S Port",
+  "Feeder Discharged at T/S Port",
+  "Vessel Loading at POL",
+  "Vessel Arrival at T/S Port",
+  "Vessel Berthing at T/S Port",
+  "Vessel Loading at T/S Port",
+  "Vessel Discharged at T/S Port",
+  "Vessel Arrival at POD",
+  "Vessel Berthing at POD",
+  "Vessel Discharged at POD",
+]);
+
+const EV_TRANSIT = new Set([
+  "Vessel Departure from POL",
+  "Vessel Departure from T/S Port",
+]);
+
+function getDisplayCoord(s) {
+  const events = Array.isArray(s.events) ? s.events : [];
+  for (const ev of events) {
+    const status = ev.status || "";
+    const loc    = ev.loc    || "";
+    if (EV_ANCHOR.has(status)) {
+      const coord = PORT_COORDS[loc];
+      if (coord) return { coord, loc }; // { coord: [lat,lng], loc: "PORT KLANG,MALAYSIA" 등 }
+      return null; // statusLoc이 PORT_COORDS에 없으면 routePoints fallback
+    }
+    if (EV_TRANSIT.has(status)) {
+      return null; // 출항 이벤트 → routePoints
+    }
+    // IGNORE → 계속 탐색
+  }
+  return null; // events 없거나 위치 이벤트 없음 → routePoints
 }
 
 /* ---------- MAP ---------- */
@@ -111,32 +230,99 @@ function initMap(data){
 
   const portSeen = {};
   data.shipments.forEach(s=>{
-    if(!Array.isArray(s.route) || s.route.length<2){ markers.push(null); return; }
-    const r = s.route.map(wrap);
-    L.polyline(r,{color:'#1E3A4C',weight:s.routeSynth?1:1.5,
-      dashArray:s.routeSynth?'2,8':'4,6',opacity:s.routeSynth?.7:1}).addTo(map);
-    r.forEach((p,k)=>{
-      const key = p[0].toFixed(2)+","+p[1].toFixed(2);
-      if(portSeen[key]) return; portSeen[key]=1;
-      L.circleMarker(p,{radius:4,color:cssVar('--fog','#8AA4B5'),weight:1.5,
-                        fillColor:cssVar('--ink','#07141C'),fillOpacity:1})
-        .bindTooltip(s.names[k] || ("P"+(k+1)),{className:'vsl-tip',direction:'top'}).addTo(map);
-    });
+    const det = detectService(s);
+    const svcRoute = det.svc ? getServiceRoute(det.svc) : null;
+    /* s.route 없어도 고정 항로(svcRoute)가 있으면 계속 진행 */
+    if (!svcRoute && (!Array.isArray(s.route) || s.route.length < 2)) {
+      markers.push(null); return;
+    }
+
+    if (svcRoute) {
+      /* PS3/PS5 실제 항로 표시 */
+      const lineColor = det.inferred ? '#B8860B' : '#1E3A4C';
+      L.polyline(svcRoute, {
+        color: lineColor, weight: 1.5,
+        dashArray: det.inferred ? '4,4' : null, opacity: 0.9
+      }).addTo(map);
+      /* 기항지 마커 (실제 route 좌표 기반) */
+      const r = s.route.map(wrap);
+      r.forEach((p,k)=>{
+        const key = p[0].toFixed(2)+","+p[1].toFixed(2);
+        if(portSeen[key]) return; portSeen[key]=1;
+        L.circleMarker(p,{radius:4,color:cssVar('--fog','#8AA4B5'),weight:1.5,
+                          fillColor:cssVar('--ink','#07141C'),fillOpacity:1})
+          .bindTooltip(s.names[k] || ("P"+(k+1)),{className:'vsl-tip',direction:'top'}).addTo(map);
+      });
+    } else {
+      /* UNKNOWN — 항로 라인 없음, 기항지 마커만 */
+      const r = s.route.map(wrap);
+      r.forEach((p,k)=>{
+        const key = p[0].toFixed(2)+","+p[1].toFixed(2);
+        if(portSeen[key]) return; portSeen[key]=1;
+        L.circleMarker(p,{radius:4,color:'#E53935',weight:1.5,
+                          fillColor:cssVar('--ink','#07141C'),fillOpacity:1})
+          .bindTooltip(s.names[k] || ("P"+(k+1)),{className:'vsl-tip',direction:'top'}).addTo(map);
+      });
+    }
   });
 
-  const seen={};
-  data.shipments.forEach((s,idx)=>{
+  /* 0.05도 이내 같은 위치 → 클러스터링 */
+  const CLUSTER_D = 0.05;
+  const located = data.shipments.map((s, idx) => {
     const L2 = locate(s);
-    if(!L2){ markers.push(null); return; }
-    let [lat,lng] = L2.pos;
-    const key = lat.toFixed(1)+","+lng.toFixed(1);
-    seen[key]=(seen[key]||0)+1;
-    if(seen[key]>1){ lat += 0.9*(seen[key]-1); lng += 1.4*(seen[key]-1); }
-    const m = L.circleMarker([lat,lng],{radius:8,color:cssVar('--buoy','#FF6B35'),weight:2,
-      fillColor:'#FF6B35',fillOpacity:L2.atPort?1:0.45}).addTo(map);
-    m.bindTooltip(`${s.vessel} ${s.voyage}`,{className:'vsl-tip',direction:'top',offset:[0,-6]});
-    m.on('click',()=>{ select(s,idx,false); showPO(s,idx); });
-    markers.push(m);
+    if (!L2) return null;
+    return { s, idx, L2, lat: L2.pos[0], lng: L2.pos[1] };
+  });
+
+  /* 클러스터 그룹 생성 */
+  const clusters = [];
+  const assigned = new Array(located.length).fill(false);
+  for (let i = 0; i < located.length; i++) {
+    if (!located[i] || assigned[i]) continue;
+    const grp = [i];
+    for (let j = i + 1; j < located.length; j++) {
+      if (!located[j] || assigned[j]) continue;
+      const dlat = Math.abs(located[i].lat - located[j].lat);
+      const dlng = Math.abs(located[i].lng - located[j].lng);
+      if (dlat <= CLUSTER_D && dlng <= CLUSTER_D) { grp.push(j); assigned[j] = true; }
+    }
+    assigned[i] = true;
+    clusters.push(grp);
+  }
+
+  /* 클러스터별 마커 생성 */
+  clusters.forEach(grp => {
+    const first = located[grp[0]];
+    const lat = first.lat, lng = first.lng;
+    const count = grp.length;
+    const atPort = grp.every(i => located[i].L2.atPort);
+
+    if (count === 1) {
+      /* 단독 마커 */
+      const { s, idx, L2 } = first;
+      const m = L.circleMarker([lat, lng], {
+        radius: 8, color: cssVar('--buoy','#FF6B35'), weight: 2,
+        fillColor: '#FF6B35', fillOpacity: L2.atPort ? 1 : 0.45
+      }).addTo(map);
+      m.bindTooltip(`${s.vessel} ${s.voyage}`, {className:'vsl-tip', direction:'top', offset:[0,-6]});
+      m.on('click', () => { select(s, idx, false); showPO(s, idx); });
+      markers.push(m);
+    } else {
+      /* 클러스터 마커 — 숫자 표시 */
+      const vessels = grp.map(i => `${located[i].s.vessel} ${located[i].s.voyage}`).join('<br>');
+      const icon = L.divIcon({
+        className: '',
+        html: `<div style="width:28px;height:28px;border-radius:50%;background:#FF6B35;border:2px solid #FF6B35;opacity:${atPort?1:0.7};display:flex;align-items:center;justify-content:center;font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:600;color:#07141C;line-height:1">${count}</div>`,
+        iconSize: [28, 28], iconAnchor: [14, 14]
+      });
+      const m = L.marker([lat, lng], { icon }).addTo(map);
+      m.bindTooltip(vessels, {className:'vsl-tip', direction:'top', offset:[0,-14]});
+      m.on('click', () => {
+        const { s, idx } = located[grp[0]];
+        select(s, idx, false); showPO(s, idx);
+      });
+      markers.push(m);
+    }
   });
   if(markers.filter(Boolean).length) map.fitBounds(L.featureGroup(markers.filter(Boolean)).getBounds().pad(0.35));
 }
