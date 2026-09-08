@@ -463,6 +463,15 @@ function schTableHTML(s) {
   </div>`;
 }
 
+function svcDisplay(s) {
+  const svc = (s.svc || '').trim().toUpperCase();
+  if (svc === 'PS3' || svc === 'PS5') return { cls: '', text: svc };
+  const names = Array.isArray(s.names) ? s.names.join(',').toUpperCase() : '';
+  if (names.includes('HAI PHONG')) return { cls: 'svc-inferred', text: 'PS5' };
+  if (names.includes('YANTIAN'))   return { cls: 'svc-inferred', text: 'PS3' };
+  return { cls: 'svc-unknown', text: 'UNKNOWN' };
+}
+
 function cardHTML(s){
   const L2 = locate(s);
   const pre = s.preShipment ? `<span class="dtag pre">NOT SHIPPED</span>` : "";
@@ -499,7 +508,7 @@ function cardHTML(s){
         <div class="f"><label>SIN ETA</label><span>${fmtDT(s.tsArr)}</span></div>
         <div class="f"><label>SIN ETD</label><span>${fmtDT(s.tsDep)}</span></div>
         <div class="f"><label>LA ETB</label><span>${fmtDT(s.eta)}</span></div>
-        <div class="f"><label>SERVICE</label><span>${s.svc}</span></div>
+        <div class="f"><label>SERVICE</label><span class="${svcDisplay(s).cls}">${svcDisplay(s).text}</span></div>
         <div class="f"><label>FEEDER</label><span>${s.feeder||"— (direct)"}</span></div>
         <div class="f"><label>CNTR</label><span>${s.cntrQty||"—"}</span></div>
         <div class="f"><label>PO / LOT</label><span>${po||"—"}</span></div>
@@ -694,8 +703,9 @@ function setView(v){
   document.getElementById('history').style.display  = v==='history'?'block':'none';
   document.getElementById('system').style.display   = v==='system'?'block':'none';
   document.getElementById('beta').style.display     = v==='beta'?'block':'none';
+  document.getElementById('calendar').style.display = v==='calendar'?'block':'none';
   const laneEl = document.querySelector('.lane');
-  if(laneEl) laneEl.style.display = (v==='history'||v==='system'||v==='beta') ? 'none' : 'flex';
+  if(laneEl) laneEl.style.display = (v==='history'||v==='system'||v==='beta'||v==='calendar') ? 'none' : 'flex';
   if(v==='map'&&map) {
     setTimeout(()=>map.invalidateSize(),60);
     /* MAP 첫 진입 시 ETA 가장 빠른 vessel 자동 표시 */
@@ -716,6 +726,7 @@ function setView(v){
   if(v==='history') renderHistoryMonths().catch(e=>console.error("History",e));
   if(v==='system') renderSystemTab();
   if(v==='beta') renderBetaTab();
+  if(v==='calendar') renderCalendarTab();
 }
 function show(v){
   if(v==="ship" && ACCESS_ROLE==="qc") return;
@@ -776,6 +787,10 @@ function applyRoleRestrictions(){
   if(sysTab) sysTab.style.display = isAdmin ? '' : 'none';
   const betaTab = document.getElementById('tab-beta');
   if(betaTab) betaTab.style.display = isAdmin ? '' : 'none';
+  const mobBetaTab = document.getElementById('tab-mob-beta');
+  const mobSysTab  = document.getElementById('tab-mob-system');
+  if(mobBetaTab) mobBetaTab.style.display = isAdmin ? '' : 'none';
+  if(mobSysTab)  mobSysTab.style.display  = isAdmin ? '' : 'none';
   if(mobileSysBtn) mobileSysBtn.hidden = !isAdmin;
   if(backBtn)    backBtn.style.display    = restricted ? 'none' : '';
   if(qbackBtn)   qbackBtn.style.display   = restricted ? 'none' : '';
@@ -870,6 +885,7 @@ document.getElementById("force-reload-btn").addEventListener("click", function()
 });
 
 document.addEventListener("DOMContentLoaded",()=>{
+  document.title = `Kossan OQC-DEV ${APP_VERSION}`;
   initTheme();
   /* 모바일: #side 패널 터치 스크롤이 Leaflet 지도로 전파되지 않도록 차단 */
   const sideEl = document.getElementById("side");
