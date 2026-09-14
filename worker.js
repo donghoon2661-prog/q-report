@@ -963,13 +963,13 @@ function buildWeeklyHtml(shipments, now, isTest = false) {
 }
 
 
-async function sendWeeklyEmail(env, isTest = false, bccOnly = false, nowOverride = null) {
+async function sendWeeklyEmail(env, isTest = false, bccOnly = false) {
   if (!env.RESEND_KEY || !env.ALERT_TO_WEEKLY) return { skipped: "RESEND_KEY 또는 ALERT_TO_WEEKLY 미설정" };
 
   const saved = await getSaved(env);
   if (!saved || !Array.isArray(saved.shipments)) return { skipped: "shipments 없음" };
 
-  const now = nowOverride || new Date();
+  const now = new Date();
   const html = buildWeeklyHtml(saved.shipments, now, isTest);
 
   const la = toLA(now);
@@ -1883,12 +1883,9 @@ if (!one) return json({ error: "Failed to fetch booking after 10 session attempt
     if (url.pathname === "/weekly-test") {
       if (!auth(req, env)) return json({ error: "Authentication failed" }, 401);
       /* ?real=1 → TEST 배너 없이, BCC 주소를 TO로 발송 (테스트용) */
-      /* ?date=YYYY-MM-DDTHH:MM:SSZ → 특정 시각 기준으로 주간 범위 계산 */
       const isTest = url.searchParams.get("real") !== "1";
       const bccOnly = url.searchParams.get("real") === "1";
-      const dateParam = url.searchParams.get("date");
-      const nowOverride = dateParam ? new Date(dateParam) : new Date();
-      const r = await sendWeeklyEmail(env, isTest, bccOnly, nowOverride);
+      const r = await sendWeeklyEmail(env, isTest, bccOnly);
       return json({ to: bccOnly ? env.ALERT_BCC_WEEKLY : (env.ALERT_TO_WEEKLY || env.ALERT_TO || null), testBanner: isTest, ...r });
     }
     if (url.pathname === "/delaylog") {
