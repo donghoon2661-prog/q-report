@@ -722,8 +722,10 @@ function laDateStr(date) {
 function weekRange(now) {
   const la = toLA(now);
   const dow = la.getUTCDay(); // 0=일
+  // LA 기준 일요일(Cron 실행 시점)이면 다음 주 일요일을 기준으로 계산
+  const offset = dow === 0 ? 7 : 0;
   // 이번 주 일요일 00:00 LA
-  const thisSun = new Date(Date.UTC(la.getUTCFullYear(), la.getUTCMonth(), la.getUTCDate() - dow));
+  const thisSun = new Date(Date.UTC(la.getUTCFullYear(), la.getUTCMonth(), la.getUTCDate() - dow + offset));
   // 이번 주 토요일
   const thisSat = new Date(thisSun.getTime() + 6 * 86400000);
   // 다음 주 월요일
