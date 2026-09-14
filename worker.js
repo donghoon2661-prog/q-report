@@ -962,7 +962,7 @@ function buildWeeklyHtml(shipments, now) {
 }
 
 
-async function sendWeeklyEmail(env, isTest = false, bccOnly = false) {
+async function sendWeeklyEmail(env) {
   if (!env.RESEND_KEY || !env.ALERT_TO_WEEKLY) return { skipped: "RESEND_KEY 또는 ALERT_TO_WEEKLY 미설정" };
 
   const saved = await getSaved(env);
@@ -974,15 +974,6 @@ async function sendWeeklyEmail(env, isTest = false, bccOnly = false) {
   const la = toLA(now);
   const mon = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][la.getUTCMonth()];
   const subject = `Weekly Shipment Schedule — ${mon} ${la.getUTCDate()}, ${la.getUTCFullYear()}`;
-
-  if (bccOnly) {
-    /* ?real=1 테스트: BCC 주소를 TO로만 발송 */
-    return await sendMail(env, subject, html, {
-      to:  env.ALERT_BCC_WEEKLY || env.ALERT_TO_WEEKLY,
-      cc:  null,
-      bcc: null
-    });
-  }
 
   return await sendMail(env, subject, html, {
     to:  env.ALERT_TO_WEEKLY,
@@ -1881,11 +1872,8 @@ if (!one) return json({ error: "Failed to fetch booking after 10 session attempt
     }
     if (url.pathname === "/weekly-test") {
       if (!auth(req, env)) return json({ error: "Authentication failed" }, 401);
-      /* ?real=1 → TEST 배너 없이, BCC 주소를 TO로 발송 (테스트용) */
-      const isTest = url.searchParams.get("real") !== "1";
-      const bccOnly = url.searchParams.get("real") === "1";
-      const r = await sendWeeklyEmail(env, isTest, bccOnly);
-      return json({ to: bccOnly ? env.ALERT_BCC_WEEKLY : (env.ALERT_TO_WEEKLY || env.ALERT_TO || null), testBanner: isTest, ...r });
+      const r = await sendWeeklyEmail(env);
+      return json({ to: env.ALERT_TO_WEEKLY || null, ...r });
     }
     if (url.pathname === "/delaylog") {
       const bkg = url.searchParams.get("bkg");
