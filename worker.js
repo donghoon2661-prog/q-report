@@ -702,10 +702,11 @@ function diffSchedule(prev, next) {
 
 /* LA 시간 오프셋 (PDT: -7, PST: -8) */
 function laOffset(date) {
-  const jan = new Date(date.getFullYear(), 0, 1);
-  const jul = new Date(date.getFullYear(), 6, 1);
-  const stdOff = Math.max(jan.getTimezoneOffset(), jul.getTimezoneOffset());
-  return date.getTimezoneOffset() < stdOff ? -7 : -8;
+  /* DST: 3월 둘째 일요일 ~ 11월 첫째 일요일 = PDT(-7), 나머지 = PST(-8) */
+  const y = date.getUTCFullYear();
+  const dstStart = new Date(Date.UTC(y, 2, 8 + (7 - new Date(Date.UTC(y, 2, 8)).getUTCDay()) % 7, 10)); // 3월 둘째 일 02:00 PST = 10:00 UTC
+  const dstEnd   = new Date(Date.UTC(y, 10, 1 + (7 - new Date(Date.UTC(y, 10, 1)).getUTCDay()) % 7, 9));  // 11월 첫째 일 02:00 PDT = 09:00 UTC
+  return date >= dstStart && date < dstEnd ? -7 : -8;
 }
 
 function toLA(date) {
