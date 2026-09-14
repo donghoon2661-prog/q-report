@@ -1872,8 +1872,10 @@ if (!one) return json({ error: "Failed to fetch booking after 10 session attempt
     }
     if (url.pathname === "/weekly-test") {
       if (!auth(req, env)) return json({ error: "Authentication failed" }, 401);
-      const r = await sendWeeklyEmail(env, true);
-      return json({ to: env.ALERT_TO_WEEKLY || env.ALERT_TO || null, ...r });
+      /* ?real=1 → TEST 배너 없이 실제 발송과 동일한 형태로 전송 */
+      const isTest = url.searchParams.get("real") !== "1";
+      const r = await sendWeeklyEmail(env, isTest);
+      return json({ to: env.ALERT_TO_WEEKLY || env.ALERT_TO || null, testBanner: isTest, ...r });
     }
     if (url.pathname === "/delaylog") {
       const bkg = url.searchParams.get("bkg");
