@@ -962,7 +962,7 @@ function buildWeeklyHtml(shipments, now) {
 }
 
 
-async function sendWeeklyEmail(env) {
+async function sendWeeklyEmail(env, bccOnly = false) {
   if (!env.RESEND_KEY || !env.ALERT_TO_WEEKLY) return { skipped: "RESEND_KEY 또는 ALERT_TO_WEEKLY 미설정" };
 
   const saved = await getSaved(env);
@@ -975,6 +975,13 @@ async function sendWeeklyEmail(env) {
   const mon = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][la.getUTCMonth()];
   const subject = `Weekly Shipment Schedule — ${mon} ${la.getUTCDate()}, ${la.getUTCFullYear()}`;
 
+  if (bccOnly) {
+    return await sendMail(env, subject, html, {
+      to:  env.ALERT_BCC_WEEKLY || env.ALERT_TO_WEEKLY,
+      cc:  null,
+      bcc: null
+    });
+  }
   return await sendMail(env, subject, html, {
     to:  env.ALERT_TO_WEEKLY,
     cc:  env.ALERT_CC_WEEKLY  || null,
@@ -1872,8 +1879,8 @@ if (!one) return json({ error: "Failed to fetch booking after 10 session attempt
     }
     if (url.pathname === "/weekly-test") {
       if (!auth(req, env)) return json({ error: "Authentication failed" }, 401);
-      const r = await sendWeeklyEmail(env);
-      return json({ to: env.ALERT_TO_WEEKLY || null, ...r });
+      const r = await sendWeeklyEmail(env, true);
+      return json({ to: env.ALERT_BCC_WEEKLY || null, ...r });
     }
     if (url.pathname === "/delaylog") {
       const bkg = url.searchParams.get("bkg");
