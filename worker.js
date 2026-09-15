@@ -962,7 +962,7 @@ function buildWeeklyHtml(shipments, now) {
 }
 
 
-async function sendWeeklyEmail(env) {
+async function sendWeeklyEmail(env, mode = null) {
   if (!env.RESEND_KEY || !env.ALERT_TO_WEEKLY) return { skipped: "RESEND_KEY 또는 ALERT_TO_WEEKLY 미설정" };
 
   const saved = await getSaved(env);
@@ -975,6 +975,23 @@ async function sendWeeklyEmail(env) {
   const mon = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][la.getUTCMonth()];
   const subject = `Weekly Shipment Schedule — ${mon} ${la.getUTCDate()}, ${la.getUTCFullYear()}`;
 
+  if (mode === "1") {
+    /* TO: ALERT_TO, CC: ALERT_CC_WEEKLY, BCC: ALERT_BCC_WEEKLY */
+    return await sendMail(env, subject, html, {
+      to:  env.ALERT_TO,
+      cc:  env.ALERT_CC_WEEKLY  || null,
+      bcc: env.ALERT_BCC_WEEKLY || null
+    });
+  }
+  if (mode === "2") {
+    /* TO: ALERT_CC_WEEKLY, CC: ALERT_TO, BCC: ALERT_BCC_WEEKLY */
+    return await sendMail(env, subject, html, {
+      to:  env.ALERT_CC_WEEKLY,
+      cc:  env.ALERT_TO        || null,
+      bcc: env.ALERT_BCC_WEEKLY || null
+    });
+  }
+  /* 기본: TO/CC/BCC 정상 발송 */
   return await sendMail(env, subject, html, {
     to:  env.ALERT_TO_WEEKLY,
     cc:  env.ALERT_CC_WEEKLY  || null,
@@ -1872,8 +1889,9 @@ if (!one) return json({ error: "Failed to fetch booking after 10 session attempt
     }
     if (url.pathname === "/weekly-test") {
       if (!auth(req, env)) return json({ error: "Authentication failed" }, 401);
-      const r = await sendWeeklyEmail(env);
-      return json({ to: env.ALERT_TO_WEEKLY || null, ...r });
+      const mode = url.searchParams.get("mode");
+      const r = await sendWeeklyEmail(env, mode);
+      return json({ mode: mode || "default", ...r });
     }
     if (url.pathname === "/delaylog") {
       const bkg = url.searchParams.get("bkg");
