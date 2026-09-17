@@ -648,17 +648,19 @@ function computeMaritimeRoute(graph, rawRoute) {
 }
 
 /* /collect-marnet 전용: marnet.geojson → compact graph → KV 저장 */
-async function collectMarnet(env) {
-  const MARNET_URL =
-    "https://www.hmm21.com/js/e-service/general/trackNTrace/marnet_densified.geojson?v=1.02";
-  const r = await fetch(MARNET_URL, {
-    headers: {
-      "User-Agent": UA,
-      "Referer": "https://www.hmm21.com/e-service/general/trackNTrace/trackMap.do"
-    }
-  });
-  if (!r.ok) throw new Error("marnet fetch failed: " + r.status);
-  const geojson = await r.json();
+async function collectMarnet(env, geojson = null) {
+  if (!geojson) {
+    const MARNET_URL =
+      "https://www.hmm21.com/js/e-service/general/trackNTrace/marnet_densified.geojson?v=1.02";
+    const r = await fetch(MARNET_URL, {
+      headers: {
+        "User-Agent": UA,
+        "Referer": "https://www.hmm21.com/e-service/general/trackNTrace/trackMap.do"
+      }
+    });
+    if (!r.ok) throw new Error("marnet fetch failed: " + r.status);
+    geojson = await r.json();
+  }
 
   const nodeIndex = {}, nodes = [], edges = [];
   for (const feat of geojson.features) {
@@ -2235,6 +2237,20 @@ if (!one) return json({ error: "Failed to fetch booking after 10 session attempt
       try { out.lastrun = JSON.parse((await env.OQC.get("lastrun")) || "null"); } catch (_) {}
       try { out.sessionLog = await env.OQC.get("sessionLog"); } catch (_) {}
       return json(out);
+    }
+
+    /* /upload-marnet: 클라이언트가 직접 geojson을 POST → compact graph 변환 → KV 저장
+       Worker IP 차단으로 /collect-marnet이 안 될 때 사용 */
+    if (url.pathname === "/upload-marnet" && req.method === "POST") {
+      if (!auth(req, env)) return json({ error: "Authentication failed" }, 401);
+      try {
+        const geojson = await req.json();
+        if (!geojson.features) return json({ error: "invalid geojson" }, 400);
+        const result = await collectMarnet(env, geojson);
+        return json({ ok: true, ...result });
+      } catch (e) {
+        return json({ error: String(e.message || e) }, 502);
+      }
     }
 
     if (url.pathname === "/collect-marnet" && req.method === "POST") {
