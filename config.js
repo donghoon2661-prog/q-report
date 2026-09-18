@@ -1,5 +1,5 @@
 /* ===== config.js — 상수 · 유틸 · 날짜 포맷 ===== */
-const APP_VERSION = 'v1.1.0';
+const APP_VERSION = 'v1.1.1';
 const QUALITY_URL = "quality.html";
 const API_ROOT = "https://kossan-oqc.dhoqc.workers.dev";
 const API = API_ROOT + "/data";
