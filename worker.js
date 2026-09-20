@@ -1005,9 +1005,11 @@ const US_HOLIDAYS_WEEKLY = {
 
 /* ETA 날짜 추출 (destEta 우선, 없으면 eta) */
 function getEtaDate(s) {
-  const raw = s.destEta || s.eta;
-  if (!raw) return null;
-  return new Date(raw.length === 10 ? raw + "T00:00:00Z" : raw);
+  /* 사이트 calendar.js calendarEta()와 동일 규칙: eta와 destEta 중 이른 날짜 */
+  const a = typeof s.eta === 'string' && /^\d{4}-\d{2}-\d{2}/.test(s.eta) ? s.eta.slice(0, 10) : null;
+  const b = typeof s.destEta === 'string' && /^\d{4}-\d{2}-\d{2}/.test(s.destEta) ? s.destEta.slice(0, 10) : null;
+  const d = (a && b) ? (a < b ? a : b) : (a || b);
+  return d ? new Date(d + "T00:00:00Z") : null;
 }
 
 /* 날짜가 범위 안에 있는지 */
@@ -1021,8 +1023,8 @@ const DOW_SHORT = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
 const MON_SHORT = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 
 function fmtEta(d) {
-  const la = toLA(d);
-  return `${MON_SHORT[la.getUTCMonth()]} ${la.getUTCDate()} (${DOW_SHORT[la.getUTCDay()]})`;
+  /* d는 이미 날짜 단위(00:00Z) — 시간대 변환하면 하루 밀림 */
+  return `${MON_SHORT[d.getUTCMonth()]} ${d.getUTCDate()} (${DOW_SHORT[d.getUTCDay()]})`;
 }
 
 /* HTML 생성 */
@@ -2381,7 +2383,7 @@ if (!one) return json({ error: "Failed to fetch booking after 10 session attempt
   async scheduled(evt, env, ctx) {
     const cron = evt.cron || "";
     const cronMin = parseInt((cron.match(/^\s*(\d+)/) || [])[1] ?? "99", 10);
-    const isWeekly = cronMin === 0 && /0\s+3\s+\*\s+\*\s+1/.test(cron);
+    const isWeekly = cronMin === 0 && /0\s+3\s+\*\s+\*\s+2/.test(cron);
     const isMaps = !isWeekly && cronMin === 10;
     const isStaleRetry = !isWeekly && (cronMin === 15 || cronMin === 45);
     const trigger = isWeekly ? "cron-weekly" : isMaps ? "cron-maps" : isStaleRetry ? "cron-stale" : "cron";
