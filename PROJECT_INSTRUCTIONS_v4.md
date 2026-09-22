@@ -322,7 +322,7 @@ curl -s "https://api.github.com/repos/donghoon2661-prog/q-report/contents/{file}
 
 > Kossan OQC 프로젝트 v4. 구조: index.html/style.css/config.js/app.js/system.js/history.js/trend.js/map.js/po.js/quality.js(GitHub Pages) + worker.js(Cloudflare Worker, Smart Placement 활성화).
 > 본사이트: https://kossan-oqc.dhoqc.workers.dev / DEV: https://kossan-oqc-dev.dhoqc.workers.dev
-> 상세 지침은 PROJECT_INSTRUCTIONS_v4.md 참조.
+> 상세 지침은 PROJECT_INSTRUCTIONS_v4.md 참조. 최근 작업 이력은 18장(작업 이력/세션 로그) 참조.
 > [여기에 이번에 하고 싶은 작업 설명]
 
 ---
@@ -334,4 +334,38 @@ curl -s "https://api.github.com/repos/donghoon2661-prog/q-report/contents/{file}
 - **LIST**: 상단 국가 버튼(USA/Korea/Australia), 기본값 USA
 - **HISTORY**: 국가별 이력 분리
 - **수정 필요 파일**: `app.js`, `index.html`, `style.css`, `worker.js`
+
+---
+
+## 18. 작업 이력 (세션 로그)
+
+다른 PC에서 새 대화창을 열었을 때 맥락을 빠르게 잡기 위한 기록. 세션마다 아래에 이어서 추가할 것.
+
+### 2026-09-22 — 전체 파일 1회 순회 검수 (Claude Code)
+
+quality.js부터 이 문서까지 전체 파일을 한 번씩 다 검수함. 발견·수정한 버그 9건(커밋 해시는 MAIN 기준, DEV도 동일 내용으로 별도 커밋):
+
+1. `quality.js` — 언어 토글 차트 오류 등 3건 (`fc7875d`)
+2. `map.js` — 리스트 선택 시 엉뚱한 배로 이동하는 markers 인덱스 버그 (`80996e9`)
+3. `app.js` — gapBox() 지연 색상 기준 통일, ROUTE 합성 항로점(Pn) 표시 제외 (`ca16099`)
+4. `worker.js` — weekly 메일 cron 요일 판정 정규식 오류 2→1 (`f144151`)
+5. `history.js` — "PKG ETD" 열이 실제값 대신 계획값을 중복 표시 (`689934b`)
+6. `worker.js` — `pickSlice()` 죽은 코드 제거 (부킹 9개 이상이면 예산 분산이 실제로 안 됐음). `newBudget` 40→200, `MAX_PER_RUN` 8→30 (`64d1d37`)
+7. `system.js` — `sysRetry()`가 flat span 인덱스로 DOM 갱신 → RETRY 성공 시 vessel/voyage가 시각으로 덮어써지고 REFRESH 버튼이 사라짐. `data-role` 속성으로 수정 (`d34f420`)
+8. `worker.js` — **가장 위험했던 버그**: `/restore`가 GitHub raw URL을 MAIN 저장소로 하드코딩해서, DEV Worker에서 RESTORE 쓰면 MAIN 운영 데이터가 DEV KV에 덮어써지던 크로스 오염 버그. `env.GITHUB_REPO`(wrangler.toml [vars])로 분리 (`287b8a5`)
+9. `holidays.js` / `worker.js` — 같은 미국 공휴일을 서로 다른 날짜(대체공휴일 vs 실제)로 표시하던 불일치. "실제 날짜로 통일"로 결정, holidays.js 4건 수정 (`8f8ca6c`)
+10. `style.css` — 8/26 rollback 커밋 흔적으로 셀렉터 없이 떠 있던 CSS 두 줄 때문에 `.sys-retry{...}` 전체가 무효 처리 → RETRY 버튼이 브라우저 기본 스타일로 렌더링. 실제 배포 사이트에서 컴퓨티드 스타일 찍어서 검증 후 수정 (`2a77a20`)
+11. `index.html` — 위 수정들에 맞춰 `?v=` 캐시 버스팅 버전을 올림(안 올리면 이미 방문한 사용자 브라우저 캐시에 구버전이 남을 수 있었음) (`4c3e51d`, `2a77a20`)
+
+**사용자가 의도적으로 보류(미수정)한 것들** — 다시 꺼내기 전엔 언급 불필요:
+- app.js: `schTableHTML()`의 Loading Port Arrival 셀 중복 표시, `_caller` 죽은 디버그 변수(633번 줄), `ROLE_PW` 평문 하드코딩(내부 툴이라 허용)
+- po.js: `parsePO()`의 "부킹 번호만 한 줄" 엣지케이스 — 실제 UI 사용법상 발생 불가로 판단
+- calendar-public.html: `CAL_PALETTE` 20색(calendar.js는 30색), `calendarEta()` 날짜 검증 누락 — calendar.js와 드리프트, 안 고침
+- manifest.json: DEV의 `start_url`/`scope`가 MAIN 경로(`/q-report/`)로 잘못됨 (PWA 설치 시 MAIN이 열림) — 사용자가 "냅두라"고 함
+
+**정리 후보(버그 아님, 미조치)**: 루트 `COA_FNG-0310-06-16_to_07-11.json`(MAIN은 미사용/DEV는 0바이트), DEV의 `test-runner.html`, `devlog.js`(어느 index.html에도 로드 안 되는 죽은 파일)
+
+**남은 것**: worker.js의 weekly 리포트 본문 HTML·일부 세부 엔드포인트는 구조만 확인, 라인 단위 정밀검토는 안 함. 이 문서 5장의 엔드포인트 목록도 실제보다 적음(문서 업데이트 안 함).
+
+**다음에 할 일**: 이번 라운드는 끝났으니, 이제부터는 새로 추가/수정되는 코드 위주로 리뷰하면 됨.
 
