@@ -2469,7 +2469,7 @@ if (!one) return json({ error: "Failed to fetch booking after 10 session attempt
   async scheduled(evt, env, ctx) {
     const cron = evt.cron || "";
     const cronMin = parseInt((cron.match(/^\s*(\d+)/) || [])[1] ?? "99", 10);
-    const isWeekly = cronMin === 0 && /0\s+3\s+\*\s+\*\s+2/.test(cron);
+    const isWeekly = cronMin === 0 && /0\s+3\s+\*\s+\*\s+1/.test(cron);
     const isMaps = !isWeekly && cronMin === 10;
     const isStaleRetry = !isWeekly && (cronMin === 15 || cronMin === 45);
     const trigger = isWeekly ? "cron-weekly" : isMaps ? "cron-maps" : isStaleRetry ? "cron-stale" : "cron";
