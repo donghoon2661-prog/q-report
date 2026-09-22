@@ -298,7 +298,7 @@ function initMap(data){
     const portRoute = (Array.isArray(s.rawRoute) && s.rawRoute.length >= 2) ? s.rawRoute : s.route;
     const svcRoute = hasDense ? null : (det.svc ? getServiceRoute(det.svc) : null);
     if (!hasDense && !svcRoute && (!Array.isArray(s.route) || s.route.length < 2)) {
-      markers.push(null); return;
+      return;
     }
 
     if (hasDense) {
@@ -367,7 +367,10 @@ function initMap(data){
     clusters.push(grp);
   }
 
-  /* 클러스터별 마커 생성 */
+  /* 클러스터별 마커 생성
+     markers[i] = i번째 shipment의 마커 (app.js select()가 목록 인덱스로 찾음)
+     클러스터에 묶인 shipment들은 모두 같은 클러스터 마커를 가리킨다 */
+  markers = new Array(data.shipments.length).fill(null);
   clusters.forEach(grp => {
     const first = located[grp[0]];
     const lat = first.lat, lng = first.lng;
@@ -383,7 +386,7 @@ function initMap(data){
       }).addTo(map);
       m.bindTooltip(`${s.vessel} ${s.voyage}`, {className:'vsl-tip', direction:'top', offset:[0,-6]});
       m.on('click', () => { select(s, idx, false); showPO(s, idx); });
-      markers.push(m);
+      markers[idx] = m;
     } else {
       /* 클러스터 마커 — 숫자 표시 */
       const vessels = grp.map(i => `${located[i].s.vessel} ${located[i].s.voyage}`).join('<br>');
@@ -398,8 +401,9 @@ function initMap(data){
         const { s, idx } = located[grp[0]];
         select(s, idx, false); showPO(s, idx);
       });
-      markers.push(m);
+      grp.forEach(i => { markers[located[i].idx] = m; });
     }
   });
-  if(markers.filter(Boolean).length) map.fitBounds(L.featureGroup(markers.filter(Boolean)).getBounds().pad(0.35));
+  const uniq = [...new Set(markers.filter(Boolean))];
+  if(uniq.length) map.fitBounds(L.featureGroup(uniq).getBounds().pad(0.35));
 }
