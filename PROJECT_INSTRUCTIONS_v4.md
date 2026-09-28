@@ -348,7 +348,7 @@ quality.js부터 이 문서까지 전체 파일을 한 번씩 다 검수함. 발
 1. `quality.js` — 언어 토글 차트 오류 등 3건 (`fc7875d`)
 2. `map.js` — 리스트 선택 시 엉뚱한 배로 이동하는 markers 인덱스 버그 (`80996e9`)
 3. `app.js` — gapBox() 지연 색상 기준 통일, ROUTE 합성 항로점(Pn) 표시 제외 (`ca16099`)
-4. `worker.js` — weekly 메일 cron 요일 판정 정규식 오류 2→1 (`f144151`)
+4. `worker.js` — weekly 메일 cron 요일 판정 정규식 2→1 (`f144151`) — **⚠️ 잘못된 수정이었음(2026-09-28 정정)**. Cloudflare 크론 요일 번호는 1=일요일, 2=월요일이라 원래 `0 3 * * 2`(UTC 월 03:00 = LA 일 19~20시 = 한국 월 12:00)가 맞았다. 이 수정 때문에 09-28 위클리 메일이 발송되지 않음. 요일 숫자와 무관하게 "03:00 정각 + 요일 지정" 크론이면 weekly로 판정하도록 변경. **Cloudflare 크론은 대시보드 기준, 요일 번호 주의.**
 5. `history.js` — "PKG ETD" 열이 실제값 대신 계획값을 중복 표시 (`689934b`)
 6. `worker.js` — `pickSlice()` 죽은 코드 제거 (부킹 9개 이상이면 예산 분산이 실제로 안 됐음). `newBudget` 40→200, `MAX_PER_RUN` 8→30 (`64d1d37`)
 7. `system.js` — `sysRetry()`가 flat span 인덱스로 DOM 갱신 → RETRY 성공 시 vessel/voyage가 시각으로 덮어써지고 REFRESH 버튼이 사라짐. `data-role` 속성으로 수정 (`d34f420`)
