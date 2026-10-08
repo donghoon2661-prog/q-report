@@ -400,6 +400,20 @@ async function sysMapRefreshOne(bkg, btn){
 
 /* ---------- Changelog ---------- */
 const CHANGELOG = [
+  { v:"1.3", date:"2026-10-08", notes:[
+    "호주(포트클랑 → 시드니) 노선 추가 — 국가 필터(ALL / USA / Australia), 호주 표, 지도 경로(멜버른 중간 기항 포함), 달력 칩, 상단 요약 줄",
+    "Traqo 연동으로 호주 선적의 일정·컨테이너 이벤트(Gate in, Gate out, Return)를 12시간마다 자동 갱신, 관리자용 ADD / EDIT 창 추가",
+    "표 칸 정리 — GATE IN / ETD · PKG(IN·ETD 두 줄)와 GATE OUT / RETURN, 호주 선적 단계 배지(BOOKED ~ RETURNED)",
+    "호주 선박 마커: 출항 전은 속 빈 원, 출항 후는 속 찬 원, 지도 범례·안내문 정리",
+    "AIS 수신 시간을 90초에서 13분으로 늘려 선박 정적 정보(목적지·ETA) 수신 가능성 향상"
+  ]},
+  { v:"1.2", date:"2026-09-28", notes:[
+    "LA 하역 이후 반출(Gate Out)·공컨 반납(Empty Return)까지 추적 — 표에 LA GATE OUT / EMPTY RETURN 열 추가, 단계 배지 DISCHARGED → GATED OUT → RETURNED",
+    "상세 카드에 LA DELIVERY 타임라인(하역 → 반출 → 반납) 추가 — 부킹의 첫 번째 컨테이너 기준",
+    "진행표: LA 뒤에 LA DELIVERY 구간 추가, 출항 전 부킹은 BOOKED 상자로 분리, 같은 선박은 ×N으로 묶음",
+    "진행표 선박 이름이 겹쳐 보이던 문제 수정",
+    "도착지 접안 부킹의 진행률이 75%로 멈추던 문제, 접안 후 ETB가 scheduled로 뜨던 문제 수정"
+  ]},
   { v:"1.1", date:"2026-08-08", notes:[
     "admin 계정 추가 — 업데이트 로그(변경 이력)는 이제 admin 계정에서만 볼 수 있음 (kossan 포함 다른 계정에서는 안 보임)",
     "eta / qc 계정으로 로그인하면 메뉴(01/02 선택 화면) 없이 바로 해당 화면으로 진입",
