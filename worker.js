@@ -2955,6 +2955,22 @@ export default {
     const url = new URL(req.url);
     if (req.method === "OPTIONS") return new Response(null, { headers: CORS });
 
+  /* ── COA 원문 PDF (QUALITY 백데이터 창) ───────────────────────────
+     GET /coa-pdf?sheet=<data/coa 파일 이름(확장자 제외)> → KV "coa:file:<sheet>" 의 PDF 만 내려준다.
+     PDF 는 tools/coa 처리기가 미리 올린다. pCloud 폴더 링크(인보이스 등 다른 파일이 같이 있음)는 쓰지 않고,
+     pCloud 다운로드 주소는 요청 IP 에 묶여(410) 워커에서 그때그때 받을 수 없다. KV 백업(/backup) 목록에는 넣지 않는다. */
+  if (url.pathname === '/coa-pdf' && req.method === 'GET') {
+    const sheet = String(url.searchParams.get('sheet') || '');
+    if (!/^[A-Za-z0-9_\-]{3,80}$/.test(sheet)) return json({ error: "bad sheet" }, 400);
+    const pdf = await env.OQC.get("coa:file:" + sheet, "arrayBuffer");
+    if (!pdf) return json({ error: "COA PDF not registered" }, 404);
+    return new Response(pdf, { status: 200, headers: {
+      ...CORS, "Content-Type": "application/pdf",
+      "Content-Disposition": 'inline; filename="' + sheet + '.pdf"',
+      "Cache-Control": "private, max-age=3600",
+      "X-Content-Type-Options": "nosniff" } });
+  }
+
   // ── AIS 조회(읽기 전용) / 수동 수집(인증) ───────────────────────────
   if (url.pathname === '/ais') {
     const latest = await readJsonKV(env, "ais:latest", null);
