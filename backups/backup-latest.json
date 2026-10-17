@@ -1,202 +1,26 @@
 {
- "backupAt": "2026-10-16T18:30:12.552Z",
+ "backupAt": "2026-10-17T17:36:12.278Z",
  "kv": {
   "shipments": {
-   "updated": "2026-10-16 18:01Z",
+   "updated": "2026-10-17 15:00Z",
    "source": "hmm21.com Track & Trace",
-   "tracked": 9,
-   "requested": 9,
-   "ok": 9,
+   "tracked": 8,
+   "requested": 8,
+   "ok": 8,
    "carried": [],
    "missing": [],
    "mapOk": 0,
    "rollovers": 0,
    "alerts": 2,
-   "changed": [],
+   "changed": [
+    "KULM78736300"
+   ],
    "sessionsUsed": 1,
    "budgetUsed": 9,
    "partial": false,
    "cursor": 0,
    "stale": false,
    "shipments": [
-    {
-     "booking": "KULM64432100",
-     "vessel": "ONE HANNOVER",
-     "voyage": "0102E",
-     "svc": "PS3",
-     "feeder": "HMM PRIVILEGE 0119E",
-     "feederSvc": "KME",
-     "origin": "PORT KLANG,MALAYSIA",
-     "pol": "PORT KLANG,MALAYSIA",
-     "ts": "SINGAPORE",
-     "pod": "LOS ANGELES, CA",
-     "dest": "LOS ANGELES, CA",
-     "terminals": [
-      "WESTPORTS MALAYSIA SDN BHD",
-      "WESTPORTS MALAYSIA SDN BHD",
-      "PSA (PORT OF SINGAPORE AUTHORITY)",
-      "TRAPAC TERMINAL, LOS",
-      "TRAPAC TERMINAL, LOS"
-     ],
-     "polDep": "2026-08-29T14:44",
-     "tsArr": "2026-09-01T02:40",
-     "tsDep": "2026-09-03T07:59",
-     "eta": "2026-10-01T06:41",
-     "destEta": "2026-10-04T13:33",
-     "status": "Import Empty Container Returned",
-     "statusLoc": "LOS ANGELES, CA",
-     "stamp": "2026-10-14T08:36",
-     "eventStamp": "2026-10-14T08:36",
-     "lastEvent": "Import Empty Container Returned @ LOS ANGELES, CA",
-     "last": "Import Empty Container Returned @ LOS ANGELES, CA (2026-10-14 08:36)",
-     "legs": [
-      {
-       "vessel": "HMM PRIVILEGE",
-       "voyage": "0119E",
-       "svc": "KME",
-       "pol": "PORT KLANG,MALAYSIA",
-       "etd": "2026-08-29T14:44",
-       "pod": "SINGAPORE",
-       "eta": "2026-08-31T12:00"
-      },
-      {
-       "vessel": "ONE HANNOVER",
-       "voyage": "0102E",
-       "svc": "PS3",
-       "pol": "SINGAPORE",
-       "etd": "2026-09-03T07:59",
-       "pod": "LOS ANGELES, CA",
-       "eta": "2026-10-01T06:41"
-      }
-     ],
-     "events": [
-      {
-       "at": "2026-10-14T08:36",
-       "loc": "LOS ANGELES, CA",
-       "status": "Import Empty Container Returned",
-       "mode": "Truck"
-      },
-      {
-       "at": "2026-10-09T12:41",
-       "loc": "LOS ANGELES, CA",
-       "status": "Import Truck Gate Out from Terminal",
-       "mode": "Truck"
-      },
-      {
-       "at": "2026-10-04T13:33",
-       "loc": "LOS ANGELES, CA",
-       "status": "Vessel Discharged at POD",
-       "mode": "ONE HANNOVER 0102E"
-      },
-      {
-       "at": "2026-10-01T06:41",
-       "loc": "LOS ANGELES, CA",
-       "status": "Vessel Berthing at POD",
-       "mode": "ONE HANNOVER 0102E"
-      },
-      {
-       "at": "2026-10-01T02:41",
-       "loc": "LOS ANGELES, CA",
-       "status": "Vessel Arrival at POD",
-       "mode": "ONE HANNOVER 0102E"
-      },
-      {
-       "at": "2026-09-03T07:59",
-       "loc": "SINGAPORE",
-       "status": "Vessel Departure from T/S Port",
-       "mode": "ONE HANNOVER 0102E"
-      },
-      {
-       "at": "2026-09-02T17:59",
-       "loc": "SINGAPORE",
-       "status": "Vessel Loading at T/S Port",
-       "mode": "ONE HANNOVER 0102E"
-      },
-      {
-       "at": "2026-09-01T02:40",
-       "loc": "SINGAPORE",
-       "status": "Vessel Discharged at T/S Port",
-       "mode": "HMM PRIVILEGE 0119E"
-      },
-      {
-       "at": "2026-08-31T12:00",
-       "loc": "SINGAPORE",
-       "status": "Vessel Berthing at T/S Port",
-       "mode": "HMM PRIVILEGE 0119E"
-      },
-      {
-       "at": "2026-08-30T03:40",
-       "loc": "SINGAPORE",
-       "status": "Vessel Arrival at T/S Port",
-       "mode": "HMM PRIVILEGE 0119E"
-      },
-      {
-       "at": "2026-08-29T14:44",
-       "loc": "PORT KLANG,MALAYSIA",
-       "status": "Vessel Departure from POL",
-       "mode": "HMM PRIVILEGE 0119E"
-      },
-      {
-       "at": "2026-08-29T12:16",
-       "loc": "PORT KLANG,MALAYSIA",
-       "status": "Vessel Loading at POL",
-       "mode": "HMM PRIVILEGE 0119E"
-      },
-      {
-       "at": "2026-08-26T22:28",
-       "loc": "PORT KLANG,MALAYSIA",
-       "status": "Export Truck Gate In to Terminal",
-       "mode": "Truck"
-      },
-      {
-       "at": "2026-08-23T00:56",
-       "loc": "PORT KLANG,MALAYSIA",
-       "status": "Export Empty Container Released",
-       "mode": "Truck"
-      }
-     ],
-     "containers": [
-      "HMMU4925781",
-      "HMMU4129064",
-      "HMMU7179916",
-      "KOCU4951236",
-      "HMMU6955147",
-      "TXGU8540641",
-      "HMMU7097320",
-      "HMMU6498185",
-      "HMMU7006551",
-      "HMMU6762575",
-      "HMMU6559927",
-      "TIIU5019106",
-      "HMMU4223980",
-      "HMMU4982890"
-     ],
-     "cntrQty": 14,
-     "container": "HMMU4925781",
-     "spDep": "2026-08-23T00:56",
-     "spArr": "2026-10-04T13:33",
-     "successEdge": "EWR",
-     "checkedAt": "2026-10-14 18:01Z",
-     "scheduleCheckedAt": "2026-10-14 18:01Z",
-     "delaySnapshotDone": true,
-     "delayCompletedAt": "2026-10-04T13:33",
-     "arrivalMailSent": true,
-     "rollover": false,
-     "planEta": "2026-09-29",
-     "delayDays": 2,
-     "alert": "ok",
-     "firstSeenEta": "2026-09-30T07:00",
-     "firstSeenPolDep": "2026-08-29T05:43",
-     "etaChangeCount": 6,
-     "polDepChangeCount": 1,
-     "polDepActual": true,
-     "tsArrActual": true,
-     "tsDepActual": true,
-     "etaActual": true,
-     "podBerthingActual": true,
-     "polDepActualDate": null,
-     "podBerthingAt": "2026-10-01T06:41"
-    },
     {
      "booking": "KULM68502700",
      "vessel": "ONE CONTRIBUTION",
@@ -306,9 +130,9 @@
      "container": "HMMU4618717",
      "spDep": "2026-08-29T12:28",
      "spArr": "2026-10-20T12:55",
-     "successEdge": "ORD",
-     "checkedAt": "2026-10-16 18:01Z",
-     "scheduleCheckedAt": "2026-10-16 18:01Z",
+     "successEdge": "TPE",
+     "checkedAt": "2026-10-17 15:00Z",
+     "scheduleCheckedAt": "2026-10-17 15:00Z",
      "rollover": false,
      "planEta": "2026-10-06",
      "delayDays": 13,
@@ -440,9 +264,9 @@
      "container": "HMMU6468832",
      "spDep": "2026-09-11T12:01",
      "spArr": "2026-10-29T22:00",
-     "successEdge": "ORD",
-     "checkedAt": "2026-10-16 18:01Z",
-     "scheduleCheckedAt": "2026-10-16 18:01Z",
+     "successEdge": "TPE",
+     "checkedAt": "2026-10-17 15:00Z",
+     "scheduleCheckedAt": "2026-10-17 15:00Z",
      "rollover": false,
      "planEta": "2026-10-25",
      "delayDays": 3,
@@ -568,9 +392,9 @@
      "container": "TXGU7910799",
      "spDep": "2026-09-19T01:36",
      "spArr": "2026-11-05T12:00",
-     "successEdge": "ORD",
-     "checkedAt": "2026-10-16 18:01Z",
-     "scheduleCheckedAt": "2026-10-16 18:01Z",
+     "successEdge": "TPE",
+     "checkedAt": "2026-10-17 15:00Z",
+     "scheduleCheckedAt": "2026-10-17 15:00Z",
      "rollover": false,
      "planEta": "2026-11-01",
      "delayDays": 3,
@@ -690,9 +514,9 @@
      "container": "HMMU6668907",
      "spDep": "2026-09-22T18:51",
      "spArr": "2026-11-15T23:02",
-     "successEdge": "ORD",
-     "checkedAt": "2026-10-16 18:01Z",
-     "scheduleCheckedAt": "2026-10-16 18:01Z",
+     "successEdge": "TPE",
+     "checkedAt": "2026-10-17 15:00Z",
+     "scheduleCheckedAt": "2026-10-17 15:00Z",
      "rollover": false,
      "planEta": "2026-11-08",
      "delayDays": 6,
@@ -812,9 +636,9 @@
      "container": "HMMU7164243",
      "spDep": "2026-10-02T18:32",
      "spArr": "2026-11-20T05:02",
-     "successEdge": "ORD",
-     "checkedAt": "2026-10-16 18:01Z",
-     "scheduleCheckedAt": "2026-10-16 18:01Z",
+     "successEdge": "TPE",
+     "checkedAt": "2026-10-17 15:00Z",
+     "scheduleCheckedAt": "2026-10-17 15:00Z",
      "rollover": false,
      "planEta": "2026-11-15",
      "delayDays": 4,
@@ -928,9 +752,9 @@
      "container": "HMMU6748290",
      "spDep": "2026-10-07T15:30",
      "spArr": "2026-11-20T05:02",
-     "successEdge": "ORD",
-     "checkedAt": "2026-10-16 18:01Z",
-     "scheduleCheckedAt": "2026-10-16 18:01Z",
+     "successEdge": "TPE",
+     "checkedAt": "2026-10-17 15:00Z",
+     "scheduleCheckedAt": "2026-10-17 15:00Z",
      "rollover": false,
      "planEta": "2026-11-13",
      "delayDays": 6,
@@ -968,7 +792,7 @@
      ],
      "polDep": "2026-10-23T01:00",
      "tsArr": "2026-10-23T18:00",
-     "tsDep": "2026-10-31T22:30",
+     "tsDep": "2026-10-30T14:30",
      "eta": "2026-11-22T07:00",
      "destEta": "2026-11-23T13:02",
      "status": "Export Truck Gate In to Terminal",
@@ -993,7 +817,7 @@
        "voyage": "0088E",
        "svc": "PS5",
        "pol": "SINGAPORE",
-       "etd": "2026-10-31T22:30",
+       "etd": "2026-10-30T14:30",
        "pod": "LOS ANGELES, CA",
        "eta": "2026-11-22T07:00"
       }
@@ -1032,9 +856,9 @@
      "container": "KOCU4292294",
      "spDep": "2026-10-13T16:48",
      "spArr": "2026-11-23T13:02",
-     "successEdge": "ORD",
-     "checkedAt": "2026-10-16 18:01Z",
-     "scheduleCheckedAt": "2026-10-16 18:01Z",
+     "successEdge": "TPE",
+     "checkedAt": "2026-10-17 15:00Z",
+     "scheduleCheckedAt": "2026-10-17 15:00Z",
      "rollover": false,
      "planEta": "2026-11-22",
      "delayDays": 0,
@@ -1072,15 +896,15 @@
      ],
      "polDep": "2026-10-23T01:00",
      "tsArr": "2026-10-23T18:00",
-     "tsDep": "2026-11-03T11:00",
+     "tsDep": "2026-11-04T17:00",
      "eta": "2026-12-02T07:00",
      "destEta": "2026-12-03T12:02",
      "status": "Export Empty Container Released",
      "statusLoc": "PORT KLANG,MALAYSIA",
-     "stamp": "2026-10-16T02:48",
-     "eventStamp": "2026-10-16T02:48",
+     "stamp": "2026-10-17T19:36",
+     "eventStamp": "2026-10-17T19:36",
      "lastEvent": "Export Empty Container Released @ PORT KLANG,MALAYSIA",
-     "last": "Export Empty Container Released @ PORT KLANG,MALAYSIA (2026-10-16 02:48)",
+     "last": "Export Empty Container Released @ PORT KLANG,MALAYSIA (2026-10-17 19:36)",
      "legsIncomplete": false,
      "legs": [
       {
@@ -1097,33 +921,48 @@
        "voyage": "0099E",
        "svc": "PS3",
        "pol": "SINGAPORE",
-       "etd": "2026-11-03T11:00",
+       "etd": "2026-11-04T17:00",
        "pod": "LOS ANGELES, CA",
        "eta": "2026-12-02T07:00"
       }
      ],
      "events": [
       {
-       "at": "2026-10-16T02:48",
+       "at": "2026-10-17T19:36",
        "loc": "PORT KLANG,MALAYSIA",
        "status": "Export Empty Container Released",
        "mode": "Truck"
       }
      ],
      "containers": [
+      "HMMU4105191",
+      "KOCU4839695",
+      "HMMU4678104",
+      "HMMU4670274",
+      "KOCU4060431",
+      "KOCU4524954",
+      "KOCU4136769",
       "KOCU4867038"
      ],
-     "cntrQty": 1,
-     "container": "KOCU4867038",
-     "spDep": "2026-10-16T02:48",
+     "cntrQty": 8,
+     "container": "HMMU4105191",
+     "spDep": "2026-10-17T19:36",
      "spArr": "2026-12-03T12:02",
-     "successEdge": "ORD",
-     "checkedAt": "2026-10-16 18:01Z",
-     "scheduleCheckedAt": "2026-10-16 18:01Z",
+     "successEdge": "TPE",
+     "checkedAt": "2026-10-17 15:00Z",
+     "scheduleCheckedAt": "2026-10-17 15:00Z",
      "rollover": false,
      "planEta": "2026-11-22",
      "delayDays": 10,
      "alert": "alert",
+     "justChanged": [
+      {
+       "field": "tsDep",
+       "label": "T/S ETD",
+       "from": "2026-11-03T17:00",
+       "to": "2026-11-04T17:00"
+      }
+     ],
      "firstSeenEta": "2026-11-23T17:00",
      "firstSeenPolDep": "2026-10-24T12:00",
      "etaChangeCount": 2,
@@ -1141,11 +980,10 @@
    "budget": {
     "left": 191,
     "used": 9,
-    "lastCfRay": "a4b8f7ef2b7d6163-ORD"
+    "lastCfRay": "a4c02ce68fd6a39f-TPE"
    }
   },
   "bookings": [
-   "KULM64432100",
    "KULM68502700",
    "KULM52279100",
    "KULM30733200",
@@ -4376,6 +4214,17 @@
        "to": "2026-10-31T22:30"
       }
      ]
+    },
+    {
+     "at": "2026-10-16 21:01Z",
+     "changes": [
+      {
+       "field": "tsDep",
+       "label": "T/S ETD",
+       "from": "2026-10-31T22:30",
+       "to": "2026-10-30T14:30"
+      }
+     ]
     }
    ],
    "KULM78736300": [
@@ -4509,6 +4358,28 @@
        "to": "2026-12-03T12:02"
       }
      ]
+    },
+    {
+     "at": "2026-10-17 03:01Z",
+     "changes": [
+      {
+       "field": "tsDep",
+       "label": "T/S ETD",
+       "from": "2026-11-03T11:00",
+       "to": "2026-11-03T17:00"
+      }
+     ]
+    },
+    {
+     "at": "2026-10-17 15:00Z",
+     "changes": [
+      {
+       "field": "tsDep",
+       "label": "T/S ETD",
+       "from": "2026-11-03T17:00",
+       "to": "2026-11-04T17:00"
+      }
+     ]
     }
    ]
   },
@@ -4553,59 +4424,59 @@
     "level": "watch",
     "delayDays": 3,
     "rollover": false,
-    "at": "2026-10-16 18:01Z"
+    "at": "2026-10-17 15:00Z"
    },
    "KULM04993400": {
     "level": "watch",
     "delayDays": 4,
     "rollover": false,
-    "at": "2026-10-16 18:01Z"
+    "at": "2026-10-17 15:00Z"
    },
    "KULM68502700": {
     "level": "alert",
     "delayDays": 13,
     "rollover": false,
-    "at": "2026-10-16 18:01Z"
+    "at": "2026-10-17 15:00Z"
    },
    "KULM15263800": {
     "level": "watch",
     "delayDays": 6,
     "rollover": false,
-    "at": "2026-10-16 18:01Z"
+    "at": "2026-10-17 15:00Z"
    },
    "KULM64432100": {
     "level": "ok",
     "delayDays": 2,
     "rollover": false,
-    "at": "2026-10-16 18:01Z"
+    "at": "2026-10-17 06:00Z"
    },
    "KULM30733200": {
     "level": "watch",
     "delayDays": 3,
     "rollover": false,
-    "at": "2026-10-16 18:01Z"
+    "at": "2026-10-17 15:00Z"
    },
    "KULM77897700": {
     "level": "ok",
     "delayDays": 0,
     "rollover": false,
-    "at": "2026-10-16 18:01Z"
+    "at": "2026-10-17 15:00Z"
    },
    "KULM36744200": {
     "level": "watch",
     "delayDays": 6,
     "rollover": false,
-    "at": "2026-10-16 18:01Z"
+    "at": "2026-10-17 15:00Z"
    },
    "KULM78736300": {
     "level": "alert",
     "delayDays": 10,
     "rollover": false,
-    "at": "2026-10-16 18:01Z"
+    "at": "2026-10-17 15:00Z"
    }
   },
   "lastrun": {
-   "at": "2026-10-16T18:16:11.514Z",
+   "at": "2026-10-17T17:15:45.242Z",
    "trigger": "cron-stale",
    "cron": "15,45 * * * *",
    "schedRetry": 0,
@@ -4613,622 +4484,6 @@
   },
   "sessionLog": [
    {
-    "t": 1791983857442,
-    "date": "10/14",
-    "time": "22:17",
-    "ok": false,
-    "tag": "retry",
-    "booking": "KULM77897700",
-    "attempt": 6,
-    "code": "520",
-    "loc": "EWR"
-   },
-   {
-    "t": 1791983857442,
-    "date": "10/14",
-    "time": "22:17",
-    "ok": false,
-    "tag": "retry",
-    "booking": "KULM78736300",
-    "attempt": 6,
-    "code": "520",
-    "loc": "EWR"
-   },
-   {
-    "t": 1791985605086,
-    "date": "10/14",
-    "time": "22:46",
-    "ok": false,
-    "tag": "retry",
-    "booking": "KULM68502700",
-    "attempt": 1,
-    "code": "520",
-    "loc": "EWR"
-   },
-   {
-    "t": 1791985605086,
-    "date": "10/14",
-    "time": "22:46",
-    "ok": false,
-    "tag": "retry",
-    "booking": "KULM52279100",
-    "attempt": 1,
-    "code": "520",
-    "loc": "EWR"
-   },
-   {
-    "t": 1791985605086,
-    "date": "10/14",
-    "time": "22:46",
-    "ok": true,
-    "tag": "retry",
-    "booking": "KULM36744200",
-    "attempt": 1,
-    "code": null,
-    "loc": "EWR"
-   },
-   {
-    "t": 1791985605086,
-    "date": "10/14",
-    "time": "22:46",
-    "ok": false,
-    "tag": "retry",
-    "booking": "KULM77897700",
-    "attempt": 1,
-    "code": "520",
-    "loc": "EWR"
-   },
-   {
-    "t": 1791985605086,
-    "date": "10/14",
-    "time": "22:46",
-    "ok": false,
-    "tag": "retry",
-    "booking": "KULM78736300",
-    "attempt": 1,
-    "code": "520",
-    "loc": "EWR"
-   },
-   {
-    "t": 1791987437696,
-    "date": "10/14",
-    "time": "23:17",
-    "ok": false,
-    "tag": "retry",
-    "booking": "KULM68502700",
-    "attempt": 1,
-    "code": "520",
-    "loc": "EWR"
-   },
-   {
-    "t": 1791987437696,
-    "date": "10/14",
-    "time": "23:17",
-    "ok": false,
-    "tag": "retry",
-    "booking": "KULM52279100",
-    "attempt": 1,
-    "code": "520",
-    "loc": "EWR"
-   },
-   {
-    "t": 1791987437696,
-    "date": "10/14",
-    "time": "23:17",
-    "ok": false,
-    "tag": "retry",
-    "booking": "KULM77897700",
-    "attempt": 1,
-    "code": "520",
-    "loc": "EWR"
-   },
-   {
-    "t": 1791987437696,
-    "date": "10/14",
-    "time": "23:17",
-    "ok": false,
-    "tag": "retry",
-    "booking": "KULM78736300",
-    "attempt": 1,
-    "code": "520",
-    "loc": "EWR"
-   },
-   {
-    "t": 1791987437696,
-    "date": "10/14",
-    "time": "23:17",
-    "ok": false,
-    "tag": "retry",
-    "booking": "KULM68502700",
-    "attempt": 2,
-    "code": "520",
-    "loc": "EWR"
-   },
-   {
-    "t": 1791987437696,
-    "date": "10/14",
-    "time": "23:17",
-    "ok": false,
-    "tag": "retry",
-    "booking": "KULM52279100",
-    "attempt": 2,
-    "code": "520",
-    "loc": "EWR"
-   },
-   {
-    "t": 1791987437696,
-    "date": "10/14",
-    "time": "23:17",
-    "ok": false,
-    "tag": "retry",
-    "booking": "KULM77897700",
-    "attempt": 2,
-    "code": "520",
-    "loc": "EWR"
-   },
-   {
-    "t": 1791987437696,
-    "date": "10/14",
-    "time": "23:17",
-    "ok": false,
-    "tag": "retry",
-    "booking": "KULM78736300",
-    "attempt": 2,
-    "code": "520",
-    "loc": "EWR"
-   },
-   {
-    "t": 1791987437696,
-    "date": "10/14",
-    "time": "23:17",
-    "ok": false,
-    "tag": "retry",
-    "booking": "KULM68502700",
-    "attempt": 7,
-    "code": "520",
-    "loc": "EWR"
-   },
-   {
-    "t": 1791987437696,
-    "date": "10/14",
-    "time": "23:17",
-    "ok": true,
-    "tag": "retry",
-    "booking": "KULM52279100",
-    "attempt": 7,
-    "code": null,
-    "loc": "EWR"
-   },
-   {
-    "t": 1791987437696,
-    "date": "10/14",
-    "time": "23:17",
-    "ok": false,
-    "tag": "retry",
-    "booking": "KULM77897700",
-    "attempt": 7,
-    "code": "520",
-    "loc": "EWR"
-   },
-   {
-    "t": 1791987437696,
-    "date": "10/14",
-    "time": "23:17",
-    "ok": false,
-    "tag": "retry",
-    "booking": "KULM78736300",
-    "attempt": 7,
-    "code": "520",
-    "loc": "EWR"
-   },
-   {
-    "t": 1791989190953,
-    "date": "10/14",
-    "time": "23:46",
-    "ok": false,
-    "tag": "retry",
-    "booking": "KULM68502700",
-    "attempt": 2,
-    "code": "520",
-    "loc": "EWR"
-   },
-   {
-    "t": 1791989190953,
-    "date": "10/14",
-    "time": "23:46",
-    "ok": false,
-    "tag": "retry",
-    "booking": "KULM77897700",
-    "attempt": 2,
-    "code": "520",
-    "loc": "EWR"
-   },
-   {
-    "t": 1791989190953,
-    "date": "10/14",
-    "time": "23:46",
-    "ok": false,
-    "tag": "retry",
-    "booking": "KULM78736300",
-    "attempt": 2,
-    "code": "520",
-    "loc": "EWR"
-   },
-   {
-    "t": 1791990189732,
-    "date": "10/15",
-    "time": "00:03",
-    "ok": false,
-    "tag": "cron",
-    "booking": "KULM64432100",
-    "attempt": 2,
-    "code": "520",
-    "loc": "EWR"
-   },
-   {
-    "t": 1791990189732,
-    "date": "10/15",
-    "time": "00:03",
-    "ok": false,
-    "tag": "cron",
-    "booking": "KULM68502700",
-    "attempt": 2,
-    "code": "520",
-    "loc": "EWR"
-   },
-   {
-    "t": 1791990189732,
-    "date": "10/15",
-    "time": "00:03",
-    "ok": false,
-    "tag": "cron",
-    "booking": "KULM52279100",
-    "attempt": 2,
-    "code": "520",
-    "loc": "EWR"
-   },
-   {
-    "t": 1791990189732,
-    "date": "10/15",
-    "time": "00:03",
-    "ok": false,
-    "tag": "cron",
-    "booking": "KULM30733200",
-    "attempt": 2,
-    "code": "520",
-    "loc": "EWR"
-   },
-   {
-    "t": 1791990189732,
-    "date": "10/15",
-    "time": "00:03",
-    "ok": true,
-    "tag": "cron",
-    "booking": "KULM15263800",
-    "attempt": 2,
-    "code": null,
-    "loc": "EWR"
-   },
-   {
-    "t": 1791990189732,
-    "date": "10/15",
-    "time": "00:03",
-    "ok": false,
-    "tag": "cron",
-    "booking": "KULM04993400",
-    "attempt": 2,
-    "code": "520",
-    "loc": "EWR"
-   },
-   {
-    "t": 1791990189732,
-    "date": "10/15",
-    "time": "00:03",
-    "ok": false,
-    "tag": "cron",
-    "booking": "KULM36744200",
-    "attempt": 2,
-    "code": "520",
-    "loc": "EWR"
-   },
-   {
-    "t": 1791990189732,
-    "date": "10/15",
-    "time": "00:03",
-    "ok": false,
-    "tag": "cron",
-    "booking": "KULM77897700",
-    "attempt": 2,
-    "code": "520",
-    "loc": "EWR"
-   },
-   {
-    "t": 1791990189732,
-    "date": "10/15",
-    "time": "00:03",
-    "ok": false,
-    "tag": "cron",
-    "booking": "KULM78736300",
-    "attempt": 2,
-    "code": "520",
-    "loc": "EWR"
-   },
-   {
-    "t": 1791990189732,
-    "date": "10/15",
-    "time": "00:03",
-    "ok": false,
-    "tag": "cron",
-    "booking": "KULM64432100",
-    "attempt": 4,
-    "code": "520",
-    "loc": "EWR"
-   },
-   {
-    "t": 1791990189732,
-    "date": "10/15",
-    "time": "00:03",
-    "ok": false,
-    "tag": "cron",
-    "booking": "KULM68502700",
-    "attempt": 4,
-    "code": "520",
-    "loc": "EWR"
-   },
-   {
-    "t": 1791990189732,
-    "date": "10/15",
-    "time": "00:03",
-    "ok": false,
-    "tag": "cron",
-    "booking": "KULM52279100",
-    "attempt": 4,
-    "code": "520",
-    "loc": "EWR"
-   },
-   {
-    "t": 1791990189732,
-    "date": "10/15",
-    "time": "00:03",
-    "ok": false,
-    "tag": "cron",
-    "booking": "KULM30733200",
-    "attempt": 4,
-    "code": "520",
-    "loc": "EWR"
-   },
-   {
-    "t": 1791990189732,
-    "date": "10/15",
-    "time": "00:03",
-    "ok": false,
-    "tag": "cron",
-    "booking": "KULM04993400",
-    "attempt": 4,
-    "code": "520",
-    "loc": "EWR"
-   },
-   {
-    "t": 1791990189732,
-    "date": "10/15",
-    "time": "00:03",
-    "ok": false,
-    "tag": "cron",
-    "booking": "KULM36744200",
-    "attempt": 4,
-    "code": "520",
-    "loc": "EWR"
-   },
-   {
-    "t": 1791990189732,
-    "date": "10/15",
-    "time": "00:03",
-    "ok": false,
-    "tag": "cron",
-    "booking": "KULM77897700",
-    "attempt": 4,
-    "code": "520",
-    "loc": "EWR"
-   },
-   {
-    "t": 1791990189732,
-    "date": "10/15",
-    "time": "00:03",
-    "ok": false,
-    "tag": "cron",
-    "booking": "KULM78736300",
-    "attempt": 4,
-    "code": "520",
-    "loc": "EWR"
-   },
-   {
-    "t": 1791990189732,
-    "date": "10/15",
-    "time": "00:03",
-    "ok": false,
-    "tag": "cron",
-    "booking": "KULM64432100",
-    "attempt": 8,
-    "code": "520",
-    "loc": "EWR"
-   },
-   {
-    "t": 1791990189732,
-    "date": "10/15",
-    "time": "00:03",
-    "ok": false,
-    "tag": "cron",
-    "booking": "KULM68502700",
-    "attempt": 8,
-    "code": "520",
-    "loc": "EWR"
-   },
-   {
-    "t": 1791990189732,
-    "date": "10/15",
-    "time": "00:03",
-    "ok": false,
-    "tag": "cron",
-    "booking": "KULM52279100",
-    "attempt": 8,
-    "code": "520",
-    "loc": "EWR"
-   },
-   {
-    "t": 1791990189732,
-    "date": "10/15",
-    "time": "00:03",
-    "ok": false,
-    "tag": "cron",
-    "booking": "KULM30733200",
-    "attempt": 8,
-    "code": "520",
-    "loc": "EWR"
-   },
-   {
-    "t": 1791990189732,
-    "date": "10/15",
-    "time": "00:03",
-    "ok": false,
-    "tag": "cron",
-    "booking": "KULM04993400",
-    "attempt": 8,
-    "code": "520",
-    "loc": "EWR"
-   },
-   {
-    "t": 1791990189732,
-    "date": "10/15",
-    "time": "00:03",
-    "ok": true,
-    "tag": "cron",
-    "booking": "KULM36744200",
-    "attempt": 8,
-    "code": null,
-    "loc": "EWR"
-   },
-   {
-    "t": 1791990189732,
-    "date": "10/15",
-    "time": "00:03",
-    "ok": false,
-    "tag": "cron",
-    "booking": "KULM77897700",
-    "attempt": 8,
-    "code": "520",
-    "loc": "EWR"
-   },
-   {
-    "t": 1791990189732,
-    "date": "10/15",
-    "time": "00:03",
-    "ok": false,
-    "tag": "cron",
-    "booking": "KULM78736300",
-    "attempt": 8,
-    "code": "520",
-    "loc": "EWR"
-   },
-   {
-    "t": 1791991120553,
-    "date": "10/15",
-    "time": "00:18",
-    "ok": false,
-    "tag": "retry",
-    "booking": "KULM64432100",
-    "attempt": 1,
-    "code": "520",
-    "loc": "EWR"
-   },
-   {
-    "t": 1791991120553,
-    "date": "10/15",
-    "time": "00:18",
-    "ok": true,
-    "tag": "retry",
-    "booking": "KULM68502700",
-    "attempt": 1,
-    "code": null,
-    "loc": "EWR"
-   },
-   {
-    "t": 1791991120553,
-    "date": "10/15",
-    "time": "00:18",
-    "ok": false,
-    "tag": "retry",
-    "booking": "KULM52279100",
-    "attempt": 1,
-    "code": "520",
-    "loc": "EWR"
-   },
-   {
-    "t": 1791991120553,
-    "date": "10/15",
-    "time": "00:18",
-    "ok": true,
-    "tag": "retry",
-    "booking": "KULM30733200",
-    "attempt": 1,
-    "code": null,
-    "loc": "EWR"
-   },
-   {
-    "t": 1791991120553,
-    "date": "10/15",
-    "time": "00:18",
-    "ok": false,
-    "tag": "retry",
-    "booking": "KULM04993400",
-    "attempt": 1,
-    "code": "520",
-    "loc": "EWR"
-   },
-   {
-    "t": 1791991120553,
-    "date": "10/15",
-    "time": "00:18",
-    "ok": false,
-    "tag": "retry",
-    "booking": "KULM77897700",
-    "attempt": 1,
-    "code": "520",
-    "loc": "EWR"
-   },
-   {
-    "t": 1791991120553,
-    "date": "10/15",
-    "time": "00:18",
-    "ok": false,
-    "tag": "retry",
-    "booking": "KULM78736300",
-    "attempt": 1,
-    "code": "520",
-    "loc": "EWR"
-   },
-   {
-    "t": 1791991120553,
-    "date": "10/15",
-    "time": "00:18",
-    "ok": false,
-    "tag": "retry",
-    "booking": "KULM64432100",
-    "attempt": 3,
-    "code": "520",
-    "loc": "EWR"
-   },
-   {
-    "t": 1791991120553,
-    "date": "10/15",
-    "time": "00:18",
-    "ok": true,
-    "tag": "retry",
-    "booking": "KULM52279100",
-    "attempt": 3,
-    "code": null,
-    "loc": "EWR"
-   },
-   {
     "t": 1791991120553,
     "date": "10/15",
     "time": "00:18",
@@ -6811,6 +6066,622 @@
     "attempt": 1,
     "code": null,
     "loc": "ORD"
+   },
+   {
+    "t": 1792184480256,
+    "date": "10/17",
+    "time": "06:01",
+    "ok": true,
+    "tag": "cron",
+    "booking": "KULM68502700",
+    "attempt": 1,
+    "code": null,
+    "loc": "ORD"
+   },
+   {
+    "t": 1792184480256,
+    "date": "10/17",
+    "time": "06:01",
+    "ok": true,
+    "tag": "cron",
+    "booking": "KULM52279100",
+    "attempt": 1,
+    "code": null,
+    "loc": "ORD"
+   },
+   {
+    "t": 1792184480256,
+    "date": "10/17",
+    "time": "06:01",
+    "ok": true,
+    "tag": "cron",
+    "booking": "KULM30733200",
+    "attempt": 1,
+    "code": null,
+    "loc": "ORD"
+   },
+   {
+    "t": 1792184480256,
+    "date": "10/17",
+    "time": "06:01",
+    "ok": true,
+    "tag": "cron",
+    "booking": "KULM15263800",
+    "attempt": 1,
+    "code": null,
+    "loc": "ORD"
+   },
+   {
+    "t": 1792184480256,
+    "date": "10/17",
+    "time": "06:01",
+    "ok": true,
+    "tag": "cron",
+    "booking": "KULM04993400",
+    "attempt": 1,
+    "code": null,
+    "loc": "ORD"
+   },
+   {
+    "t": 1792184480256,
+    "date": "10/17",
+    "time": "06:01",
+    "ok": true,
+    "tag": "cron",
+    "booking": "KULM36744200",
+    "attempt": 1,
+    "code": null,
+    "loc": "ORD"
+   },
+   {
+    "t": 1792184480256,
+    "date": "10/17",
+    "time": "06:01",
+    "ok": true,
+    "tag": "cron",
+    "booking": "KULM77897700",
+    "attempt": 1,
+    "code": null,
+    "loc": "ORD"
+   },
+   {
+    "t": 1792184480256,
+    "date": "10/17",
+    "time": "06:01",
+    "ok": true,
+    "tag": "cron",
+    "booking": "KULM78736300",
+    "attempt": 1,
+    "code": null,
+    "loc": "ORD"
+   },
+   {
+    "t": 1792195279954,
+    "date": "10/17",
+    "time": "09:01",
+    "ok": true,
+    "tag": "cron",
+    "booking": "KULM68502700",
+    "attempt": 1,
+    "code": null,
+    "loc": "ORD"
+   },
+   {
+    "t": 1792195279954,
+    "date": "10/17",
+    "time": "09:01",
+    "ok": true,
+    "tag": "cron",
+    "booking": "KULM52279100",
+    "attempt": 1,
+    "code": null,
+    "loc": "ORD"
+   },
+   {
+    "t": 1792195279954,
+    "date": "10/17",
+    "time": "09:01",
+    "ok": true,
+    "tag": "cron",
+    "booking": "KULM30733200",
+    "attempt": 1,
+    "code": null,
+    "loc": "ORD"
+   },
+   {
+    "t": 1792195279954,
+    "date": "10/17",
+    "time": "09:01",
+    "ok": true,
+    "tag": "cron",
+    "booking": "KULM15263800",
+    "attempt": 1,
+    "code": null,
+    "loc": "ORD"
+   },
+   {
+    "t": 1792195279954,
+    "date": "10/17",
+    "time": "09:01",
+    "ok": true,
+    "tag": "cron",
+    "booking": "KULM04993400",
+    "attempt": 1,
+    "code": null,
+    "loc": "ORD"
+   },
+   {
+    "t": 1792195279954,
+    "date": "10/17",
+    "time": "09:01",
+    "ok": true,
+    "tag": "cron",
+    "booking": "KULM36744200",
+    "attempt": 1,
+    "code": null,
+    "loc": "ORD"
+   },
+   {
+    "t": 1792195279954,
+    "date": "10/17",
+    "time": "09:01",
+    "ok": true,
+    "tag": "cron",
+    "booking": "KULM77897700",
+    "attempt": 1,
+    "code": null,
+    "loc": "ORD"
+   },
+   {
+    "t": 1792195279954,
+    "date": "10/17",
+    "time": "09:01",
+    "ok": true,
+    "tag": "cron",
+    "booking": "KULM78736300",
+    "attempt": 1,
+    "code": null,
+    "loc": "ORD"
+   },
+   {
+    "t": 1792206073527,
+    "date": "10/17",
+    "time": "12:01",
+    "ok": true,
+    "tag": "cron",
+    "booking": "KULM68502700",
+    "attempt": 1,
+    "code": null,
+    "loc": "ORD"
+   },
+   {
+    "t": 1792206073527,
+    "date": "10/17",
+    "time": "12:01",
+    "ok": true,
+    "tag": "cron",
+    "booking": "KULM52279100",
+    "attempt": 1,
+    "code": null,
+    "loc": "ORD"
+   },
+   {
+    "t": 1792206073527,
+    "date": "10/17",
+    "time": "12:01",
+    "ok": true,
+    "tag": "cron",
+    "booking": "KULM30733200",
+    "attempt": 1,
+    "code": null,
+    "loc": "ORD"
+   },
+   {
+    "t": 1792206073527,
+    "date": "10/17",
+    "time": "12:01",
+    "ok": true,
+    "tag": "cron",
+    "booking": "KULM15263800",
+    "attempt": 1,
+    "code": null,
+    "loc": "ORD"
+   },
+   {
+    "t": 1792206073527,
+    "date": "10/17",
+    "time": "12:01",
+    "ok": true,
+    "tag": "cron",
+    "booking": "KULM04993400",
+    "attempt": 1,
+    "code": null,
+    "loc": "ORD"
+   },
+   {
+    "t": 1792206073527,
+    "date": "10/17",
+    "time": "12:01",
+    "ok": true,
+    "tag": "cron",
+    "booking": "KULM36744200",
+    "attempt": 1,
+    "code": null,
+    "loc": "ORD"
+   },
+   {
+    "t": 1792206073527,
+    "date": "10/17",
+    "time": "12:01",
+    "ok": true,
+    "tag": "cron",
+    "booking": "KULM77897700",
+    "attempt": 1,
+    "code": null,
+    "loc": "ORD"
+   },
+   {
+    "t": 1792206073527,
+    "date": "10/17",
+    "time": "12:01",
+    "ok": true,
+    "tag": "cron",
+    "booking": "KULM78736300",
+    "attempt": 1,
+    "code": null,
+    "loc": "ORD"
+   },
+   {
+    "t": 1792216843509,
+    "date": "10/17",
+    "time": "15:00",
+    "ok": true,
+    "tag": "cron",
+    "booking": "KULM68502700",
+    "attempt": 1,
+    "code": null,
+    "loc": "ORD"
+   },
+   {
+    "t": 1792216843509,
+    "date": "10/17",
+    "time": "15:00",
+    "ok": true,
+    "tag": "cron",
+    "booking": "KULM52279100",
+    "attempt": 1,
+    "code": null,
+    "loc": "ORD"
+   },
+   {
+    "t": 1792216843509,
+    "date": "10/17",
+    "time": "15:00",
+    "ok": true,
+    "tag": "cron",
+    "booking": "KULM30733200",
+    "attempt": 1,
+    "code": null,
+    "loc": "ORD"
+   },
+   {
+    "t": 1792216843509,
+    "date": "10/17",
+    "time": "15:00",
+    "ok": true,
+    "tag": "cron",
+    "booking": "KULM15263800",
+    "attempt": 1,
+    "code": null,
+    "loc": "ORD"
+   },
+   {
+    "t": 1792216843509,
+    "date": "10/17",
+    "time": "15:00",
+    "ok": true,
+    "tag": "cron",
+    "booking": "KULM04993400",
+    "attempt": 1,
+    "code": null,
+    "loc": "ORD"
+   },
+   {
+    "t": 1792216843509,
+    "date": "10/17",
+    "time": "15:00",
+    "ok": true,
+    "tag": "cron",
+    "booking": "KULM36744200",
+    "attempt": 1,
+    "code": null,
+    "loc": "ORD"
+   },
+   {
+    "t": 1792216843509,
+    "date": "10/17",
+    "time": "15:00",
+    "ok": true,
+    "tag": "cron",
+    "booking": "KULM77897700",
+    "attempt": 1,
+    "code": null,
+    "loc": "ORD"
+   },
+   {
+    "t": 1792216843509,
+    "date": "10/17",
+    "time": "15:00",
+    "ok": true,
+    "tag": "cron",
+    "booking": "KULM78736300",
+    "attempt": 1,
+    "code": null,
+    "loc": "ORD"
+   },
+   {
+    "t": 1792227640827,
+    "date": "10/17",
+    "time": "18:00",
+    "ok": true,
+    "tag": "cron",
+    "booking": "KULM68502700",
+    "attempt": 1,
+    "code": null,
+    "loc": "ORD"
+   },
+   {
+    "t": 1792227640827,
+    "date": "10/17",
+    "time": "18:00",
+    "ok": true,
+    "tag": "cron",
+    "booking": "KULM52279100",
+    "attempt": 1,
+    "code": null,
+    "loc": "ORD"
+   },
+   {
+    "t": 1792227640827,
+    "date": "10/17",
+    "time": "18:00",
+    "ok": true,
+    "tag": "cron",
+    "booking": "KULM30733200",
+    "attempt": 1,
+    "code": null,
+    "loc": "ORD"
+   },
+   {
+    "t": 1792227640827,
+    "date": "10/17",
+    "time": "18:00",
+    "ok": true,
+    "tag": "cron",
+    "booking": "KULM15263800",
+    "attempt": 1,
+    "code": null,
+    "loc": "ORD"
+   },
+   {
+    "t": 1792227640827,
+    "date": "10/17",
+    "time": "18:00",
+    "ok": true,
+    "tag": "cron",
+    "booking": "KULM04993400",
+    "attempt": 1,
+    "code": null,
+    "loc": "ORD"
+   },
+   {
+    "t": 1792227640827,
+    "date": "10/17",
+    "time": "18:00",
+    "ok": true,
+    "tag": "cron",
+    "booking": "KULM36744200",
+    "attempt": 1,
+    "code": null,
+    "loc": "ORD"
+   },
+   {
+    "t": 1792227640827,
+    "date": "10/17",
+    "time": "18:00",
+    "ok": true,
+    "tag": "cron",
+    "booking": "KULM77897700",
+    "attempt": 1,
+    "code": null,
+    "loc": "ORD"
+   },
+   {
+    "t": 1792227640827,
+    "date": "10/17",
+    "time": "18:00",
+    "ok": true,
+    "tag": "cron",
+    "booking": "KULM78736300",
+    "attempt": 1,
+    "code": null,
+    "loc": "ORD"
+   },
+   {
+    "t": 1792238440872,
+    "date": "10/17",
+    "time": "21:00",
+    "ok": true,
+    "tag": "cron",
+    "booking": "KULM68502700",
+    "attempt": 1,
+    "code": null,
+    "loc": "ORD"
+   },
+   {
+    "t": 1792238440872,
+    "date": "10/17",
+    "time": "21:00",
+    "ok": true,
+    "tag": "cron",
+    "booking": "KULM52279100",
+    "attempt": 1,
+    "code": null,
+    "loc": "ORD"
+   },
+   {
+    "t": 1792238440872,
+    "date": "10/17",
+    "time": "21:00",
+    "ok": true,
+    "tag": "cron",
+    "booking": "KULM30733200",
+    "attempt": 1,
+    "code": null,
+    "loc": "ORD"
+   },
+   {
+    "t": 1792238440872,
+    "date": "10/17",
+    "time": "21:00",
+    "ok": true,
+    "tag": "cron",
+    "booking": "KULM15263800",
+    "attempt": 1,
+    "code": null,
+    "loc": "ORD"
+   },
+   {
+    "t": 1792238440872,
+    "date": "10/17",
+    "time": "21:00",
+    "ok": true,
+    "tag": "cron",
+    "booking": "KULM04993400",
+    "attempt": 1,
+    "code": null,
+    "loc": "ORD"
+   },
+   {
+    "t": 1792238440872,
+    "date": "10/17",
+    "time": "21:00",
+    "ok": true,
+    "tag": "cron",
+    "booking": "KULM36744200",
+    "attempt": 1,
+    "code": null,
+    "loc": "ORD"
+   },
+   {
+    "t": 1792238440872,
+    "date": "10/17",
+    "time": "21:00",
+    "ok": true,
+    "tag": "cron",
+    "booking": "KULM77897700",
+    "attempt": 1,
+    "code": null,
+    "loc": "ORD"
+   },
+   {
+    "t": 1792238440872,
+    "date": "10/17",
+    "time": "21:00",
+    "ok": true,
+    "tag": "cron",
+    "booking": "KULM78736300",
+    "attempt": 1,
+    "code": null,
+    "loc": "ORD"
+   },
+   {
+    "t": 1792249255332,
+    "date": "10/18",
+    "time": "00:00",
+    "ok": true,
+    "tag": "cron",
+    "booking": "KULM68502700",
+    "attempt": 1,
+    "code": null,
+    "loc": "TPE"
+   },
+   {
+    "t": 1792249255332,
+    "date": "10/18",
+    "time": "00:00",
+    "ok": true,
+    "tag": "cron",
+    "booking": "KULM52279100",
+    "attempt": 1,
+    "code": null,
+    "loc": "TPE"
+   },
+   {
+    "t": 1792249255332,
+    "date": "10/18",
+    "time": "00:00",
+    "ok": true,
+    "tag": "cron",
+    "booking": "KULM30733200",
+    "attempt": 1,
+    "code": null,
+    "loc": "TPE"
+   },
+   {
+    "t": 1792249255332,
+    "date": "10/18",
+    "time": "00:00",
+    "ok": true,
+    "tag": "cron",
+    "booking": "KULM15263800",
+    "attempt": 1,
+    "code": null,
+    "loc": "TPE"
+   },
+   {
+    "t": 1792249255332,
+    "date": "10/18",
+    "time": "00:00",
+    "ok": true,
+    "tag": "cron",
+    "booking": "KULM04993400",
+    "attempt": 1,
+    "code": null,
+    "loc": "TPE"
+   },
+   {
+    "t": 1792249255332,
+    "date": "10/18",
+    "time": "00:00",
+    "ok": true,
+    "tag": "cron",
+    "booking": "KULM36744200",
+    "attempt": 1,
+    "code": null,
+    "loc": "TPE"
+   },
+   {
+    "t": 1792249255332,
+    "date": "10/18",
+    "time": "00:00",
+    "ok": true,
+    "tag": "cron",
+    "booking": "KULM77897700",
+    "attempt": 1,
+    "code": null,
+    "loc": "TPE"
+   },
+   {
+    "t": 1792249255332,
+    "date": "10/18",
+    "time": "00:00",
+    "ok": true,
+    "tag": "cron",
+    "booking": "KULM78736300",
+    "attempt": 1,
+    "code": null,
+    "loc": "TPE"
    }
   ],
   "raw_material_history": {
@@ -25223,9 +25094,9 @@
    "container": "HMMU7164243",
    "spDep": "2026-10-02T18:32",
    "spArr": "2026-11-20T05:02",
-   "successEdge": "ORD",
-   "checkedAt": "2026-10-16 18:01Z",
-   "scheduleCheckedAt": "2026-10-16 18:01Z",
+   "successEdge": "TPE",
+   "checkedAt": "2026-10-17 15:00Z",
+   "scheduleCheckedAt": "2026-10-17 15:00Z",
    "rollover": false,
    "planEta": "2026-11-15",
    "delayDays": 4,
@@ -25345,9 +25216,9 @@
    "container": "HMMU6668907",
    "spDep": "2026-09-22T18:51",
    "spArr": "2026-11-15T23:02",
-   "successEdge": "ORD",
-   "checkedAt": "2026-10-16 18:01Z",
-   "scheduleCheckedAt": "2026-10-16 18:01Z",
+   "successEdge": "TPE",
+   "checkedAt": "2026-10-17 15:00Z",
+   "scheduleCheckedAt": "2026-10-17 15:00Z",
    "rollover": false,
    "planEta": "2026-11-08",
    "delayDays": 6,
@@ -25473,9 +25344,9 @@
    "container": "TXGU7910799",
    "spDep": "2026-09-19T01:36",
    "spArr": "2026-11-05T12:00",
-   "successEdge": "ORD",
-   "checkedAt": "2026-10-16 18:01Z",
-   "scheduleCheckedAt": "2026-10-16 18:01Z",
+   "successEdge": "TPE",
+   "checkedAt": "2026-10-17 15:00Z",
+   "scheduleCheckedAt": "2026-10-17 15:00Z",
    "rollover": false,
    "planEta": "2026-11-01",
    "delayDays": 3,
@@ -25589,9 +25460,9 @@
    "container": "HMMU6748290",
    "spDep": "2026-10-07T15:30",
    "spArr": "2026-11-20T05:02",
-   "successEdge": "ORD",
-   "checkedAt": "2026-10-16 18:01Z",
-   "scheduleCheckedAt": "2026-10-16 18:01Z",
+   "successEdge": "TPE",
+   "checkedAt": "2026-10-17 15:00Z",
+   "scheduleCheckedAt": "2026-10-17 15:00Z",
    "rollover": false,
    "planEta": "2026-11-13",
    "delayDays": 6,
@@ -25881,9 +25752,9 @@
    "container": "HMMU6468832",
    "spDep": "2026-09-11T12:01",
    "spArr": "2026-10-29T22:00",
-   "successEdge": "ORD",
-   "checkedAt": "2026-10-16 18:01Z",
-   "scheduleCheckedAt": "2026-10-16 18:01Z",
+   "successEdge": "TPE",
+   "checkedAt": "2026-10-17 15:00Z",
+   "scheduleCheckedAt": "2026-10-17 15:00Z",
    "rollover": false,
    "planEta": "2026-10-25",
    "delayDays": 3,
@@ -26187,9 +26058,9 @@
    "container": "HMMU4618717",
    "spDep": "2026-08-29T12:28",
    "spArr": "2026-10-20T12:55",
-   "successEdge": "ORD",
-   "checkedAt": "2026-10-16 18:01Z",
-   "scheduleCheckedAt": "2026-10-16 18:01Z",
+   "successEdge": "TPE",
+   "checkedAt": "2026-10-17 15:00Z",
+   "scheduleCheckedAt": "2026-10-17 15:00Z",
    "rollover": false,
    "planEta": "2026-10-06",
    "delayDays": 13,
@@ -26707,7 +26578,7 @@
    ],
    "polDep": "2026-10-23T01:00",
    "tsArr": "2026-10-23T18:00",
-   "tsDep": "2026-10-31T22:30",
+   "tsDep": "2026-10-30T14:30",
    "eta": "2026-11-22T07:00",
    "destEta": "2026-11-23T13:02",
    "status": "Export Truck Gate In to Terminal",
@@ -26732,7 +26603,7 @@
      "voyage": "0088E",
      "svc": "PS5",
      "pol": "SINGAPORE",
-     "etd": "2026-10-31T22:30",
+     "etd": "2026-10-30T14:30",
      "pod": "LOS ANGELES, CA",
      "eta": "2026-11-22T07:00"
     }
@@ -26771,9 +26642,9 @@
    "container": "KOCU4292294",
    "spDep": "2026-10-13T16:48",
    "spArr": "2026-11-23T13:02",
-   "successEdge": "ORD",
-   "checkedAt": "2026-10-16 18:01Z",
-   "scheduleCheckedAt": "2026-10-16 18:01Z",
+   "successEdge": "TPE",
+   "checkedAt": "2026-10-17 15:00Z",
+   "scheduleCheckedAt": "2026-10-17 15:00Z",
    "rollover": false,
    "planEta": "2026-11-22",
    "delayDays": 0,
@@ -26811,15 +26682,15 @@
    ],
    "polDep": "2026-10-23T01:00",
    "tsArr": "2026-10-23T18:00",
-   "tsDep": "2026-11-03T11:00",
+   "tsDep": "2026-11-04T17:00",
    "eta": "2026-12-02T07:00",
    "destEta": "2026-12-03T12:02",
    "status": "Export Empty Container Released",
    "statusLoc": "PORT KLANG,MALAYSIA",
-   "stamp": "2026-10-16T02:48",
-   "eventStamp": "2026-10-16T02:48",
+   "stamp": "2026-10-17T19:36",
+   "eventStamp": "2026-10-17T19:36",
    "lastEvent": "Export Empty Container Released @ PORT KLANG,MALAYSIA",
-   "last": "Export Empty Container Released @ PORT KLANG,MALAYSIA (2026-10-16 02:48)",
+   "last": "Export Empty Container Released @ PORT KLANG,MALAYSIA (2026-10-17 19:36)",
    "legsIncomplete": false,
    "legs": [
     {
@@ -26836,33 +26707,48 @@
      "voyage": "0099E",
      "svc": "PS3",
      "pol": "SINGAPORE",
-     "etd": "2026-11-03T11:00",
+     "etd": "2026-11-04T17:00",
      "pod": "LOS ANGELES, CA",
      "eta": "2026-12-02T07:00"
     }
    ],
    "events": [
     {
-     "at": "2026-10-16T02:48",
+     "at": "2026-10-17T19:36",
      "loc": "PORT KLANG,MALAYSIA",
      "status": "Export Empty Container Released",
      "mode": "Truck"
     }
    ],
    "containers": [
+    "HMMU4105191",
+    "KOCU4839695",
+    "HMMU4678104",
+    "HMMU4670274",
+    "KOCU4060431",
+    "KOCU4524954",
+    "KOCU4136769",
     "KOCU4867038"
    ],
-   "cntrQty": 1,
-   "container": "KOCU4867038",
-   "spDep": "2026-10-16T02:48",
+   "cntrQty": 8,
+   "container": "HMMU4105191",
+   "spDep": "2026-10-17T19:36",
    "spArr": "2026-12-03T12:02",
-   "successEdge": "ORD",
-   "checkedAt": "2026-10-16 18:01Z",
-   "scheduleCheckedAt": "2026-10-16 18:01Z",
+   "successEdge": "TPE",
+   "checkedAt": "2026-10-17 15:00Z",
+   "scheduleCheckedAt": "2026-10-17 15:00Z",
    "rollover": false,
    "planEta": "2026-11-22",
    "delayDays": 10,
    "alert": "alert",
+   "justChanged": [
+    {
+     "field": "tsDep",
+     "label": "T/S ETD",
+     "from": "2026-11-03T17:00",
+     "to": "2026-11-04T17:00"
+    }
+   ],
    "firstSeenEta": "2026-11-23T17:00",
    "firstSeenPolDep": "2026-10-24T12:00",
    "etaChangeCount": 2,
@@ -34062,7 +33948,7 @@
     "YANTIAN, SHENZHEN, CHINA",
     "LOS ANGELES, CA"
    ],
-   "mapAt": "2026-10-16 18:16Z",
+   "mapAt": "2026-10-17 17:15Z",
    "idx": 1,
    "ratio": 0,
    "namedPorts": true,
@@ -40239,7 +40125,7 @@
     "HAI PHONG, VIETNAM",
     "LOS ANGELES, CA"
    ],
-   "mapAt": "2026-10-16 18:15Z",
+   "mapAt": "2026-10-17 17:15Z",
    "idx": 1,
    "ratio": 0,
    "namedPorts": true,
@@ -47136,9 +47022,9 @@
     "YANTIAN, SHENZHEN, CHINA",
     "LOS ANGELES, CA"
    ],
-   "mapAt": "2026-10-16 18:15Z",
+   "mapAt": "2026-10-17 17:15Z",
    "idx": 3,
-   "ratio": 0,
+   "ratio": 0.045153607265258654,
    "namedPorts": true,
    "rawRoute": [
     [
@@ -54033,7 +53919,7 @@
     "YANTIAN, SHENZHEN, CHINA",
     "LOS ANGELES, CA"
    ],
-   "mapAt": "2026-10-16 18:16Z",
+   "mapAt": "2026-10-17 17:15Z",
    "idx": 1,
    "ratio": 0,
    "namedPorts": true,
@@ -60961,9 +60847,9 @@
     "YANTIAN, SHENZHEN, CHINA",
     "LOS ANGELES, CA"
    ],
-   "mapAt": "2026-10-16 18:15Z",
+   "mapAt": "2026-10-17 17:15Z",
    "idx": 3,
-   "ratio": 0.19085058843334404,
+   "ratio": 0.25418713557687894,
    "namedPorts": true,
    "rawRoute": [
     [
@@ -74757,8 +74643,8 @@
    ],
    "namedPorts": true,
    "idx": 3,
-   "ratio": 0.8148121145842826,
-   "mapAt": "2026-10-16 18:15Z",
+   "ratio": 0.8776732282268599,
+   "mapAt": "2026-10-17 17:15Z",
    "rawRoute": [
     [
      2.9372384,
@@ -94042,7 +93928,7 @@
     "HAI PHONG, VIETNAM",
     "LOS ANGELES, CA"
    ],
-   "mapAt": "2026-10-16 18:16Z",
+   "mapAt": "2026-10-17 17:15Z",
    "idx": 0,
    "ratio": 0,
    "namedPorts": true,
@@ -100939,7 +100825,7 @@
     "YANTIAN, SHENZHEN, CHINA",
     "LOS ANGELES, CA"
    ],
-   "mapAt": "2026-10-16 18:16Z",
+   "mapAt": "2026-10-17 17:15Z",
    "idx": -1,
    "ratio": 0,
    "namedPorts": true,
