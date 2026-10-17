@@ -21,6 +21,21 @@ const ITEMS = [
   {id:'fin', name:'Thk Finger Min', dir:'lo', s1:0.08, s2:null, key:'fin_min', unit:'mm', specTxt:'≥ 0.08 · 근접밴드 없음', specTxt_en:'≥ 0.08 · no near-limit band'},
   {id:'width', name:'Width 경계 여유', name_en:'Width Boundary Margin', dir:'lo', s1:0, s2:1, key:null, unit:'mm', specTxt:'사이즈별 ±5, 0 = 스펙 경계', specTxt_en:'±5 per size, 0 = spec boundary', margin:true},
 ];
+/* COA 원문 쪽 뷰어(PC 전용) — coa-panel.js. 모바일(≤900px)은 기존 'Open original COA PDF' 버튼만 쓴다 */
+let coaPanel = null;
+function coaPanelShow(stem, pages){
+  if(typeof CoaPanel==='undefined' || typeof API_ROOT==='undefined') return;
+  if(!coaPanel) coaPanel = CoaPanel.create({
+    modalBody: document.getElementById('mBody'), apiRoot: API_ROOT,
+    isDesktop: ()=>!window.matchMedia('(max-width:900px)').matches,
+    msgs: LANG==='en'
+      ? {loading:'Loading COA pages…', error:'Could not load the COA PDF.', noPages:'These pages are not in the PDF.', open:'Open in new tab ↗'}
+      : {loading:'성적서 쪽을 불러오는 중…', error:'성적서 PDF를 불러오지 못했습니다.', noPages:'PDF에 해당 쪽이 없습니다.', open:'새 탭에서 열기 ↗'}
+  });
+  coaPanel.showSector(stem, pages);
+}
+function coaPanelClose(){ if(coaPanel) coaPanel.close(); }
+
 function itemName(it){ return LANG==='en' && it.name_en ? it.name_en : it.name; }
 function itemSpecTxt(it){ return LANG==='en' && it.specTxt_en ? it.specTxt_en : it.specTxt; }
 
@@ -423,15 +438,15 @@ function buildQuality(){
   window.__qBound = true;
   if(firstBind){
   document.getElementById('mClose').addEventListener('click',()=>{
-    overlay.classList.remove('show');
+    overlay.classList.remove('show'); coaPanelClose();
     document.body.classList.remove('modal-open');
   });
   overlay.addEventListener('click',e=>{if(e.target===overlay){
-    overlay.classList.remove('show');
+    overlay.classList.remove('show'); coaPanelClose();
     document.body.classList.remove('modal-open');
   }});
   document.addEventListener('keydown',e=>{if(e.key==='Escape'){
-    overlay.classList.remove('show');
+    overlay.classList.remove('show'); coaPanelClose();
     document.body.classList.remove('modal-open');
   }});
   }
@@ -484,14 +499,12 @@ function buildQuality(){
     const sizes=Object.keys(sec.rows);
     let h='<div class="meta-row"><span>'+t('lot')+' <b>'+sec.lot+'</b></span><span>'+t('mfgDate')+' <b>'+(sec.mfg||'—')+'</b></span><span>'+t('pages')+' <b>'+sec.pages+'</b></span></div>';
     h+='<table class="bd"><tr><th>'+t('itemHeader')+'</th>'+sizes.map(s=>'<th>'+s+'</th>').join('')+'</tr>';
+    /* 새 PSR 양식(phys_mixed)의 물성 12줄은 사이즈 구분 없이 장갑 13개를 잰 값이라 칸을 합친다 — coa-table.js.
+       13 = 추출기(coa_extract.py)가 정확히 13행을 읽었을 때만 phys_mixed 를 붙인다 */
+    const mixed=!!sec.phys_mixed;
     GROUPS.forEach(g=>{
-      h+='<tr><td class="grp" colspan="'+(sizes.length+1)+'">'+g[0][LANG]+'</td></tr>';
-      g[1].forEach(col=>{
-        h+='<tr><td>'+col[1]+'</td>'+sizes.map(sz=>{
-          const v=sec.rows[sz][col[0]];
-          return '<td class="'+cellClass(col[0],v,sz)+'">'+(v==null?'—':v)+'</td>';
-        }).join('')+'</tr>';
-      });
+      h+='<tr><td class="grp" colspan="'+(sizes.length+1)+'">'+CoaTable.groupTitle(g[0][LANG],g[1].map(c=>c[0]),mixed,13,LANG)+'</td></tr>';
+      g[1].forEach(col=>{ h+=CoaTable.rowHtml(col[0],col[1],sizes,sec.rows,mixed,cellClass); });
     });
     h+='</table><div class="legend-bd">'+t('legendPrefix')+' <i class="r">'+t('legendOff')+'</i> · <i class="y">'+t('legendNear')+'</i> — '+t('legendNote')+'</div>';
     /* COA 원문 PDF 링크 — 오른쪽 맨 아래. 워커 /coa-pdf 가 PDF 만 내려준다(pCloud 주소는 화면·저장소에 두지 않음) */
@@ -503,6 +516,7 @@ function buildQuality(){
          'border-radius:14px;padding:5px 12px;text-decoration:none;white-space:nowrap">'+t('coaLink')+'</a></div>';
     }
     document.getElementById('mBody').innerHTML=h;
+    coaPanelShow(sheet.pdf ? stem : null, sec.pages);
   }
 
   /* ── 모바일 탭 전환 ── */
