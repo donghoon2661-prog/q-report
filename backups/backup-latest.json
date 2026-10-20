@@ -1,32 +1,22 @@
 {
- "backupAt": "2026-10-19T20:16:57.140Z",
+ "backupAt": "2026-10-20T18:48:45.109Z",
  "kv": {
   "shipments": {
-   "updated": "2026-10-19 18:16Z",
+   "updated": "2026-10-20 18:01Z",
    "source": "hmm21.com Track & Trace",
    "tracked": 8,
-   "requested": 7,
-   "ok": 7,
-   "carried": [
-    "KULM68502700",
-    "KULM52279100",
-    "KULM15263800",
-    "KULM04993400",
-    "KULM36744200",
-    "KULM77897700",
-    "KULM78736300"
-   ],
+   "requested": 8,
+   "ok": 8,
+   "carried": [],
    "missing": [],
    "mapOk": 0,
    "rollovers": 0,
    "alerts": 3,
-   "changed": [
-    "KULM68502700"
-   ],
-   "sessionsUsed": 0,
-   "budgetUsed": 8,
+   "changed": [],
+   "sessionsUsed": 1,
+   "budgetUsed": 9,
    "partial": false,
-   "cursor": null,
+   "cursor": 0,
    "stale": false,
    "shipments": [
     {
@@ -151,26 +141,12 @@
      "spDep": "2026-08-29T12:28",
      "spArr": "2026-10-20T12:16",
      "successEdge": "ORD",
-     "checkedAt": "2026-10-19 15:16Z",
-     "scheduleCheckedAt": "2026-10-19 15:16Z",
+     "checkedAt": "2026-10-20 18:01Z",
+     "scheduleCheckedAt": "2026-10-20 18:01Z",
      "rollover": false,
      "planEta": "2026-10-06",
      "delayDays": 13,
      "alert": "alert",
-     "justChanged": [
-      {
-       "field": "eta",
-       "label": "POD ETB",
-       "from": "2026-10-19T07:00",
-       "to": "2026-10-19T06:21"
-      },
-      {
-       "field": "destEta",
-       "label": "DEST ETA",
-       "from": "2026-10-20T12:55",
-       "to": "2026-10-20T12:16"
-      }
-     ],
      "firstSeenEta": "2026-10-14T17:00",
      "firstSeenPolDep": "2026-09-03T12:00",
      "etaChangeCount": 6,
@@ -181,9 +157,7 @@
      "etaActual": false,
      "podBerthingActual": true,
      "polDepActualDate": "2026-09-04T19:18",
-     "podBerthingAt": "2026-10-19T06:21",
-     "staleItem": false,
-     "scheduleError": null
+     "podBerthingAt": "2026-10-19T06:21"
     },
     {
      "booking": "KULM52279100",
@@ -301,8 +275,8 @@
      "spDep": "2026-09-11T12:01",
      "spArr": "2026-10-29T22:00",
      "successEdge": "ORD",
-     "checkedAt": "2026-10-19 15:03Z",
-     "scheduleCheckedAt": "2026-10-19 15:03Z",
+     "checkedAt": "2026-10-20 18:01Z",
+     "scheduleCheckedAt": "2026-10-20 18:01Z",
      "rollover": false,
      "planEta": "2026-10-25",
      "delayDays": 3,
@@ -317,9 +291,7 @@
      "etaActual": false,
      "podBerthingActual": false,
      "polDepActualDate": "2026-09-19T07:36",
-     "podBerthingAt": null,
-     "staleItem": false,
-     "scheduleError": null
+     "podBerthingAt": null
     },
     {
      "booking": "KULM30733200",
@@ -431,8 +403,8 @@
      "spDep": "2026-09-19T01:36",
      "spArr": "2026-11-05T12:00",
      "successEdge": "ORD",
-     "checkedAt": "2026-10-19 18:02Z",
-     "scheduleCheckedAt": "2026-10-19 18:02Z",
+     "checkedAt": "2026-10-20 18:01Z",
+     "scheduleCheckedAt": "2026-10-20 18:01Z",
      "rollover": false,
      "planEta": "2026-11-01",
      "delayDays": 3,
@@ -553,8 +525,8 @@
      "spDep": "2026-09-22T18:51",
      "spArr": "2026-11-16T23:02",
      "successEdge": "ORD",
-     "checkedAt": "2026-10-19 15:03Z",
-     "scheduleCheckedAt": "2026-10-19 15:03Z",
+     "checkedAt": "2026-10-20 18:01Z",
+     "scheduleCheckedAt": "2026-10-20 18:01Z",
      "rollover": false,
      "planEta": "2026-11-08",
      "delayDays": 7,
@@ -569,9 +541,7 @@
      "etaActual": false,
      "podBerthingActual": false,
      "polDepActualDate": "2026-09-28T07:26",
-     "podBerthingAt": null,
-     "staleItem": false,
-     "scheduleError": null
+     "podBerthingAt": null
     },
     {
      "booking": "KULM04993400",
@@ -595,8 +565,8 @@
      "polDep": "2026-10-10T09:42",
      "tsArr": "2026-10-14T10:18",
      "tsDep": "2026-10-26T15:00",
-     "eta": "2026-11-19T07:00",
-     "destEta": "2026-11-20T05:02",
+     "eta": "2026-11-17T07:00",
+     "destEta": "2026-11-18T05:02",
      "status": "Export Truck Gate In to Terminal",
      "statusLoc": "PORT KLANG,MALAYSIA",
      "stamp": "2026-10-05T19:44",
@@ -621,7 +591,7 @@
        "pol": "SINGAPORE",
        "etd": "2026-10-26T15:00",
        "pod": "LOS ANGELES, CA",
-       "eta": "2026-11-19T07:00"
+       "eta": "2026-11-17T07:00"
       }
      ],
      "events": [
@@ -675,17 +645,17 @@
      "cntrQty": 14,
      "container": "HMMU7164243",
      "spDep": "2026-10-02T18:32",
-     "spArr": "2026-11-20T05:02",
-     "successEdge": "TPE",
-     "checkedAt": "2026-10-19 03:00Z",
-     "scheduleCheckedAt": "2026-10-19 03:00Z",
+     "spArr": "2026-11-18T05:02",
+     "successEdge": "ORD",
+     "checkedAt": "2026-10-20 18:01Z",
+     "scheduleCheckedAt": "2026-10-20 18:01Z",
      "rollover": false,
      "planEta": "2026-11-15",
-     "delayDays": 4,
-     "alert": "watch",
+     "delayDays": 2,
+     "alert": "ok",
      "firstSeenEta": "2026-11-05T07:00",
      "firstSeenPolDep": "2026-10-03T12:00",
-     "etaChangeCount": 7,
+     "etaChangeCount": 8,
      "polDepChangeCount": 5,
      "polDepActual": true,
      "tsArrActual": true,
@@ -693,9 +663,7 @@
      "etaActual": false,
      "podBerthingActual": false,
      "polDepActualDate": "2026-10-09T22:36",
-     "podBerthingAt": null,
-     "staleItem": false,
-     "scheduleError": null
+     "podBerthingAt": null
     },
     {
      "booking": "KULM36744200",
@@ -719,8 +687,8 @@
      "polDep": "2026-10-12T12:45",
      "tsArr": "2026-10-15T21:03",
      "tsDep": "2026-10-26T15:00",
-     "eta": "2026-11-19T07:00",
-     "destEta": "2026-11-20T05:02",
+     "eta": "2026-11-17T07:00",
+     "destEta": "2026-11-18T05:02",
      "status": "Export Truck Gate In to Terminal",
      "statusLoc": "PORT KLANG,MALAYSIA",
      "stamp": "2026-10-10T13:39",
@@ -745,7 +713,7 @@
        "pol": "SINGAPORE",
        "etd": "2026-10-26T15:00",
        "pod": "LOS ANGELES, CA",
-       "eta": "2026-11-19T07:00"
+       "eta": "2026-11-17T07:00"
       }
      ],
      "events": [
@@ -793,17 +761,17 @@
      "cntrQty": 14,
      "container": "HMMU6748290",
      "spDep": "2026-10-07T15:30",
-     "spArr": "2026-11-20T05:02",
+     "spArr": "2026-11-18T05:02",
      "successEdge": "ORD",
-     "checkedAt": "2026-10-19 15:03Z",
-     "scheduleCheckedAt": "2026-10-19 15:03Z",
+     "checkedAt": "2026-10-20 18:01Z",
+     "scheduleCheckedAt": "2026-10-20 18:01Z",
      "rollover": false,
      "planEta": "2026-11-13",
-     "delayDays": 6,
+     "delayDays": 4,
      "alert": "watch",
      "firstSeenEta": "2026-11-10T07:00",
      "firstSeenPolDep": "2026-10-10T12:00",
-     "etaChangeCount": 4,
+     "etaChangeCount": 5,
      "polDepChangeCount": 2,
      "polDepActual": true,
      "tsArrActual": true,
@@ -811,9 +779,7 @@
      "etaActual": false,
      "podBerthingActual": false,
      "polDepActualDate": "2026-10-12T10:22",
-     "podBerthingAt": null,
-     "staleItem": false,
-     "scheduleError": null
+     "podBerthingAt": null
     },
     {
      "booking": "KULM77897700",
@@ -835,10 +801,10 @@
       "TRAPAC TERMINAL, LOS"
      ],
      "polDep": "2026-10-23T01:00",
-     "tsArr": "2026-10-23T18:00",
-     "tsDep": "2026-10-30T14:30",
-     "eta": "2026-11-22T07:00",
-     "destEta": "2026-11-23T13:02",
+     "tsArr": "2026-10-27T10:00",
+     "tsDep": "2026-10-30T23:00",
+     "eta": "2026-11-23T07:00",
+     "destEta": "2026-11-24T13:02",
      "status": "Export Truck Gate In to Terminal",
      "statusLoc": "PORT KLANG,MALAYSIA",
      "stamp": "2026-10-15T22:12",
@@ -854,16 +820,16 @@
        "pol": "PORT KLANG,MALAYSIA",
        "etd": "2026-10-23T01:00",
        "pod": "SINGAPORE",
-       "eta": "2026-10-23T18:00"
+       "eta": "2026-10-27T10:00"
       },
       {
        "vessel": "SAN FRANCISCO BRIDGE",
        "voyage": "0088E",
        "svc": "PS5",
        "pol": "SINGAPORE",
-       "etd": "2026-10-30T14:30",
+       "etd": "2026-10-30T23:00",
        "pod": "LOS ANGELES, CA",
-       "eta": "2026-11-22T07:00"
+       "eta": "2026-11-23T07:00"
       }
      ],
      "events": [
@@ -899,17 +865,17 @@
      "cntrQty": 14,
      "container": "KOCU4292294",
      "spDep": "2026-10-13T16:48",
-     "spArr": "2026-11-23T13:02",
+     "spArr": "2026-11-24T13:02",
      "successEdge": "ORD",
-     "checkedAt": "2026-10-19 15:16Z",
-     "scheduleCheckedAt": "2026-10-19 15:16Z",
+     "checkedAt": "2026-10-20 18:01Z",
+     "scheduleCheckedAt": "2026-10-20 18:01Z",
      "rollover": false,
      "planEta": "2026-11-22",
-     "delayDays": 0,
+     "delayDays": 1,
      "alert": "ok",
      "firstSeenEta": "2026-11-29T17:00",
      "firstSeenPolDep": "2026-10-17T12:00",
-     "etaChangeCount": 1,
+     "etaChangeCount": 2,
      "polDepChangeCount": 1,
      "polDepActual": false,
      "tsArrActual": false,
@@ -917,9 +883,7 @@
      "etaActual": false,
      "podBerthingActual": false,
      "polDepActualDate": null,
-     "podBerthingAt": null,
-     "staleItem": false,
-     "scheduleError": null
+     "podBerthingAt": null
     },
     {
      "booking": "KULM78736300",
@@ -941,16 +905,16 @@
       "TRAPAC TERMINAL, LOS"
      ],
      "polDep": "2026-10-23T01:00",
-     "tsArr": "2026-10-23T18:00",
+     "tsArr": "2026-10-27T10:00",
      "tsDep": "2026-11-04T17:00",
-     "eta": "2026-12-02T07:00",
-     "destEta": "2026-12-03T12:02",
+     "eta": "2026-12-04T07:00",
+     "destEta": "2026-12-05T12:02",
      "status": "Export Empty Container Released",
      "statusLoc": "PORT KLANG,MALAYSIA",
-     "stamp": "2026-10-19T17:38",
-     "eventStamp": "2026-10-19T17:38",
+     "stamp": "2026-10-20T11:53",
+     "eventStamp": "2026-10-20T11:53",
      "lastEvent": "Export Empty Container Released @ PORT KLANG,MALAYSIA",
-     "last": "Export Empty Container Released @ PORT KLANG,MALAYSIA (2026-10-19 17:38)",
+     "last": "Export Empty Container Released @ PORT KLANG,MALAYSIA (2026-10-20 11:53)",
      "legsIncomplete": false,
      "legs": [
       {
@@ -960,7 +924,7 @@
        "pol": "PORT KLANG,MALAYSIA",
        "etd": "2026-10-23T01:00",
        "pod": "SINGAPORE",
-       "eta": "2026-10-23T18:00"
+       "eta": "2026-10-27T10:00"
       },
       {
        "vessel": "ONE HENRY HUDSON",
@@ -969,18 +933,21 @@
        "pol": "SINGAPORE",
        "etd": "2026-11-04T17:00",
        "pod": "LOS ANGELES, CA",
-       "eta": "2026-12-02T07:00"
+       "eta": "2026-12-04T07:00"
       }
      ],
      "events": [
       {
-       "at": "2026-10-19T17:38",
+       "at": "2026-10-20T11:53",
        "loc": "PORT KLANG,MALAYSIA",
        "status": "Export Empty Container Released",
        "mode": "Truck"
       }
      ],
      "containers": [
+      "HMMU6690449",
+      "HMMU4282324",
+      "HMMU4261980",
       "HMMU4864921",
       "KOCU4087324",
       "HMMU6739580",
@@ -993,20 +960,20 @@
       "KOCU4136769",
       "KOCU4867038"
      ],
-     "cntrQty": 11,
-     "container": "HMMU4864921",
-     "spDep": "2026-10-19T17:38",
-     "spArr": "2026-12-03T12:02",
+     "cntrQty": 14,
+     "container": "HMMU6690449",
+     "spDep": "2026-10-20T11:53",
+     "spArr": "2026-12-05T12:02",
      "successEdge": "ORD",
-     "checkedAt": "2026-10-19 15:03Z",
-     "scheduleCheckedAt": "2026-10-19 15:03Z",
+     "checkedAt": "2026-10-20 18:01Z",
+     "scheduleCheckedAt": "2026-10-20 18:01Z",
      "rollover": false,
      "planEta": "2026-11-22",
-     "delayDays": 10,
+     "delayDays": 12,
      "alert": "alert",
      "firstSeenEta": "2026-11-23T17:00",
      "firstSeenPolDep": "2026-10-24T12:00",
-     "etaChangeCount": 2,
+     "etaChangeCount": 3,
      "polDepChangeCount": 3,
      "polDepActual": false,
      "tsArrActual": false,
@@ -1014,25 +981,14 @@
      "etaActual": false,
      "podBerthingActual": false,
      "polDepActualDate": null,
-     "podBerthingAt": null,
-     "staleItem": false,
-     "scheduleError": null
+     "podBerthingAt": null
     }
    ],
-   "errors": [
-    "Session 1 failed: 03:15:49 세션 페이지 response 520 (cf-ray a4d1c5355c41104c-ORD, attempt 1)",
-    "Session 2 failed: 03:15:54 세션 페이지 response 520 (cf-ray a4d1c554dd28104c-ORD, attempt 1)",
-    "Session 3 failed: 03:15:59 세션 페이지 response 520 (cf-ray a4d1c5748e65104c-ORD, attempt 1)",
-    "Session 4 failed: 03:16:04 세션 페이지 response 520 (cf-ray a4d1c5943f8f104c-ORD, attempt 1)",
-    "Session 5 failed: 03:16:09 세션 페이지 response 520 (cf-ray a4d1c5b3987a104c-ORD, attempt 1)",
-    "Session 6 failed: 03:16:14 세션 페이지 response 520 (cf-ray a4d1c5d3595d104c-ORD, attempt 1)",
-    "Session 7 failed: 03:16:19 세션 페이지 response 520 (cf-ray a4d1c5f2fb3c104c-ORD, attempt 1)",
-    "Session 8 failed: 03:16:24 세션 페이지 response 520 (cf-ray a4d1c6125c42104c-ORD, attempt 1)",
-    "Unresolved: KULM68502700, KULM52279100, KULM15263800, KULM04993400, KULM36744200, KULM77897700, KULM78736300"
-   ],
+   "errors": [],
    "budget": {
-    "left": 192,
-    "used": 8
+    "left": 191,
+    "used": 9,
+    "lastCfRay": "a4d9ed66ee081116-ORD"
    }
   },
   "bookings": [
@@ -4048,6 +4004,23 @@
        "to": "2026-11-20T05:02"
       }
      ]
+    },
+    {
+     "at": "2026-10-20 15:01Z",
+     "changes": [
+      {
+       "field": "eta",
+       "label": "POD ETB",
+       "from": "2026-11-19T07:00",
+       "to": "2026-11-17T07:00"
+      },
+      {
+       "field": "destEta",
+       "label": "DEST ETA",
+       "from": "2026-11-20T05:02",
+       "to": "2026-11-18T05:02"
+      }
+     ]
     }
    ],
    "KULM36744200": [
@@ -4213,6 +4186,23 @@
        "to": "2026-11-20T05:02"
       }
      ]
+    },
+    {
+     "at": "2026-10-20 15:01Z",
+     "changes": [
+      {
+       "field": "eta",
+       "label": "POD ETB",
+       "from": "2026-11-19T07:00",
+       "to": "2026-11-17T07:00"
+      },
+      {
+       "field": "destEta",
+       "label": "DEST ETA",
+       "from": "2026-11-20T05:02",
+       "to": "2026-11-18T05:02"
+      }
+     ]
     }
    ],
    "KULM77897700": [
@@ -4320,6 +4310,40 @@
        "label": "T/S ETD",
        "from": "2026-10-31T22:30",
        "to": "2026-10-30T14:30"
+      }
+     ]
+    },
+    {
+     "at": "2026-10-20 05:16Z",
+     "changes": [
+      {
+       "field": "tsArr",
+       "label": "T/S ETA",
+       "from": "2026-10-23T18:00",
+       "to": "2026-10-27T10:00"
+      }
+     ]
+    },
+    {
+     "at": "2026-10-20 15:01Z",
+     "changes": [
+      {
+       "field": "tsDep",
+       "label": "T/S ETD",
+       "from": "2026-10-30T14:30",
+       "to": "2026-10-30T23:00"
+      },
+      {
+       "field": "eta",
+       "label": "POD ETB",
+       "from": "2026-11-22T07:00",
+       "to": "2026-11-23T07:00"
+      },
+      {
+       "field": "destEta",
+       "label": "DEST ETA",
+       "from": "2026-11-23T13:02",
+       "to": "2026-11-24T13:02"
       }
      ]
     }
@@ -4477,6 +4501,34 @@
        "to": "2026-11-04T17:00"
       }
      ]
+    },
+    {
+     "at": "2026-10-20 00:17Z",
+     "changes": [
+      {
+       "field": "eta",
+       "label": "POD ETB",
+       "from": "2026-12-02T07:00",
+       "to": "2026-12-04T07:00"
+      },
+      {
+       "field": "destEta",
+       "label": "DEST ETA",
+       "from": "2026-12-03T12:02",
+       "to": "2026-12-05T12:02"
+      }
+     ]
+    },
+    {
+     "at": "2026-10-20 05:16Z",
+     "changes": [
+      {
+       "field": "tsArr",
+       "label": "T/S ETA",
+       "from": "2026-10-23T18:00",
+       "to": "2026-10-27T10:00"
+      }
+     ]
     }
    ]
   },
@@ -4521,25 +4573,25 @@
     "level": "watch",
     "delayDays": 3,
     "rollover": false,
-    "at": "2026-10-19 15:03Z"
+    "at": "2026-10-20 18:01Z"
    },
    "KULM04993400": {
-    "level": "watch",
-    "delayDays": 4,
+    "level": "ok",
+    "delayDays": 2,
     "rollover": false,
-    "at": "2026-10-19 12:01Z"
+    "at": "2026-10-20 18:01Z"
    },
    "KULM68502700": {
     "level": "alert",
     "delayDays": 13,
     "rollover": false,
-    "at": "2026-10-19 12:01Z"
+    "at": "2026-10-20 18:01Z"
    },
    "KULM15263800": {
     "level": "alert",
     "delayDays": 7,
     "rollover": false,
-    "at": "2026-10-19 15:03Z"
+    "at": "2026-10-20 18:01Z"
    },
    "KULM64432100": {
     "level": "ok",
@@ -4551,29 +4603,29 @@
     "level": "watch",
     "delayDays": 3,
     "rollover": false,
-    "at": "2026-10-19 18:02Z"
+    "at": "2026-10-20 18:01Z"
    },
    "KULM77897700": {
     "level": "ok",
-    "delayDays": 0,
+    "delayDays": 1,
     "rollover": false,
-    "at": "2026-10-19 12:01Z"
+    "at": "2026-10-20 18:01Z"
    },
    "KULM36744200": {
     "level": "watch",
-    "delayDays": 6,
+    "delayDays": 4,
     "rollover": false,
-    "at": "2026-10-19 15:03Z"
+    "at": "2026-10-20 18:01Z"
    },
    "KULM78736300": {
     "level": "alert",
-    "delayDays": 10,
+    "delayDays": 12,
     "rollover": false,
-    "at": "2026-10-19 15:03Z"
+    "at": "2026-10-20 18:01Z"
    }
   },
   "lastrun": {
-   "at": "2026-10-19T19:47:53.122Z",
+   "at": "2026-10-20T18:46:15.063Z",
    "trigger": "cron-stale",
    "cron": "15,45 * * * *",
    "schedRetry": 0,
@@ -4581,1436 +4633,6 @@
   },
   "sessionLog": [
    {
-    "t": 1792152084736,
-    "date": "10/16",
-    "time": "21:01",
-    "ok": true,
-    "tag": "cron",
-    "booking": "KULM52279100",
-    "attempt": 1,
-    "code": null,
-    "loc": "ORD"
-   },
-   {
-    "t": 1792152084736,
-    "date": "10/16",
-    "time": "21:01",
-    "ok": true,
-    "tag": "cron",
-    "booking": "KULM30733200",
-    "attempt": 1,
-    "code": null,
-    "loc": "ORD"
-   },
-   {
-    "t": 1792152084736,
-    "date": "10/16",
-    "time": "21:01",
-    "ok": true,
-    "tag": "cron",
-    "booking": "KULM15263800",
-    "attempt": 1,
-    "code": null,
-    "loc": "ORD"
-   },
-   {
-    "t": 1792152084736,
-    "date": "10/16",
-    "time": "21:01",
-    "ok": true,
-    "tag": "cron",
-    "booking": "KULM04993400",
-    "attempt": 1,
-    "code": null,
-    "loc": "ORD"
-   },
-   {
-    "t": 1792152084736,
-    "date": "10/16",
-    "time": "21:01",
-    "ok": true,
-    "tag": "cron",
-    "booking": "KULM36744200",
-    "attempt": 1,
-    "code": null,
-    "loc": "ORD"
-   },
-   {
-    "t": 1792152084736,
-    "date": "10/16",
-    "time": "21:01",
-    "ok": true,
-    "tag": "cron",
-    "booking": "KULM77897700",
-    "attempt": 1,
-    "code": null,
-    "loc": "ORD"
-   },
-   {
-    "t": 1792152084736,
-    "date": "10/16",
-    "time": "21:01",
-    "ok": true,
-    "tag": "cron",
-    "booking": "KULM78736300",
-    "attempt": 1,
-    "code": null,
-    "loc": "ORD"
-   },
-   {
-    "t": 1792162888577,
-    "date": "10/17",
-    "time": "00:01",
-    "ok": true,
-    "tag": "cron",
-    "booking": "KULM68502700",
-    "attempt": 1,
-    "code": null,
-    "loc": "ORD"
-   },
-   {
-    "t": 1792162888577,
-    "date": "10/17",
-    "time": "00:01",
-    "ok": true,
-    "tag": "cron",
-    "booking": "KULM52279100",
-    "attempt": 1,
-    "code": null,
-    "loc": "ORD"
-   },
-   {
-    "t": 1792162888577,
-    "date": "10/17",
-    "time": "00:01",
-    "ok": true,
-    "tag": "cron",
-    "booking": "KULM30733200",
-    "attempt": 1,
-    "code": null,
-    "loc": "ORD"
-   },
-   {
-    "t": 1792162888577,
-    "date": "10/17",
-    "time": "00:01",
-    "ok": true,
-    "tag": "cron",
-    "booking": "KULM15263800",
-    "attempt": 1,
-    "code": null,
-    "loc": "ORD"
-   },
-   {
-    "t": 1792162888577,
-    "date": "10/17",
-    "time": "00:01",
-    "ok": true,
-    "tag": "cron",
-    "booking": "KULM04993400",
-    "attempt": 1,
-    "code": null,
-    "loc": "ORD"
-   },
-   {
-    "t": 1792162888577,
-    "date": "10/17",
-    "time": "00:01",
-    "ok": true,
-    "tag": "cron",
-    "booking": "KULM36744200",
-    "attempt": 1,
-    "code": null,
-    "loc": "ORD"
-   },
-   {
-    "t": 1792162888577,
-    "date": "10/17",
-    "time": "00:01",
-    "ok": true,
-    "tag": "cron",
-    "booking": "KULM77897700",
-    "attempt": 1,
-    "code": null,
-    "loc": "ORD"
-   },
-   {
-    "t": 1792162888577,
-    "date": "10/17",
-    "time": "00:01",
-    "ok": true,
-    "tag": "cron",
-    "booking": "KULM78736300",
-    "attempt": 1,
-    "code": null,
-    "loc": "ORD"
-   },
-   {
-    "t": 1792173685814,
-    "date": "10/17",
-    "time": "03:01",
-    "ok": true,
-    "tag": "cron",
-    "booking": "KULM68502700",
-    "attempt": 1,
-    "code": null,
-    "loc": "ORD"
-   },
-   {
-    "t": 1792173685814,
-    "date": "10/17",
-    "time": "03:01",
-    "ok": true,
-    "tag": "cron",
-    "booking": "KULM52279100",
-    "attempt": 1,
-    "code": null,
-    "loc": "ORD"
-   },
-   {
-    "t": 1792173685814,
-    "date": "10/17",
-    "time": "03:01",
-    "ok": true,
-    "tag": "cron",
-    "booking": "KULM30733200",
-    "attempt": 1,
-    "code": null,
-    "loc": "ORD"
-   },
-   {
-    "t": 1792173685814,
-    "date": "10/17",
-    "time": "03:01",
-    "ok": true,
-    "tag": "cron",
-    "booking": "KULM15263800",
-    "attempt": 1,
-    "code": null,
-    "loc": "ORD"
-   },
-   {
-    "t": 1792173685814,
-    "date": "10/17",
-    "time": "03:01",
-    "ok": true,
-    "tag": "cron",
-    "booking": "KULM04993400",
-    "attempt": 1,
-    "code": null,
-    "loc": "ORD"
-   },
-   {
-    "t": 1792173685814,
-    "date": "10/17",
-    "time": "03:01",
-    "ok": true,
-    "tag": "cron",
-    "booking": "KULM36744200",
-    "attempt": 1,
-    "code": null,
-    "loc": "ORD"
-   },
-   {
-    "t": 1792173685814,
-    "date": "10/17",
-    "time": "03:01",
-    "ok": true,
-    "tag": "cron",
-    "booking": "KULM77897700",
-    "attempt": 1,
-    "code": null,
-    "loc": "ORD"
-   },
-   {
-    "t": 1792173685814,
-    "date": "10/17",
-    "time": "03:01",
-    "ok": true,
-    "tag": "cron",
-    "booking": "KULM78736300",
-    "attempt": 1,
-    "code": null,
-    "loc": "ORD"
-   },
-   {
-    "t": 1792184480256,
-    "date": "10/17",
-    "time": "06:01",
-    "ok": true,
-    "tag": "cron",
-    "booking": "KULM68502700",
-    "attempt": 1,
-    "code": null,
-    "loc": "ORD"
-   },
-   {
-    "t": 1792184480256,
-    "date": "10/17",
-    "time": "06:01",
-    "ok": true,
-    "tag": "cron",
-    "booking": "KULM52279100",
-    "attempt": 1,
-    "code": null,
-    "loc": "ORD"
-   },
-   {
-    "t": 1792184480256,
-    "date": "10/17",
-    "time": "06:01",
-    "ok": true,
-    "tag": "cron",
-    "booking": "KULM30733200",
-    "attempt": 1,
-    "code": null,
-    "loc": "ORD"
-   },
-   {
-    "t": 1792184480256,
-    "date": "10/17",
-    "time": "06:01",
-    "ok": true,
-    "tag": "cron",
-    "booking": "KULM15263800",
-    "attempt": 1,
-    "code": null,
-    "loc": "ORD"
-   },
-   {
-    "t": 1792184480256,
-    "date": "10/17",
-    "time": "06:01",
-    "ok": true,
-    "tag": "cron",
-    "booking": "KULM04993400",
-    "attempt": 1,
-    "code": null,
-    "loc": "ORD"
-   },
-   {
-    "t": 1792184480256,
-    "date": "10/17",
-    "time": "06:01",
-    "ok": true,
-    "tag": "cron",
-    "booking": "KULM36744200",
-    "attempt": 1,
-    "code": null,
-    "loc": "ORD"
-   },
-   {
-    "t": 1792184480256,
-    "date": "10/17",
-    "time": "06:01",
-    "ok": true,
-    "tag": "cron",
-    "booking": "KULM77897700",
-    "attempt": 1,
-    "code": null,
-    "loc": "ORD"
-   },
-   {
-    "t": 1792184480256,
-    "date": "10/17",
-    "time": "06:01",
-    "ok": true,
-    "tag": "cron",
-    "booking": "KULM78736300",
-    "attempt": 1,
-    "code": null,
-    "loc": "ORD"
-   },
-   {
-    "t": 1792195279954,
-    "date": "10/17",
-    "time": "09:01",
-    "ok": true,
-    "tag": "cron",
-    "booking": "KULM68502700",
-    "attempt": 1,
-    "code": null,
-    "loc": "ORD"
-   },
-   {
-    "t": 1792195279954,
-    "date": "10/17",
-    "time": "09:01",
-    "ok": true,
-    "tag": "cron",
-    "booking": "KULM52279100",
-    "attempt": 1,
-    "code": null,
-    "loc": "ORD"
-   },
-   {
-    "t": 1792195279954,
-    "date": "10/17",
-    "time": "09:01",
-    "ok": true,
-    "tag": "cron",
-    "booking": "KULM30733200",
-    "attempt": 1,
-    "code": null,
-    "loc": "ORD"
-   },
-   {
-    "t": 1792195279954,
-    "date": "10/17",
-    "time": "09:01",
-    "ok": true,
-    "tag": "cron",
-    "booking": "KULM15263800",
-    "attempt": 1,
-    "code": null,
-    "loc": "ORD"
-   },
-   {
-    "t": 1792195279954,
-    "date": "10/17",
-    "time": "09:01",
-    "ok": true,
-    "tag": "cron",
-    "booking": "KULM04993400",
-    "attempt": 1,
-    "code": null,
-    "loc": "ORD"
-   },
-   {
-    "t": 1792195279954,
-    "date": "10/17",
-    "time": "09:01",
-    "ok": true,
-    "tag": "cron",
-    "booking": "KULM36744200",
-    "attempt": 1,
-    "code": null,
-    "loc": "ORD"
-   },
-   {
-    "t": 1792195279954,
-    "date": "10/17",
-    "time": "09:01",
-    "ok": true,
-    "tag": "cron",
-    "booking": "KULM77897700",
-    "attempt": 1,
-    "code": null,
-    "loc": "ORD"
-   },
-   {
-    "t": 1792195279954,
-    "date": "10/17",
-    "time": "09:01",
-    "ok": true,
-    "tag": "cron",
-    "booking": "KULM78736300",
-    "attempt": 1,
-    "code": null,
-    "loc": "ORD"
-   },
-   {
-    "t": 1792206073527,
-    "date": "10/17",
-    "time": "12:01",
-    "ok": true,
-    "tag": "cron",
-    "booking": "KULM68502700",
-    "attempt": 1,
-    "code": null,
-    "loc": "ORD"
-   },
-   {
-    "t": 1792206073527,
-    "date": "10/17",
-    "time": "12:01",
-    "ok": true,
-    "tag": "cron",
-    "booking": "KULM52279100",
-    "attempt": 1,
-    "code": null,
-    "loc": "ORD"
-   },
-   {
-    "t": 1792206073527,
-    "date": "10/17",
-    "time": "12:01",
-    "ok": true,
-    "tag": "cron",
-    "booking": "KULM30733200",
-    "attempt": 1,
-    "code": null,
-    "loc": "ORD"
-   },
-   {
-    "t": 1792206073527,
-    "date": "10/17",
-    "time": "12:01",
-    "ok": true,
-    "tag": "cron",
-    "booking": "KULM15263800",
-    "attempt": 1,
-    "code": null,
-    "loc": "ORD"
-   },
-   {
-    "t": 1792206073527,
-    "date": "10/17",
-    "time": "12:01",
-    "ok": true,
-    "tag": "cron",
-    "booking": "KULM04993400",
-    "attempt": 1,
-    "code": null,
-    "loc": "ORD"
-   },
-   {
-    "t": 1792206073527,
-    "date": "10/17",
-    "time": "12:01",
-    "ok": true,
-    "tag": "cron",
-    "booking": "KULM36744200",
-    "attempt": 1,
-    "code": null,
-    "loc": "ORD"
-   },
-   {
-    "t": 1792206073527,
-    "date": "10/17",
-    "time": "12:01",
-    "ok": true,
-    "tag": "cron",
-    "booking": "KULM77897700",
-    "attempt": 1,
-    "code": null,
-    "loc": "ORD"
-   },
-   {
-    "t": 1792206073527,
-    "date": "10/17",
-    "time": "12:01",
-    "ok": true,
-    "tag": "cron",
-    "booking": "KULM78736300",
-    "attempt": 1,
-    "code": null,
-    "loc": "ORD"
-   },
-   {
-    "t": 1792216843509,
-    "date": "10/17",
-    "time": "15:00",
-    "ok": true,
-    "tag": "cron",
-    "booking": "KULM68502700",
-    "attempt": 1,
-    "code": null,
-    "loc": "ORD"
-   },
-   {
-    "t": 1792216843509,
-    "date": "10/17",
-    "time": "15:00",
-    "ok": true,
-    "tag": "cron",
-    "booking": "KULM52279100",
-    "attempt": 1,
-    "code": null,
-    "loc": "ORD"
-   },
-   {
-    "t": 1792216843509,
-    "date": "10/17",
-    "time": "15:00",
-    "ok": true,
-    "tag": "cron",
-    "booking": "KULM30733200",
-    "attempt": 1,
-    "code": null,
-    "loc": "ORD"
-   },
-   {
-    "t": 1792216843509,
-    "date": "10/17",
-    "time": "15:00",
-    "ok": true,
-    "tag": "cron",
-    "booking": "KULM15263800",
-    "attempt": 1,
-    "code": null,
-    "loc": "ORD"
-   },
-   {
-    "t": 1792216843509,
-    "date": "10/17",
-    "time": "15:00",
-    "ok": true,
-    "tag": "cron",
-    "booking": "KULM04993400",
-    "attempt": 1,
-    "code": null,
-    "loc": "ORD"
-   },
-   {
-    "t": 1792216843509,
-    "date": "10/17",
-    "time": "15:00",
-    "ok": true,
-    "tag": "cron",
-    "booking": "KULM36744200",
-    "attempt": 1,
-    "code": null,
-    "loc": "ORD"
-   },
-   {
-    "t": 1792216843509,
-    "date": "10/17",
-    "time": "15:00",
-    "ok": true,
-    "tag": "cron",
-    "booking": "KULM77897700",
-    "attempt": 1,
-    "code": null,
-    "loc": "ORD"
-   },
-   {
-    "t": 1792216843509,
-    "date": "10/17",
-    "time": "15:00",
-    "ok": true,
-    "tag": "cron",
-    "booking": "KULM78736300",
-    "attempt": 1,
-    "code": null,
-    "loc": "ORD"
-   },
-   {
-    "t": 1792227640827,
-    "date": "10/17",
-    "time": "18:00",
-    "ok": true,
-    "tag": "cron",
-    "booking": "KULM68502700",
-    "attempt": 1,
-    "code": null,
-    "loc": "ORD"
-   },
-   {
-    "t": 1792227640827,
-    "date": "10/17",
-    "time": "18:00",
-    "ok": true,
-    "tag": "cron",
-    "booking": "KULM52279100",
-    "attempt": 1,
-    "code": null,
-    "loc": "ORD"
-   },
-   {
-    "t": 1792227640827,
-    "date": "10/17",
-    "time": "18:00",
-    "ok": true,
-    "tag": "cron",
-    "booking": "KULM30733200",
-    "attempt": 1,
-    "code": null,
-    "loc": "ORD"
-   },
-   {
-    "t": 1792227640827,
-    "date": "10/17",
-    "time": "18:00",
-    "ok": true,
-    "tag": "cron",
-    "booking": "KULM15263800",
-    "attempt": 1,
-    "code": null,
-    "loc": "ORD"
-   },
-   {
-    "t": 1792227640827,
-    "date": "10/17",
-    "time": "18:00",
-    "ok": true,
-    "tag": "cron",
-    "booking": "KULM04993400",
-    "attempt": 1,
-    "code": null,
-    "loc": "ORD"
-   },
-   {
-    "t": 1792227640827,
-    "date": "10/17",
-    "time": "18:00",
-    "ok": true,
-    "tag": "cron",
-    "booking": "KULM36744200",
-    "attempt": 1,
-    "code": null,
-    "loc": "ORD"
-   },
-   {
-    "t": 1792227640827,
-    "date": "10/17",
-    "time": "18:00",
-    "ok": true,
-    "tag": "cron",
-    "booking": "KULM77897700",
-    "attempt": 1,
-    "code": null,
-    "loc": "ORD"
-   },
-   {
-    "t": 1792227640827,
-    "date": "10/17",
-    "time": "18:00",
-    "ok": true,
-    "tag": "cron",
-    "booking": "KULM78736300",
-    "attempt": 1,
-    "code": null,
-    "loc": "ORD"
-   },
-   {
-    "t": 1792238440872,
-    "date": "10/17",
-    "time": "21:00",
-    "ok": true,
-    "tag": "cron",
-    "booking": "KULM68502700",
-    "attempt": 1,
-    "code": null,
-    "loc": "ORD"
-   },
-   {
-    "t": 1792238440872,
-    "date": "10/17",
-    "time": "21:00",
-    "ok": true,
-    "tag": "cron",
-    "booking": "KULM52279100",
-    "attempt": 1,
-    "code": null,
-    "loc": "ORD"
-   },
-   {
-    "t": 1792238440872,
-    "date": "10/17",
-    "time": "21:00",
-    "ok": true,
-    "tag": "cron",
-    "booking": "KULM30733200",
-    "attempt": 1,
-    "code": null,
-    "loc": "ORD"
-   },
-   {
-    "t": 1792238440872,
-    "date": "10/17",
-    "time": "21:00",
-    "ok": true,
-    "tag": "cron",
-    "booking": "KULM15263800",
-    "attempt": 1,
-    "code": null,
-    "loc": "ORD"
-   },
-   {
-    "t": 1792238440872,
-    "date": "10/17",
-    "time": "21:00",
-    "ok": true,
-    "tag": "cron",
-    "booking": "KULM04993400",
-    "attempt": 1,
-    "code": null,
-    "loc": "ORD"
-   },
-   {
-    "t": 1792238440872,
-    "date": "10/17",
-    "time": "21:00",
-    "ok": true,
-    "tag": "cron",
-    "booking": "KULM36744200",
-    "attempt": 1,
-    "code": null,
-    "loc": "ORD"
-   },
-   {
-    "t": 1792238440872,
-    "date": "10/17",
-    "time": "21:00",
-    "ok": true,
-    "tag": "cron",
-    "booking": "KULM77897700",
-    "attempt": 1,
-    "code": null,
-    "loc": "ORD"
-   },
-   {
-    "t": 1792238440872,
-    "date": "10/17",
-    "time": "21:00",
-    "ok": true,
-    "tag": "cron",
-    "booking": "KULM78736300",
-    "attempt": 1,
-    "code": null,
-    "loc": "ORD"
-   },
-   {
-    "t": 1792249255332,
-    "date": "10/18",
-    "time": "00:00",
-    "ok": true,
-    "tag": "cron",
-    "booking": "KULM68502700",
-    "attempt": 1,
-    "code": null,
-    "loc": "TPE"
-   },
-   {
-    "t": 1792249255332,
-    "date": "10/18",
-    "time": "00:00",
-    "ok": true,
-    "tag": "cron",
-    "booking": "KULM52279100",
-    "attempt": 1,
-    "code": null,
-    "loc": "TPE"
-   },
-   {
-    "t": 1792249255332,
-    "date": "10/18",
-    "time": "00:00",
-    "ok": true,
-    "tag": "cron",
-    "booking": "KULM30733200",
-    "attempt": 1,
-    "code": null,
-    "loc": "TPE"
-   },
-   {
-    "t": 1792249255332,
-    "date": "10/18",
-    "time": "00:00",
-    "ok": true,
-    "tag": "cron",
-    "booking": "KULM15263800",
-    "attempt": 1,
-    "code": null,
-    "loc": "TPE"
-   },
-   {
-    "t": 1792249255332,
-    "date": "10/18",
-    "time": "00:00",
-    "ok": true,
-    "tag": "cron",
-    "booking": "KULM04993400",
-    "attempt": 1,
-    "code": null,
-    "loc": "TPE"
-   },
-   {
-    "t": 1792249255332,
-    "date": "10/18",
-    "time": "00:00",
-    "ok": true,
-    "tag": "cron",
-    "booking": "KULM36744200",
-    "attempt": 1,
-    "code": null,
-    "loc": "TPE"
-   },
-   {
-    "t": 1792249255332,
-    "date": "10/18",
-    "time": "00:00",
-    "ok": true,
-    "tag": "cron",
-    "booking": "KULM77897700",
-    "attempt": 1,
-    "code": null,
-    "loc": "TPE"
-   },
-   {
-    "t": 1792249255332,
-    "date": "10/18",
-    "time": "00:00",
-    "ok": true,
-    "tag": "cron",
-    "booking": "KULM78736300",
-    "attempt": 1,
-    "code": null,
-    "loc": "TPE"
-   },
-   {
-    "t": 1792260047294,
-    "date": "10/18",
-    "time": "03:00",
-    "ok": true,
-    "tag": "cron",
-    "booking": "KULM68502700",
-    "attempt": 1,
-    "code": null,
-    "loc": "TPE"
-   },
-   {
-    "t": 1792260047294,
-    "date": "10/18",
-    "time": "03:00",
-    "ok": true,
-    "tag": "cron",
-    "booking": "KULM52279100",
-    "attempt": 1,
-    "code": null,
-    "loc": "TPE"
-   },
-   {
-    "t": 1792260047294,
-    "date": "10/18",
-    "time": "03:00",
-    "ok": true,
-    "tag": "cron",
-    "booking": "KULM30733200",
-    "attempt": 1,
-    "code": null,
-    "loc": "TPE"
-   },
-   {
-    "t": 1792260047294,
-    "date": "10/18",
-    "time": "03:00",
-    "ok": true,
-    "tag": "cron",
-    "booking": "KULM15263800",
-    "attempt": 1,
-    "code": null,
-    "loc": "TPE"
-   },
-   {
-    "t": 1792260047294,
-    "date": "10/18",
-    "time": "03:00",
-    "ok": true,
-    "tag": "cron",
-    "booking": "KULM04993400",
-    "attempt": 1,
-    "code": null,
-    "loc": "TPE"
-   },
-   {
-    "t": 1792260047294,
-    "date": "10/18",
-    "time": "03:00",
-    "ok": true,
-    "tag": "cron",
-    "booking": "KULM36744200",
-    "attempt": 1,
-    "code": null,
-    "loc": "TPE"
-   },
-   {
-    "t": 1792260047294,
-    "date": "10/18",
-    "time": "03:00",
-    "ok": true,
-    "tag": "cron",
-    "booking": "KULM77897700",
-    "attempt": 1,
-    "code": null,
-    "loc": "TPE"
-   },
-   {
-    "t": 1792260047294,
-    "date": "10/18",
-    "time": "03:00",
-    "ok": true,
-    "tag": "cron",
-    "booking": "KULM78736300",
-    "attempt": 1,
-    "code": null,
-    "loc": "TPE"
-   },
-   {
-    "t": 1792270841991,
-    "date": "10/18",
-    "time": "06:00",
-    "ok": true,
-    "tag": "cron",
-    "booking": "KULM68502700",
-    "attempt": 1,
-    "code": null,
-    "loc": "TPE"
-   },
-   {
-    "t": 1792270841991,
-    "date": "10/18",
-    "time": "06:00",
-    "ok": true,
-    "tag": "cron",
-    "booking": "KULM52279100",
-    "attempt": 1,
-    "code": null,
-    "loc": "TPE"
-   },
-   {
-    "t": 1792270841991,
-    "date": "10/18",
-    "time": "06:00",
-    "ok": true,
-    "tag": "cron",
-    "booking": "KULM30733200",
-    "attempt": 1,
-    "code": null,
-    "loc": "TPE"
-   },
-   {
-    "t": 1792270841991,
-    "date": "10/18",
-    "time": "06:00",
-    "ok": true,
-    "tag": "cron",
-    "booking": "KULM15263800",
-    "attempt": 1,
-    "code": null,
-    "loc": "TPE"
-   },
-   {
-    "t": 1792270841991,
-    "date": "10/18",
-    "time": "06:00",
-    "ok": true,
-    "tag": "cron",
-    "booking": "KULM04993400",
-    "attempt": 1,
-    "code": null,
-    "loc": "TPE"
-   },
-   {
-    "t": 1792270841991,
-    "date": "10/18",
-    "time": "06:00",
-    "ok": true,
-    "tag": "cron",
-    "booking": "KULM36744200",
-    "attempt": 1,
-    "code": null,
-    "loc": "TPE"
-   },
-   {
-    "t": 1792270841991,
-    "date": "10/18",
-    "time": "06:00",
-    "ok": true,
-    "tag": "cron",
-    "booking": "KULM77897700",
-    "attempt": 1,
-    "code": null,
-    "loc": "TPE"
-   },
-   {
-    "t": 1792270841991,
-    "date": "10/18",
-    "time": "06:00",
-    "ok": true,
-    "tag": "cron",
-    "booking": "KULM78736300",
-    "attempt": 1,
-    "code": null,
-    "loc": "TPE"
-   },
-   {
-    "t": 1792281645296,
-    "date": "10/18",
-    "time": "09:00",
-    "ok": true,
-    "tag": "cron",
-    "booking": "KULM68502700",
-    "attempt": 1,
-    "code": null,
-    "loc": "TPE"
-   },
-   {
-    "t": 1792281645296,
-    "date": "10/18",
-    "time": "09:00",
-    "ok": true,
-    "tag": "cron",
-    "booking": "KULM52279100",
-    "attempt": 1,
-    "code": null,
-    "loc": "TPE"
-   },
-   {
-    "t": 1792281645296,
-    "date": "10/18",
-    "time": "09:00",
-    "ok": true,
-    "tag": "cron",
-    "booking": "KULM30733200",
-    "attempt": 1,
-    "code": null,
-    "loc": "TPE"
-   },
-   {
-    "t": 1792281645296,
-    "date": "10/18",
-    "time": "09:00",
-    "ok": true,
-    "tag": "cron",
-    "booking": "KULM15263800",
-    "attempt": 1,
-    "code": null,
-    "loc": "TPE"
-   },
-   {
-    "t": 1792281645296,
-    "date": "10/18",
-    "time": "09:00",
-    "ok": true,
-    "tag": "cron",
-    "booking": "KULM04993400",
-    "attempt": 1,
-    "code": null,
-    "loc": "TPE"
-   },
-   {
-    "t": 1792281645296,
-    "date": "10/18",
-    "time": "09:00",
-    "ok": true,
-    "tag": "cron",
-    "booking": "KULM36744200",
-    "attempt": 1,
-    "code": null,
-    "loc": "TPE"
-   },
-   {
-    "t": 1792281645296,
-    "date": "10/18",
-    "time": "09:00",
-    "ok": true,
-    "tag": "cron",
-    "booking": "KULM77897700",
-    "attempt": 1,
-    "code": null,
-    "loc": "TPE"
-   },
-   {
-    "t": 1792281645296,
-    "date": "10/18",
-    "time": "09:00",
-    "ok": true,
-    "tag": "cron",
-    "booking": "KULM78736300",
-    "attempt": 1,
-    "code": null,
-    "loc": "TPE"
-   },
-   {
-    "t": 1792292450985,
-    "date": "10/18",
-    "time": "12:00",
-    "ok": true,
-    "tag": "cron",
-    "booking": "KULM68502700",
-    "attempt": 1,
-    "code": null,
-    "loc": "TPE"
-   },
-   {
-    "t": 1792292450985,
-    "date": "10/18",
-    "time": "12:00",
-    "ok": true,
-    "tag": "cron",
-    "booking": "KULM52279100",
-    "attempt": 1,
-    "code": null,
-    "loc": "TPE"
-   },
-   {
-    "t": 1792292450985,
-    "date": "10/18",
-    "time": "12:00",
-    "ok": true,
-    "tag": "cron",
-    "booking": "KULM30733200",
-    "attempt": 1,
-    "code": null,
-    "loc": "TPE"
-   },
-   {
-    "t": 1792292450985,
-    "date": "10/18",
-    "time": "12:00",
-    "ok": true,
-    "tag": "cron",
-    "booking": "KULM15263800",
-    "attempt": 1,
-    "code": null,
-    "loc": "TPE"
-   },
-   {
-    "t": 1792292450985,
-    "date": "10/18",
-    "time": "12:00",
-    "ok": true,
-    "tag": "cron",
-    "booking": "KULM04993400",
-    "attempt": 1,
-    "code": null,
-    "loc": "TPE"
-   },
-   {
-    "t": 1792292450985,
-    "date": "10/18",
-    "time": "12:00",
-    "ok": true,
-    "tag": "cron",
-    "booking": "KULM36744200",
-    "attempt": 1,
-    "code": null,
-    "loc": "TPE"
-   },
-   {
-    "t": 1792292450985,
-    "date": "10/18",
-    "time": "12:00",
-    "ok": true,
-    "tag": "cron",
-    "booking": "KULM77897700",
-    "attempt": 1,
-    "code": null,
-    "loc": "TPE"
-   },
-   {
-    "t": 1792292450985,
-    "date": "10/18",
-    "time": "12:00",
-    "ok": true,
-    "tag": "cron",
-    "booking": "KULM78736300",
-    "attempt": 1,
-    "code": null,
-    "loc": "TPE"
-   },
-   {
-    "t": 1792303265485,
-    "date": "10/18",
-    "time": "15:01",
-    "ok": true,
-    "tag": "cron",
-    "booking": "KULM68502700",
-    "attempt": 1,
-    "code": null,
-    "loc": "TPE"
-   },
-   {
-    "t": 1792303265485,
-    "date": "10/18",
-    "time": "15:01",
-    "ok": true,
-    "tag": "cron",
-    "booking": "KULM52279100",
-    "attempt": 1,
-    "code": null,
-    "loc": "TPE"
-   },
-   {
-    "t": 1792303265485,
-    "date": "10/18",
-    "time": "15:01",
-    "ok": true,
-    "tag": "cron",
-    "booking": "KULM30733200",
-    "attempt": 1,
-    "code": null,
-    "loc": "TPE"
-   },
-   {
-    "t": 1792303265485,
-    "date": "10/18",
-    "time": "15:01",
-    "ok": true,
-    "tag": "cron",
-    "booking": "KULM15263800",
-    "attempt": 1,
-    "code": null,
-    "loc": "TPE"
-   },
-   {
-    "t": 1792303265485,
-    "date": "10/18",
-    "time": "15:01",
-    "ok": true,
-    "tag": "cron",
-    "booking": "KULM04993400",
-    "attempt": 1,
-    "code": null,
-    "loc": "TPE"
-   },
-   {
-    "t": 1792303265485,
-    "date": "10/18",
-    "time": "15:01",
-    "ok": true,
-    "tag": "cron",
-    "booking": "KULM36744200",
-    "attempt": 1,
-    "code": null,
-    "loc": "TPE"
-   },
-   {
-    "t": 1792303265485,
-    "date": "10/18",
-    "time": "15:01",
-    "ok": true,
-    "tag": "cron",
-    "booking": "KULM77897700",
-    "attempt": 1,
-    "code": null,
-    "loc": "TPE"
-   },
-   {
-    "t": 1792303265485,
-    "date": "10/18",
-    "time": "15:01",
-    "ok": true,
-    "tag": "cron",
-    "booking": "KULM78736300",
-    "attempt": 1,
-    "code": null,
-    "loc": "TPE"
-   },
-   {
-    "t": 1792314063801,
-    "date": "10/18",
-    "time": "18:01",
-    "ok": true,
-    "tag": "cron",
-    "booking": "KULM68502700",
-    "attempt": 1,
-    "code": null,
-    "loc": "TPE"
-   },
-   {
-    "t": 1792314063801,
-    "date": "10/18",
-    "time": "18:01",
-    "ok": true,
-    "tag": "cron",
-    "booking": "KULM52279100",
-    "attempt": 1,
-    "code": null,
-    "loc": "TPE"
-   },
-   {
-    "t": 1792314063801,
-    "date": "10/18",
-    "time": "18:01",
-    "ok": true,
-    "tag": "cron",
-    "booking": "KULM30733200",
-    "attempt": 1,
-    "code": null,
-    "loc": "TPE"
-   },
-   {
-    "t": 1792314063801,
-    "date": "10/18",
-    "time": "18:01",
-    "ok": true,
-    "tag": "cron",
-    "booking": "KULM15263800",
-    "attempt": 1,
-    "code": null,
-    "loc": "TPE"
-   },
-   {
-    "t": 1792314063801,
-    "date": "10/18",
-    "time": "18:01",
-    "ok": true,
-    "tag": "cron",
-    "booking": "KULM04993400",
-    "attempt": 1,
-    "code": null,
-    "loc": "TPE"
-   },
-   {
-    "t": 1792314063801,
-    "date": "10/18",
-    "time": "18:01",
-    "ok": true,
-    "tag": "cron",
-    "booking": "KULM36744200",
-    "attempt": 1,
-    "code": null,
-    "loc": "TPE"
-   },
-   {
-    "t": 1792314063801,
-    "date": "10/18",
-    "time": "18:01",
-    "ok": true,
-    "tag": "cron",
-    "booking": "KULM77897700",
-    "attempt": 1,
-    "code": null,
-    "loc": "TPE"
-   },
-   {
-    "t": 1792314063801,
-    "date": "10/18",
-    "time": "18:01",
-    "ok": true,
-    "tag": "cron",
-    "booking": "KULM78736300",
-    "attempt": 1,
-    "code": null,
-    "loc": "TPE"
-   },
-   {
-    "t": 1792324857757,
-    "date": "10/18",
-    "time": "21:00",
-    "ok": true,
-    "tag": "cron",
-    "booking": "KULM68502700",
-    "attempt": 1,
-    "code": null,
-    "loc": "TPE"
-   },
-   {
-    "t": 1792324857757,
-    "date": "10/18",
-    "time": "21:00",
-    "ok": true,
-    "tag": "cron",
-    "booking": "KULM52279100",
-    "attempt": 1,
-    "code": null,
-    "loc": "TPE"
-   },
-   {
-    "t": 1792324857757,
-    "date": "10/18",
-    "time": "21:00",
-    "ok": true,
-    "tag": "cron",
-    "booking": "KULM30733200",
-    "attempt": 1,
-    "code": null,
-    "loc": "TPE"
-   },
-   {
     "t": 1792324857757,
     "date": "10/18",
     "time": "21:00",
@@ -6778,6 +5400,1436 @@
     "booking": "KULM78736300",
     "attempt": 7,
     "code": "520",
+    "loc": "ORD"
+   },
+   {
+    "t": 1792443780224,
+    "date": "10/20",
+    "time": "06:03",
+    "ok": true,
+    "tag": "cron",
+    "booking": "KULM68502700",
+    "attempt": 3,
+    "code": null,
+    "loc": "ORD"
+   },
+   {
+    "t": 1792443780224,
+    "date": "10/20",
+    "time": "06:03",
+    "ok": true,
+    "tag": "cron",
+    "booking": "KULM52279100",
+    "attempt": 3,
+    "code": null,
+    "loc": "ORD"
+   },
+   {
+    "t": 1792443780224,
+    "date": "10/20",
+    "time": "06:03",
+    "ok": false,
+    "tag": "cron",
+    "booking": "KULM30733200",
+    "attempt": 3,
+    "code": "520",
+    "loc": "ORD"
+   },
+   {
+    "t": 1792443780224,
+    "date": "10/20",
+    "time": "06:03",
+    "ok": false,
+    "tag": "cron",
+    "booking": "KULM15263800",
+    "attempt": 3,
+    "code": "520",
+    "loc": "ORD"
+   },
+   {
+    "t": 1792443780224,
+    "date": "10/20",
+    "time": "06:03",
+    "ok": true,
+    "tag": "cron",
+    "booking": "KULM04993400",
+    "attempt": 3,
+    "code": null,
+    "loc": "ORD"
+   },
+   {
+    "t": 1792443780224,
+    "date": "10/20",
+    "time": "06:03",
+    "ok": true,
+    "tag": "cron",
+    "booking": "KULM36744200",
+    "attempt": 3,
+    "code": null,
+    "loc": "ORD"
+   },
+   {
+    "t": 1792443780224,
+    "date": "10/20",
+    "time": "06:03",
+    "ok": false,
+    "tag": "cron",
+    "booking": "KULM77897700",
+    "attempt": 3,
+    "code": "520",
+    "loc": "ORD"
+   },
+   {
+    "t": 1792443780224,
+    "date": "10/20",
+    "time": "06:03",
+    "ok": false,
+    "tag": "cron",
+    "booking": "KULM78736300",
+    "attempt": 3,
+    "code": "520",
+    "loc": "ORD"
+   },
+   {
+    "t": 1792443780224,
+    "date": "10/20",
+    "time": "06:03",
+    "ok": false,
+    "tag": "cron",
+    "booking": "KULM30733200",
+    "attempt": 8,
+    "code": "520",
+    "loc": "ORD"
+   },
+   {
+    "t": 1792443780224,
+    "date": "10/20",
+    "time": "06:03",
+    "ok": false,
+    "tag": "cron",
+    "booking": "KULM15263800",
+    "attempt": 8,
+    "code": "520",
+    "loc": "ORD"
+   },
+   {
+    "t": 1792443780224,
+    "date": "10/20",
+    "time": "06:03",
+    "ok": false,
+    "tag": "cron",
+    "booking": "KULM77897700",
+    "attempt": 8,
+    "code": "520",
+    "loc": "ORD"
+   },
+   {
+    "t": 1792443780224,
+    "date": "10/20",
+    "time": "06:03",
+    "ok": true,
+    "tag": "cron",
+    "booking": "KULM78736300",
+    "attempt": 8,
+    "code": null,
+    "loc": "ORD"
+   },
+   {
+    "t": 1792454547629,
+    "date": "10/20",
+    "time": "09:02",
+    "ok": true,
+    "tag": "cron",
+    "booking": "KULM68502700",
+    "attempt": 8,
+    "code": null,
+    "loc": "ORD"
+   },
+   {
+    "t": 1792454547629,
+    "date": "10/20",
+    "time": "09:02",
+    "ok": true,
+    "tag": "cron",
+    "booking": "KULM52279100",
+    "attempt": 8,
+    "code": null,
+    "loc": "ORD"
+   },
+   {
+    "t": 1792454547629,
+    "date": "10/20",
+    "time": "09:02",
+    "ok": false,
+    "tag": "cron",
+    "booking": "KULM30733200",
+    "attempt": 8,
+    "code": "520",
+    "loc": "ORD"
+   },
+   {
+    "t": 1792454547629,
+    "date": "10/20",
+    "time": "09:02",
+    "ok": false,
+    "tag": "cron",
+    "booking": "KULM15263800",
+    "attempt": 8,
+    "code": "520",
+    "loc": "ORD"
+   },
+   {
+    "t": 1792454547629,
+    "date": "10/20",
+    "time": "09:02",
+    "ok": false,
+    "tag": "cron",
+    "booking": "KULM04993400",
+    "attempt": 8,
+    "code": "520",
+    "loc": "ORD"
+   },
+   {
+    "t": 1792454547629,
+    "date": "10/20",
+    "time": "09:02",
+    "ok": false,
+    "tag": "cron",
+    "booking": "KULM36744200",
+    "attempt": 8,
+    "code": "520",
+    "loc": "ORD"
+   },
+   {
+    "t": 1792454547629,
+    "date": "10/20",
+    "time": "09:02",
+    "ok": false,
+    "tag": "cron",
+    "booking": "KULM77897700",
+    "attempt": 8,
+    "code": "520",
+    "loc": "ORD"
+   },
+   {
+    "t": 1792454547629,
+    "date": "10/20",
+    "time": "09:02",
+    "ok": false,
+    "tag": "cron",
+    "booking": "KULM78736300",
+    "attempt": 8,
+    "code": "520",
+    "loc": "ORD"
+   },
+   {
+    "t": 1792455463711,
+    "date": "10/20",
+    "time": "09:17",
+    "ok": false,
+    "tag": "retry",
+    "booking": "KULM30733200",
+    "attempt": 4,
+    "code": "520",
+    "loc": "ORD"
+   },
+   {
+    "t": 1792455463711,
+    "date": "10/20",
+    "time": "09:17",
+    "ok": false,
+    "tag": "retry",
+    "booking": "KULM15263800",
+    "attempt": 4,
+    "code": "520",
+    "loc": "ORD"
+   },
+   {
+    "t": 1792455463711,
+    "date": "10/20",
+    "time": "09:17",
+    "ok": false,
+    "tag": "retry",
+    "booking": "KULM04993400",
+    "attempt": 4,
+    "code": "520",
+    "loc": "ORD"
+   },
+   {
+    "t": 1792455463711,
+    "date": "10/20",
+    "time": "09:17",
+    "ok": false,
+    "tag": "retry",
+    "booking": "KULM36744200",
+    "attempt": 4,
+    "code": "520",
+    "loc": "ORD"
+   },
+   {
+    "t": 1792455463711,
+    "date": "10/20",
+    "time": "09:17",
+    "ok": false,
+    "tag": "retry",
+    "booking": "KULM77897700",
+    "attempt": 4,
+    "code": "520",
+    "loc": "ORD"
+   },
+   {
+    "t": 1792455463711,
+    "date": "10/20",
+    "time": "09:17",
+    "ok": true,
+    "tag": "retry",
+    "booking": "KULM78736300",
+    "attempt": 4,
+    "code": null,
+    "loc": "ORD"
+   },
+   {
+    "t": 1792455463711,
+    "date": "10/20",
+    "time": "09:17",
+    "ok": true,
+    "tag": "retry",
+    "booking": "KULM30733200",
+    "attempt": 5,
+    "code": null,
+    "loc": "ORD"
+   },
+   {
+    "t": 1792455463711,
+    "date": "10/20",
+    "time": "09:17",
+    "ok": false,
+    "tag": "retry",
+    "booking": "KULM15263800",
+    "attempt": 5,
+    "code": "520",
+    "loc": "ORD"
+   },
+   {
+    "t": 1792455463711,
+    "date": "10/20",
+    "time": "09:17",
+    "ok": false,
+    "tag": "retry",
+    "booking": "KULM04993400",
+    "attempt": 5,
+    "code": "520",
+    "loc": "ORD"
+   },
+   {
+    "t": 1792455463711,
+    "date": "10/20",
+    "time": "09:17",
+    "ok": false,
+    "tag": "retry",
+    "booking": "KULM36744200",
+    "attempt": 5,
+    "code": "520",
+    "loc": "ORD"
+   },
+   {
+    "t": 1792455463711,
+    "date": "10/20",
+    "time": "09:17",
+    "ok": true,
+    "tag": "retry",
+    "booking": "KULM77897700",
+    "attempt": 5,
+    "code": null,
+    "loc": "ORD"
+   },
+   {
+    "t": 1792457229711,
+    "date": "10/20",
+    "time": "09:47",
+    "ok": false,
+    "tag": "retry",
+    "booking": "KULM15263800",
+    "attempt": 4,
+    "code": "520",
+    "loc": "ORD"
+   },
+   {
+    "t": 1792457229711,
+    "date": "10/20",
+    "time": "09:47",
+    "ok": false,
+    "tag": "retry",
+    "booking": "KULM04993400",
+    "attempt": 4,
+    "code": "520",
+    "loc": "ORD"
+   },
+   {
+    "t": 1792457229711,
+    "date": "10/20",
+    "time": "09:47",
+    "ok": false,
+    "tag": "retry",
+    "booking": "KULM36744200",
+    "attempt": 4,
+    "code": "520",
+    "loc": "ORD"
+   },
+   {
+    "t": 1792457229711,
+    "date": "10/20",
+    "time": "09:47",
+    "ok": true,
+    "tag": "retry",
+    "booking": "KULM15263800",
+    "attempt": 6,
+    "code": null,
+    "loc": "ORD"
+   },
+   {
+    "t": 1792457229711,
+    "date": "10/20",
+    "time": "09:47",
+    "ok": false,
+    "tag": "retry",
+    "booking": "KULM04993400",
+    "attempt": 6,
+    "code": "520",
+    "loc": "ORD"
+   },
+   {
+    "t": 1792457229711,
+    "date": "10/20",
+    "time": "09:47",
+    "ok": false,
+    "tag": "retry",
+    "booking": "KULM36744200",
+    "attempt": 6,
+    "code": "520",
+    "loc": "ORD"
+   },
+   {
+    "t": 1792459017896,
+    "date": "10/20",
+    "time": "10:16",
+    "ok": false,
+    "tag": "retry",
+    "booking": "KULM04993400",
+    "attempt": 3,
+    "code": "520",
+    "loc": "ORD"
+   },
+   {
+    "t": 1792459017896,
+    "date": "10/20",
+    "time": "10:16",
+    "ok": false,
+    "tag": "retry",
+    "booking": "KULM36744200",
+    "attempt": 3,
+    "code": "520",
+    "loc": "ORD"
+   },
+   {
+    "t": 1792459017896,
+    "date": "10/20",
+    "time": "10:16",
+    "ok": false,
+    "tag": "retry",
+    "booking": "KULM04993400",
+    "attempt": 7,
+    "code": "520",
+    "loc": "ORD"
+   },
+   {
+    "t": 1792459017896,
+    "date": "10/20",
+    "time": "10:16",
+    "ok": false,
+    "tag": "retry",
+    "booking": "KULM36744200",
+    "attempt": 7,
+    "code": "520",
+    "loc": "ORD"
+   },
+   {
+    "t": 1792460833600,
+    "date": "10/20",
+    "time": "10:47",
+    "ok": false,
+    "tag": "retry",
+    "booking": "KULM04993400",
+    "attempt": 4,
+    "code": "520",
+    "loc": "ORD"
+   },
+   {
+    "t": 1792460833600,
+    "date": "10/20",
+    "time": "10:47",
+    "ok": true,
+    "tag": "retry",
+    "booking": "KULM36744200",
+    "attempt": 4,
+    "code": null,
+    "loc": "ORD"
+   },
+   {
+    "t": 1792460833600,
+    "date": "10/20",
+    "time": "10:47",
+    "ok": true,
+    "tag": "retry",
+    "booking": "KULM04993400",
+    "attempt": 7,
+    "code": null,
+    "loc": "ORD"
+   },
+   {
+    "t": 1792465335402,
+    "date": "10/20",
+    "time": "12:02",
+    "ok": false,
+    "tag": "cron",
+    "booking": "KULM68502700",
+    "attempt": 3,
+    "code": "520",
+    "loc": "ORD"
+   },
+   {
+    "t": 1792465335402,
+    "date": "10/20",
+    "time": "12:02",
+    "ok": false,
+    "tag": "cron",
+    "booking": "KULM52279100",
+    "attempt": 3,
+    "code": "520",
+    "loc": "ORD"
+   },
+   {
+    "t": 1792465335402,
+    "date": "10/20",
+    "time": "12:02",
+    "ok": false,
+    "tag": "cron",
+    "booking": "KULM30733200",
+    "attempt": 3,
+    "code": "520",
+    "loc": "ORD"
+   },
+   {
+    "t": 1792465335402,
+    "date": "10/20",
+    "time": "12:02",
+    "ok": false,
+    "tag": "cron",
+    "booking": "KULM15263800",
+    "attempt": 3,
+    "code": "520",
+    "loc": "ORD"
+   },
+   {
+    "t": 1792465335402,
+    "date": "10/20",
+    "time": "12:02",
+    "ok": false,
+    "tag": "cron",
+    "booking": "KULM04993400",
+    "attempt": 3,
+    "code": "520",
+    "loc": "ORD"
+   },
+   {
+    "t": 1792465335402,
+    "date": "10/20",
+    "time": "12:02",
+    "ok": false,
+    "tag": "cron",
+    "booking": "KULM36744200",
+    "attempt": 3,
+    "code": "520",
+    "loc": "ORD"
+   },
+   {
+    "t": 1792465335402,
+    "date": "10/20",
+    "time": "12:02",
+    "ok": false,
+    "tag": "cron",
+    "booking": "KULM77897700",
+    "attempt": 3,
+    "code": "520",
+    "loc": "ORD"
+   },
+   {
+    "t": 1792465335402,
+    "date": "10/20",
+    "time": "12:02",
+    "ok": false,
+    "tag": "cron",
+    "booking": "KULM78736300",
+    "attempt": 3,
+    "code": "520",
+    "loc": "ORD"
+   },
+   {
+    "t": 1792466256515,
+    "date": "10/20",
+    "time": "12:17",
+    "ok": true,
+    "tag": "retry",
+    "booking": "KULM68502700",
+    "attempt": 3,
+    "code": null,
+    "loc": "ORD"
+   },
+   {
+    "t": 1792466256515,
+    "date": "10/20",
+    "time": "12:17",
+    "ok": false,
+    "tag": "retry",
+    "booking": "KULM52279100",
+    "attempt": 3,
+    "code": "520",
+    "loc": "ORD"
+   },
+   {
+    "t": 1792466256515,
+    "date": "10/20",
+    "time": "12:17",
+    "ok": false,
+    "tag": "retry",
+    "booking": "KULM30733200",
+    "attempt": 3,
+    "code": "520",
+    "loc": "ORD"
+   },
+   {
+    "t": 1792466256515,
+    "date": "10/20",
+    "time": "12:17",
+    "ok": true,
+    "tag": "retry",
+    "booking": "KULM15263800",
+    "attempt": 3,
+    "code": null,
+    "loc": "ORD"
+   },
+   {
+    "t": 1792466256515,
+    "date": "10/20",
+    "time": "12:17",
+    "ok": false,
+    "tag": "retry",
+    "booking": "KULM04993400",
+    "attempt": 3,
+    "code": "520",
+    "loc": "ORD"
+   },
+   {
+    "t": 1792466256515,
+    "date": "10/20",
+    "time": "12:17",
+    "ok": false,
+    "tag": "retry",
+    "booking": "KULM36744200",
+    "attempt": 3,
+    "code": "520",
+    "loc": "ORD"
+   },
+   {
+    "t": 1792466256515,
+    "date": "10/20",
+    "time": "12:17",
+    "ok": false,
+    "tag": "retry",
+    "booking": "KULM77897700",
+    "attempt": 3,
+    "code": "520",
+    "loc": "ORD"
+   },
+   {
+    "t": 1792466256515,
+    "date": "10/20",
+    "time": "12:17",
+    "ok": false,
+    "tag": "retry",
+    "booking": "KULM78736300",
+    "attempt": 3,
+    "code": "520",
+    "loc": "ORD"
+   },
+   {
+    "t": 1792466256515,
+    "date": "10/20",
+    "time": "12:17",
+    "ok": false,
+    "tag": "retry",
+    "booking": "KULM52279100",
+    "attempt": 6,
+    "code": "520",
+    "loc": "ORD"
+   },
+   {
+    "t": 1792466256515,
+    "date": "10/20",
+    "time": "12:17",
+    "ok": false,
+    "tag": "retry",
+    "booking": "KULM30733200",
+    "attempt": 6,
+    "code": "520",
+    "loc": "ORD"
+   },
+   {
+    "t": 1792466256515,
+    "date": "10/20",
+    "time": "12:17",
+    "ok": false,
+    "tag": "retry",
+    "booking": "KULM04993400",
+    "attempt": 6,
+    "code": "520",
+    "loc": "ORD"
+   },
+   {
+    "t": 1792466256515,
+    "date": "10/20",
+    "time": "12:17",
+    "ok": false,
+    "tag": "retry",
+    "booking": "KULM36744200",
+    "attempt": 6,
+    "code": "520",
+    "loc": "ORD"
+   },
+   {
+    "t": 1792466256515,
+    "date": "10/20",
+    "time": "12:17",
+    "ok": false,
+    "tag": "retry",
+    "booking": "KULM77897700",
+    "attempt": 6,
+    "code": "520",
+    "loc": "ORD"
+   },
+   {
+    "t": 1792466256515,
+    "date": "10/20",
+    "time": "12:17",
+    "ok": false,
+    "tag": "retry",
+    "booking": "KULM78736300",
+    "attempt": 6,
+    "code": "520",
+    "loc": "ORD"
+   },
+   {
+    "t": 1792468021832,
+    "date": "10/20",
+    "time": "12:47",
+    "ok": false,
+    "tag": "retry",
+    "booking": "KULM52279100",
+    "attempt": 1,
+    "code": "520",
+    "loc": "ORD"
+   },
+   {
+    "t": 1792468021832,
+    "date": "10/20",
+    "time": "12:47",
+    "ok": false,
+    "tag": "retry",
+    "booking": "KULM30733200",
+    "attempt": 1,
+    "code": "520",
+    "loc": "ORD"
+   },
+   {
+    "t": 1792468021832,
+    "date": "10/20",
+    "time": "12:47",
+    "ok": false,
+    "tag": "retry",
+    "booking": "KULM04993400",
+    "attempt": 1,
+    "code": "520",
+    "loc": "ORD"
+   },
+   {
+    "t": 1792468021832,
+    "date": "10/20",
+    "time": "12:47",
+    "ok": true,
+    "tag": "retry",
+    "booking": "KULM36744200",
+    "attempt": 1,
+    "code": null,
+    "loc": "ORD"
+   },
+   {
+    "t": 1792468021832,
+    "date": "10/20",
+    "time": "12:47",
+    "ok": false,
+    "tag": "retry",
+    "booking": "KULM77897700",
+    "attempt": 1,
+    "code": "520",
+    "loc": "ORD"
+   },
+   {
+    "t": 1792468021832,
+    "date": "10/20",
+    "time": "12:47",
+    "ok": false,
+    "tag": "retry",
+    "booking": "KULM78736300",
+    "attempt": 1,
+    "code": "520",
+    "loc": "ORD"
+   },
+   {
+    "t": 1792469810843,
+    "date": "10/20",
+    "time": "13:16",
+    "ok": false,
+    "tag": "retry",
+    "booking": "KULM52279100",
+    "attempt": 2,
+    "code": "520",
+    "loc": "ORD"
+   },
+   {
+    "t": 1792469810843,
+    "date": "10/20",
+    "time": "13:16",
+    "ok": false,
+    "tag": "retry",
+    "booking": "KULM30733200",
+    "attempt": 2,
+    "code": "520",
+    "loc": "ORD"
+   },
+   {
+    "t": 1792469810843,
+    "date": "10/20",
+    "time": "13:16",
+    "ok": false,
+    "tag": "retry",
+    "booking": "KULM04993400",
+    "attempt": 2,
+    "code": "520",
+    "loc": "ORD"
+   },
+   {
+    "t": 1792469810843,
+    "date": "10/20",
+    "time": "13:16",
+    "ok": false,
+    "tag": "retry",
+    "booking": "KULM77897700",
+    "attempt": 2,
+    "code": "520",
+    "loc": "ORD"
+   },
+   {
+    "t": 1792469810843,
+    "date": "10/20",
+    "time": "13:16",
+    "ok": false,
+    "tag": "retry",
+    "booking": "KULM78736300",
+    "attempt": 2,
+    "code": "520",
+    "loc": "ORD"
+   },
+   {
+    "t": 1792471607818,
+    "date": "10/20",
+    "time": "13:46",
+    "ok": false,
+    "tag": "retry",
+    "booking": "KULM52279100",
+    "attempt": 6,
+    "code": "520",
+    "loc": "ORD"
+   },
+   {
+    "t": 1792471607818,
+    "date": "10/20",
+    "time": "13:46",
+    "ok": false,
+    "tag": "retry",
+    "booking": "KULM30733200",
+    "attempt": 6,
+    "code": "520",
+    "loc": "ORD"
+   },
+   {
+    "t": 1792471607818,
+    "date": "10/20",
+    "time": "13:46",
+    "ok": false,
+    "tag": "retry",
+    "booking": "KULM04993400",
+    "attempt": 6,
+    "code": "520",
+    "loc": "ORD"
+   },
+   {
+    "t": 1792471607818,
+    "date": "10/20",
+    "time": "13:46",
+    "ok": false,
+    "tag": "retry",
+    "booking": "KULM77897700",
+    "attempt": 6,
+    "code": "520",
+    "loc": "ORD"
+   },
+   {
+    "t": 1792471607818,
+    "date": "10/20",
+    "time": "13:46",
+    "ok": false,
+    "tag": "retry",
+    "booking": "KULM78736300",
+    "attempt": 6,
+    "code": "520",
+    "loc": "ORD"
+   },
+   {
+    "t": 1792473402234,
+    "date": "10/20",
+    "time": "14:16",
+    "ok": true,
+    "tag": "retry",
+    "booking": "KULM52279100",
+    "attempt": 1,
+    "code": null,
+    "loc": "ORD"
+   },
+   {
+    "t": 1792473402234,
+    "date": "10/20",
+    "time": "14:16",
+    "ok": false,
+    "tag": "retry",
+    "booking": "KULM30733200",
+    "attempt": 1,
+    "code": "520",
+    "loc": "ORD"
+   },
+   {
+    "t": 1792473402234,
+    "date": "10/20",
+    "time": "14:16",
+    "ok": true,
+    "tag": "retry",
+    "booking": "KULM04993400",
+    "attempt": 1,
+    "code": null,
+    "loc": "ORD"
+   },
+   {
+    "t": 1792473402234,
+    "date": "10/20",
+    "time": "14:16",
+    "ok": false,
+    "tag": "retry",
+    "booking": "KULM77897700",
+    "attempt": 1,
+    "code": "520",
+    "loc": "ORD"
+   },
+   {
+    "t": 1792473402234,
+    "date": "10/20",
+    "time": "14:16",
+    "ok": true,
+    "tag": "retry",
+    "booking": "KULM78736300",
+    "attempt": 1,
+    "code": null,
+    "loc": "ORD"
+   },
+   {
+    "t": 1792473402234,
+    "date": "10/20",
+    "time": "14:16",
+    "ok": false,
+    "tag": "retry",
+    "booking": "KULM30733200",
+    "attempt": 2,
+    "code": "520",
+    "loc": "ORD"
+   },
+   {
+    "t": 1792473402234,
+    "date": "10/20",
+    "time": "14:16",
+    "ok": true,
+    "tag": "retry",
+    "booking": "KULM77897700",
+    "attempt": 2,
+    "code": null,
+    "loc": "ORD"
+   },
+   {
+    "t": 1792473402234,
+    "date": "10/20",
+    "time": "14:16",
+    "ok": true,
+    "tag": "retry",
+    "booking": "KULM30733200",
+    "attempt": 3,
+    "code": null,
+    "loc": "ORD"
+   },
+   {
+    "t": 1792476080733,
+    "date": "10/20",
+    "time": "15:01",
+    "ok": true,
+    "tag": "cron",
+    "booking": "KULM68502700",
+    "attempt": 1,
+    "code": null,
+    "loc": "ORD"
+   },
+   {
+    "t": 1792476080733,
+    "date": "10/20",
+    "time": "15:01",
+    "ok": true,
+    "tag": "cron",
+    "booking": "KULM52279100",
+    "attempt": 1,
+    "code": null,
+    "loc": "ORD"
+   },
+   {
+    "t": 1792476080733,
+    "date": "10/20",
+    "time": "15:01",
+    "ok": true,
+    "tag": "cron",
+    "booking": "KULM30733200",
+    "attempt": 1,
+    "code": null,
+    "loc": "ORD"
+   },
+   {
+    "t": 1792476080733,
+    "date": "10/20",
+    "time": "15:01",
+    "ok": true,
+    "tag": "cron",
+    "booking": "KULM15263800",
+    "attempt": 1,
+    "code": null,
+    "loc": "ORD"
+   },
+   {
+    "t": 1792476080733,
+    "date": "10/20",
+    "time": "15:01",
+    "ok": true,
+    "tag": "cron",
+    "booking": "KULM04993400",
+    "attempt": 1,
+    "code": null,
+    "loc": "ORD"
+   },
+   {
+    "t": 1792476080733,
+    "date": "10/20",
+    "time": "15:01",
+    "ok": true,
+    "tag": "cron",
+    "booking": "KULM36744200",
+    "attempt": 1,
+    "code": null,
+    "loc": "ORD"
+   },
+   {
+    "t": 1792476080733,
+    "date": "10/20",
+    "time": "15:01",
+    "ok": true,
+    "tag": "cron",
+    "booking": "KULM77897700",
+    "attempt": 1,
+    "code": null,
+    "loc": "ORD"
+   },
+   {
+    "t": 1792476080733,
+    "date": "10/20",
+    "time": "15:01",
+    "ok": true,
+    "tag": "cron",
+    "booking": "KULM78736300",
+    "attempt": 1,
+    "code": null,
+    "loc": "ORD"
+   },
+   {
+    "t": 1792486877225,
+    "date": "10/20",
+    "time": "18:01",
+    "ok": true,
+    "tag": "cron",
+    "booking": "KULM68502700",
+    "attempt": 1,
+    "code": null,
+    "loc": "ORD"
+   },
+   {
+    "t": 1792486877225,
+    "date": "10/20",
+    "time": "18:01",
+    "ok": true,
+    "tag": "cron",
+    "booking": "KULM52279100",
+    "attempt": 1,
+    "code": null,
+    "loc": "ORD"
+   },
+   {
+    "t": 1792486877225,
+    "date": "10/20",
+    "time": "18:01",
+    "ok": true,
+    "tag": "cron",
+    "booking": "KULM30733200",
+    "attempt": 1,
+    "code": null,
+    "loc": "ORD"
+   },
+   {
+    "t": 1792486877225,
+    "date": "10/20",
+    "time": "18:01",
+    "ok": true,
+    "tag": "cron",
+    "booking": "KULM15263800",
+    "attempt": 1,
+    "code": null,
+    "loc": "ORD"
+   },
+   {
+    "t": 1792486877225,
+    "date": "10/20",
+    "time": "18:01",
+    "ok": true,
+    "tag": "cron",
+    "booking": "KULM04993400",
+    "attempt": 1,
+    "code": null,
+    "loc": "ORD"
+   },
+   {
+    "t": 1792486877225,
+    "date": "10/20",
+    "time": "18:01",
+    "ok": true,
+    "tag": "cron",
+    "booking": "KULM36744200",
+    "attempt": 1,
+    "code": null,
+    "loc": "ORD"
+   },
+   {
+    "t": 1792486877225,
+    "date": "10/20",
+    "time": "18:01",
+    "ok": true,
+    "tag": "cron",
+    "booking": "KULM77897700",
+    "attempt": 1,
+    "code": null,
+    "loc": "ORD"
+   },
+   {
+    "t": 1792486877225,
+    "date": "10/20",
+    "time": "18:01",
+    "ok": true,
+    "tag": "cron",
+    "booking": "KULM78736300",
+    "attempt": 1,
+    "code": null,
+    "loc": "ORD"
+   },
+   {
+    "t": 1792497682694,
+    "date": "10/20",
+    "time": "21:01",
+    "ok": true,
+    "tag": "cron",
+    "booking": "KULM68502700",
+    "attempt": 1,
+    "code": null,
+    "loc": "ORD"
+   },
+   {
+    "t": 1792497682694,
+    "date": "10/20",
+    "time": "21:01",
+    "ok": true,
+    "tag": "cron",
+    "booking": "KULM52279100",
+    "attempt": 1,
+    "code": null,
+    "loc": "ORD"
+   },
+   {
+    "t": 1792497682694,
+    "date": "10/20",
+    "time": "21:01",
+    "ok": true,
+    "tag": "cron",
+    "booking": "KULM30733200",
+    "attempt": 1,
+    "code": null,
+    "loc": "ORD"
+   },
+   {
+    "t": 1792497682694,
+    "date": "10/20",
+    "time": "21:01",
+    "ok": true,
+    "tag": "cron",
+    "booking": "KULM15263800",
+    "attempt": 1,
+    "code": null,
+    "loc": "ORD"
+   },
+   {
+    "t": 1792497682694,
+    "date": "10/20",
+    "time": "21:01",
+    "ok": true,
+    "tag": "cron",
+    "booking": "KULM04993400",
+    "attempt": 1,
+    "code": null,
+    "loc": "ORD"
+   },
+   {
+    "t": 1792497682694,
+    "date": "10/20",
+    "time": "21:01",
+    "ok": true,
+    "tag": "cron",
+    "booking": "KULM36744200",
+    "attempt": 1,
+    "code": null,
+    "loc": "ORD"
+   },
+   {
+    "t": 1792497682694,
+    "date": "10/20",
+    "time": "21:01",
+    "ok": true,
+    "tag": "cron",
+    "booking": "KULM77897700",
+    "attempt": 1,
+    "code": null,
+    "loc": "ORD"
+   },
+   {
+    "t": 1792497682694,
+    "date": "10/20",
+    "time": "21:01",
+    "ok": true,
+    "tag": "cron",
+    "booking": "KULM78736300",
+    "attempt": 1,
+    "code": null,
+    "loc": "ORD"
+   },
+   {
+    "t": 1792508483118,
+    "date": "10/21",
+    "time": "00:01",
+    "ok": true,
+    "tag": "cron",
+    "booking": "KULM68502700",
+    "attempt": 1,
+    "code": null,
+    "loc": "ORD"
+   },
+   {
+    "t": 1792508483118,
+    "date": "10/21",
+    "time": "00:01",
+    "ok": true,
+    "tag": "cron",
+    "booking": "KULM52279100",
+    "attempt": 1,
+    "code": null,
+    "loc": "ORD"
+   },
+   {
+    "t": 1792508483118,
+    "date": "10/21",
+    "time": "00:01",
+    "ok": true,
+    "tag": "cron",
+    "booking": "KULM30733200",
+    "attempt": 1,
+    "code": null,
+    "loc": "ORD"
+   },
+   {
+    "t": 1792508483118,
+    "date": "10/21",
+    "time": "00:01",
+    "ok": true,
+    "tag": "cron",
+    "booking": "KULM15263800",
+    "attempt": 1,
+    "code": null,
+    "loc": "ORD"
+   },
+   {
+    "t": 1792508483118,
+    "date": "10/21",
+    "time": "00:01",
+    "ok": true,
+    "tag": "cron",
+    "booking": "KULM04993400",
+    "attempt": 1,
+    "code": null,
+    "loc": "ORD"
+   },
+   {
+    "t": 1792508483118,
+    "date": "10/21",
+    "time": "00:01",
+    "ok": true,
+    "tag": "cron",
+    "booking": "KULM36744200",
+    "attempt": 1,
+    "code": null,
+    "loc": "ORD"
+   },
+   {
+    "t": 1792508483118,
+    "date": "10/21",
+    "time": "00:01",
+    "ok": true,
+    "tag": "cron",
+    "booking": "KULM77897700",
+    "attempt": 1,
+    "code": null,
+    "loc": "ORD"
+   },
+   {
+    "t": 1792508483118,
+    "date": "10/21",
+    "time": "00:01",
+    "ok": true,
+    "tag": "cron",
+    "booking": "KULM78736300",
+    "attempt": 1,
+    "code": null,
+    "loc": "ORD"
+   },
+   {
+    "t": 1792519284403,
+    "date": "10/21",
+    "time": "03:01",
+    "ok": true,
+    "tag": "cron",
+    "booking": "KULM68502700",
+    "attempt": 1,
+    "code": null,
+    "loc": "ORD"
+   },
+   {
+    "t": 1792519284403,
+    "date": "10/21",
+    "time": "03:01",
+    "ok": true,
+    "tag": "cron",
+    "booking": "KULM52279100",
+    "attempt": 1,
+    "code": null,
+    "loc": "ORD"
+   },
+   {
+    "t": 1792519284403,
+    "date": "10/21",
+    "time": "03:01",
+    "ok": true,
+    "tag": "cron",
+    "booking": "KULM30733200",
+    "attempt": 1,
+    "code": null,
+    "loc": "ORD"
+   },
+   {
+    "t": 1792519284403,
+    "date": "10/21",
+    "time": "03:01",
+    "ok": true,
+    "tag": "cron",
+    "booking": "KULM15263800",
+    "attempt": 1,
+    "code": null,
+    "loc": "ORD"
+   },
+   {
+    "t": 1792519284403,
+    "date": "10/21",
+    "time": "03:01",
+    "ok": true,
+    "tag": "cron",
+    "booking": "KULM04993400",
+    "attempt": 1,
+    "code": null,
+    "loc": "ORD"
+   },
+   {
+    "t": 1792519284403,
+    "date": "10/21",
+    "time": "03:01",
+    "ok": true,
+    "tag": "cron",
+    "booking": "KULM36744200",
+    "attempt": 1,
+    "code": null,
+    "loc": "ORD"
+   },
+   {
+    "t": 1792519284403,
+    "date": "10/21",
+    "time": "03:01",
+    "ok": true,
+    "tag": "cron",
+    "booking": "KULM77897700",
+    "attempt": 1,
+    "code": null,
+    "loc": "ORD"
+   },
+   {
+    "t": 1792519284403,
+    "date": "10/21",
+    "time": "03:01",
+    "ok": true,
+    "tag": "cron",
+    "booking": "KULM78736300",
+    "attempt": 1,
+    "code": null,
     "loc": "ORD"
    }
   ],
@@ -6840,7 +6892,8 @@
      "2026-10-16": 18650,
      "2026-10-17": 18650,
      "2026-10-18": 18650,
-     "2026-10-19": 18650
+     "2026-10-19": 18650,
+     "2026-10-20": 18650
     },
     "corrugated_paper": {
      "2026-09-22": 3055,
@@ -6877,7 +6930,8 @@
      "2026-10-16": 3078,
      "2026-10-17": 3078,
      "2026-10-18": 3078,
-     "2026-10-19": 3070
+     "2026-10-19": 3070,
+     "2026-10-20": 3056
     },
     "white_cardboard": {
      "2026-09-22": 4040,
@@ -6914,7 +6968,8 @@
      "2026-10-16": 3970,
      "2026-10-17": 3970,
      "2026-10-18": 3970,
-     "2026-10-19": 3970
+     "2026-10-19": 3970,
+     "2026-10-20": 3950
     },
     "acrylonitrile": {
      "2026-09-11": 10633.33,
@@ -6948,7 +7003,8 @@
      "2026-10-16": 11133.33,
      "2026-10-17": 11133.33,
      "2026-10-18": 11133.33,
-     "2026-10-19": 11133.33
+     "2026-10-19": 11133.33,
+     "2026-10-20": 11033.33
     },
     "naphtha": {
      "2026-09-14": 9416.67,
@@ -6982,7 +7038,8 @@
      "2026-10-16": 9616.67,
      "2026-10-17": 9616.67,
      "2026-10-18": 9616.67,
-     "2026-10-19": 9616.67
+     "2026-10-19": 9616.67,
+     "2026-10-20": 9650
     },
     "koh": {
      "2026-09-11": 7395.833,
@@ -7014,7 +7071,8 @@
      "2026-10-16": 6710,
      "2026-10-17": 6710,
      "2026-10-18": 6710,
-     "2026-10-19": 6710
+     "2026-10-19": 6710,
+     "2026-10-20": 6710
     },
     "butadiene": {
      "2026-09-15": 14333.33,
@@ -7047,7 +7105,8 @@
      "2026-10-16": 13266.67,
      "2026-10-17": 13266.67,
      "2026-10-18": 13266.67,
-     "2026-10-19": 13333.33
+     "2026-10-19": 13333.33,
+     "2026-10-20": 13283.33
     },
     "nb_latex": {
      "2009-01-01": 924,
@@ -15375,7 +15434,8 @@
      "2026-05-01": 1632.76,
      "2026-06-01": 1217.39,
      "2026-07-01": 920.48,
-     "2026-08-01": 874.08
+     "2026-08-01": 874.08,
+     "2026-09-01": 983.67
     },
     "nb_latex_my": {
      "2009-01-01": 926.08,
@@ -15589,7 +15649,8 @@
      "2026-05-01": 1636.37,
      "2026-06-01": 1199.04,
      "2026-07-01": 896.45,
-     "2026-08-01": 842.26
+     "2026-08-01": 842.26,
+     "2026-09-01": 967.42
     },
     "crude_wti": {
      "2026-09-28": 92.41,
@@ -15619,7 +15680,8 @@
      "2026-10-16": 97.97,
      "2026-10-17": 97.97,
      "2026-10-18": 97.97,
-     "2026-10-19": 101.41
+     "2026-10-19": 101.41,
+     "2026-10-20": 98.54
     },
     "crude_brent": {
      "2026-09-28": 97.44,
@@ -15649,7 +15711,8 @@
      "2026-10-16": 105.92,
      "2026-10-17": 105.92,
      "2026-10-18": 105.92,
-     "2026-10-19": 109.86
+     "2026-10-19": 109.86,
+     "2026-10-20": 109.55
     },
     "titanium_dioxide": {
      "2026-09-28": 14220,
@@ -15679,10 +15742,11 @@
      "2026-10-16": 14260,
      "2026-10-17": 14260,
      "2026-10-18": 14260,
-     "2026-10-19": 14260
+     "2026-10-19": 14260,
+     "2026-10-20": 14260
     }
    },
-   "updated": "2026-10-19T18:01:28.832Z",
+   "updated": "2026-10-20T18:01:10.293Z",
    "groups": {
     "nbr": "main",
     "butadiene": "main",
@@ -15736,7 +15800,8 @@
     "2026-10-14": 0.14942,
     "2026-10-15": 0.14945,
     "2026-10-16": 0.14956,
-    "2026-10-19": 0.14968
+    "2026-10-19": 0.14968,
+    "2026-10-20": 0.14974
    },
    "usd": {
     "nbr": {
@@ -15774,7 +15839,8 @@
      "2026-10-16": 2789.29,
      "2026-10-17": 2789.29,
      "2026-10-18": 2789.29,
-     "2026-10-19": 2791.53
+     "2026-10-19": 2791.53,
+     "2026-10-20": 2792.65
     },
     "corrugated_paper": {
      "2026-09-22": 455.96,
@@ -15811,7 +15877,8 @@
      "2026-10-16": 460.35,
      "2026-10-17": 460.35,
      "2026-10-18": 460.35,
-     "2026-10-19": 459.52
+     "2026-10-19": 459.52,
+     "2026-10-20": 457.61
     },
     "white_cardboard": {
      "2026-09-22": 602.97,
@@ -15848,7 +15915,8 @@
      "2026-10-16": 593.75,
      "2026-10-17": 593.75,
      "2026-10-18": 593.75,
-     "2026-10-19": 594.23
+     "2026-10-19": 594.23,
+     "2026-10-20": 591.47
     },
     "acrylonitrile": {
      "2026-09-11": 1585.11,
@@ -15882,7 +15950,8 @@
      "2026-10-16": 1665.1,
      "2026-10-17": 1665.1,
      "2026-10-18": 1665.1,
-     "2026-10-19": 1666.44
+     "2026-10-19": 1666.44,
+     "2026-10-20": 1652.13
     },
     "naphtha": {
      "2026-09-14": 1403.74,
@@ -15916,7 +15985,8 @@
      "2026-10-16": 1438.27,
      "2026-10-17": 1438.27,
      "2026-10-18": 1438.27,
-     "2026-10-19": 1439.42
+     "2026-10-19": 1439.42,
+     "2026-10-20": 1444.99
     },
     "koh": {
      "2026-09-11": 1102.5,
@@ -15948,7 +16018,8 @@
      "2026-10-16": 1003.55,
      "2026-10-17": 1003.55,
      "2026-10-18": 1003.55,
-     "2026-10-19": 1004.35
+     "2026-10-19": 1004.35,
+     "2026-10-20": 1004.76
     },
     "butadiene": {
      "2026-09-15": 2135.67,
@@ -15981,7 +16052,8 @@
      "2026-10-16": 1984.16,
      "2026-10-17": 1984.16,
      "2026-10-18": 1984.16,
-     "2026-10-19": 1995.73
+     "2026-10-19": 1995.73,
+     "2026-10-20": 1989.05
     },
     "nb_latex": {
      "2009-01-01": 924,
@@ -24309,7 +24381,8 @@
      "2026-05-01": 1632.76,
      "2026-06-01": 1217.39,
      "2026-07-01": 920.48,
-     "2026-08-01": 874.08
+     "2026-08-01": 874.08,
+     "2026-09-01": 983.67
     },
     "nb_latex_my": {
      "2009-01-01": 926.08,
@@ -24523,7 +24596,8 @@
      "2026-05-01": 1636.37,
      "2026-06-01": 1199.04,
      "2026-07-01": 896.45,
-     "2026-08-01": 842.26
+     "2026-08-01": 842.26,
+     "2026-09-01": 967.42
     },
     "crude_wti": {
      "2026-09-28": 92.41,
@@ -24553,7 +24627,8 @@
      "2026-10-16": 97.97,
      "2026-10-17": 97.97,
      "2026-10-18": 97.97,
-     "2026-10-19": 101.41
+     "2026-10-19": 101.41,
+     "2026-10-20": 98.54
     },
     "crude_brent": {
      "2026-09-28": 97.44,
@@ -24583,7 +24658,8 @@
      "2026-10-16": 105.92,
      "2026-10-17": 105.92,
      "2026-10-18": 105.92,
-     "2026-10-19": 109.86
+     "2026-10-19": 109.86,
+     "2026-10-20": 109.55
     },
     "titanium_dioxide": {
      "2026-09-28": 2119.06,
@@ -24613,7 +24689,8 @@
      "2026-10-16": 2132.73,
      "2026-10-17": 2132.73,
      "2026-10-18": 2132.73,
-     "2026-10-19": 2134.44
+     "2026-10-19": 2134.44,
+     "2026-10-20": 2135.29
     }
    },
    "usdUnits": {
@@ -25171,8 +25248,8 @@
    "polDep": "2026-10-10T09:42",
    "tsArr": "2026-10-14T10:18",
    "tsDep": "2026-10-26T15:00",
-   "eta": "2026-11-19T07:00",
-   "destEta": "2026-11-20T05:02",
+   "eta": "2026-11-17T07:00",
+   "destEta": "2026-11-18T05:02",
    "status": "Export Truck Gate In to Terminal",
    "statusLoc": "PORT KLANG,MALAYSIA",
    "stamp": "2026-10-05T19:44",
@@ -25197,7 +25274,7 @@
      "pol": "SINGAPORE",
      "etd": "2026-10-26T15:00",
      "pod": "LOS ANGELES, CA",
-     "eta": "2026-11-19T07:00"
+     "eta": "2026-11-17T07:00"
     }
    ],
    "events": [
@@ -25251,17 +25328,17 @@
    "cntrQty": 14,
    "container": "HMMU7164243",
    "spDep": "2026-10-02T18:32",
-   "spArr": "2026-11-20T05:02",
-   "successEdge": "TPE",
-   "checkedAt": "2026-10-19 03:00Z",
-   "scheduleCheckedAt": "2026-10-19 03:00Z",
+   "spArr": "2026-11-18T05:02",
+   "successEdge": "ORD",
+   "checkedAt": "2026-10-20 18:01Z",
+   "scheduleCheckedAt": "2026-10-20 18:01Z",
    "rollover": false,
    "planEta": "2026-11-15",
-   "delayDays": 4,
-   "alert": "watch",
+   "delayDays": 2,
+   "alert": "ok",
    "firstSeenEta": "2026-11-05T07:00",
    "firstSeenPolDep": "2026-10-03T12:00",
-   "etaChangeCount": 7,
+   "etaChangeCount": 8,
    "polDepChangeCount": 5,
    "polDepActual": true,
    "tsArrActual": true,
@@ -25269,9 +25346,7 @@
    "etaActual": false,
    "podBerthingActual": false,
    "polDepActualDate": "2026-10-09T22:36",
-   "podBerthingAt": null,
-   "staleItem": false,
-   "scheduleError": null
+   "podBerthingAt": null
   },
   "schedule:KULM15263800": {
    "booking": "KULM15263800",
@@ -25377,8 +25452,8 @@
    "spDep": "2026-09-22T18:51",
    "spArr": "2026-11-16T23:02",
    "successEdge": "ORD",
-   "checkedAt": "2026-10-19 15:03Z",
-   "scheduleCheckedAt": "2026-10-19 15:03Z",
+   "checkedAt": "2026-10-20 18:01Z",
+   "scheduleCheckedAt": "2026-10-20 18:01Z",
    "rollover": false,
    "planEta": "2026-11-08",
    "delayDays": 7,
@@ -25393,9 +25468,7 @@
    "etaActual": false,
    "podBerthingActual": false,
    "polDepActualDate": "2026-09-28T07:26",
-   "podBerthingAt": null,
-   "staleItem": false,
-   "scheduleError": null
+   "podBerthingAt": null
   },
   "schedule:KULM30733200": {
    "booking": "KULM30733200",
@@ -25507,8 +25580,8 @@
    "spDep": "2026-09-19T01:36",
    "spArr": "2026-11-05T12:00",
    "successEdge": "ORD",
-   "checkedAt": "2026-10-19 18:02Z",
-   "scheduleCheckedAt": "2026-10-19 18:02Z",
+   "checkedAt": "2026-10-20 18:01Z",
+   "scheduleCheckedAt": "2026-10-20 18:01Z",
    "rollover": false,
    "planEta": "2026-11-01",
    "delayDays": 3,
@@ -25547,8 +25620,8 @@
    "polDep": "2026-10-12T12:45",
    "tsArr": "2026-10-15T21:03",
    "tsDep": "2026-10-26T15:00",
-   "eta": "2026-11-19T07:00",
-   "destEta": "2026-11-20T05:02",
+   "eta": "2026-11-17T07:00",
+   "destEta": "2026-11-18T05:02",
    "status": "Export Truck Gate In to Terminal",
    "statusLoc": "PORT KLANG,MALAYSIA",
    "stamp": "2026-10-10T13:39",
@@ -25573,7 +25646,7 @@
      "pol": "SINGAPORE",
      "etd": "2026-10-26T15:00",
      "pod": "LOS ANGELES, CA",
-     "eta": "2026-11-19T07:00"
+     "eta": "2026-11-17T07:00"
     }
    ],
    "events": [
@@ -25621,17 +25694,17 @@
    "cntrQty": 14,
    "container": "HMMU6748290",
    "spDep": "2026-10-07T15:30",
-   "spArr": "2026-11-20T05:02",
+   "spArr": "2026-11-18T05:02",
    "successEdge": "ORD",
-   "checkedAt": "2026-10-19 15:03Z",
-   "scheduleCheckedAt": "2026-10-19 15:03Z",
+   "checkedAt": "2026-10-20 18:01Z",
+   "scheduleCheckedAt": "2026-10-20 18:01Z",
    "rollover": false,
    "planEta": "2026-11-13",
-   "delayDays": 6,
+   "delayDays": 4,
    "alert": "watch",
    "firstSeenEta": "2026-11-10T07:00",
    "firstSeenPolDep": "2026-10-10T12:00",
-   "etaChangeCount": 4,
+   "etaChangeCount": 5,
    "polDepChangeCount": 2,
    "polDepActual": true,
    "tsArrActual": true,
@@ -25639,9 +25712,7 @@
    "etaActual": false,
    "podBerthingActual": false,
    "polDepActualDate": "2026-10-12T10:22",
-   "podBerthingAt": null,
-   "staleItem": false,
-   "scheduleError": null
+   "podBerthingAt": null
   },
   "schedule:KULM40326600": {
    "booking": "KULM40326600",
@@ -25917,8 +25988,8 @@
    "spDep": "2026-09-11T12:01",
    "spArr": "2026-10-29T22:00",
    "successEdge": "ORD",
-   "checkedAt": "2026-10-19 15:03Z",
-   "scheduleCheckedAt": "2026-10-19 15:03Z",
+   "checkedAt": "2026-10-20 18:01Z",
+   "scheduleCheckedAt": "2026-10-20 18:01Z",
    "rollover": false,
    "planEta": "2026-10-25",
    "delayDays": 3,
@@ -25933,9 +26004,7 @@
    "etaActual": false,
    "podBerthingActual": false,
    "polDepActualDate": "2026-09-19T07:36",
-   "podBerthingAt": null,
-   "staleItem": false,
-   "scheduleError": null
+   "podBerthingAt": null
   },
   "schedule:KULM64432100": {
    "booking": "KULM64432100",
@@ -26237,26 +26306,12 @@
    "spDep": "2026-08-29T12:28",
    "spArr": "2026-10-20T12:16",
    "successEdge": "ORD",
-   "checkedAt": "2026-10-19 15:16Z",
-   "scheduleCheckedAt": "2026-10-19 15:16Z",
+   "checkedAt": "2026-10-20 18:01Z",
+   "scheduleCheckedAt": "2026-10-20 18:01Z",
    "rollover": false,
    "planEta": "2026-10-06",
    "delayDays": 13,
    "alert": "alert",
-   "justChanged": [
-    {
-     "field": "eta",
-     "label": "POD ETB",
-     "from": "2026-10-19T07:00",
-     "to": "2026-10-19T06:21"
-    },
-    {
-     "field": "destEta",
-     "label": "DEST ETA",
-     "from": "2026-10-20T12:55",
-     "to": "2026-10-20T12:16"
-    }
-   ],
    "firstSeenEta": "2026-10-14T17:00",
    "firstSeenPolDep": "2026-09-03T12:00",
    "etaChangeCount": 6,
@@ -26267,9 +26322,7 @@
    "etaActual": false,
    "podBerthingActual": true,
    "polDepActualDate": "2026-09-04T19:18",
-   "podBerthingAt": "2026-10-19T06:21",
-   "staleItem": false,
-   "scheduleError": null
+   "podBerthingAt": "2026-10-19T06:21"
   },
   "schedule:KULM72444200": {
    "booking": "KULM72444200",
@@ -26771,10 +26824,10 @@
     "TRAPAC TERMINAL, LOS"
    ],
    "polDep": "2026-10-23T01:00",
-   "tsArr": "2026-10-23T18:00",
-   "tsDep": "2026-10-30T14:30",
-   "eta": "2026-11-22T07:00",
-   "destEta": "2026-11-23T13:02",
+   "tsArr": "2026-10-27T10:00",
+   "tsDep": "2026-10-30T23:00",
+   "eta": "2026-11-23T07:00",
+   "destEta": "2026-11-24T13:02",
    "status": "Export Truck Gate In to Terminal",
    "statusLoc": "PORT KLANG,MALAYSIA",
    "stamp": "2026-10-15T22:12",
@@ -26790,16 +26843,16 @@
      "pol": "PORT KLANG,MALAYSIA",
      "etd": "2026-10-23T01:00",
      "pod": "SINGAPORE",
-     "eta": "2026-10-23T18:00"
+     "eta": "2026-10-27T10:00"
     },
     {
      "vessel": "SAN FRANCISCO BRIDGE",
      "voyage": "0088E",
      "svc": "PS5",
      "pol": "SINGAPORE",
-     "etd": "2026-10-30T14:30",
+     "etd": "2026-10-30T23:00",
      "pod": "LOS ANGELES, CA",
-     "eta": "2026-11-22T07:00"
+     "eta": "2026-11-23T07:00"
     }
    ],
    "events": [
@@ -26835,17 +26888,17 @@
    "cntrQty": 14,
    "container": "KOCU4292294",
    "spDep": "2026-10-13T16:48",
-   "spArr": "2026-11-23T13:02",
+   "spArr": "2026-11-24T13:02",
    "successEdge": "ORD",
-   "checkedAt": "2026-10-19 15:16Z",
-   "scheduleCheckedAt": "2026-10-19 15:16Z",
+   "checkedAt": "2026-10-20 18:01Z",
+   "scheduleCheckedAt": "2026-10-20 18:01Z",
    "rollover": false,
    "planEta": "2026-11-22",
-   "delayDays": 0,
+   "delayDays": 1,
    "alert": "ok",
    "firstSeenEta": "2026-11-29T17:00",
    "firstSeenPolDep": "2026-10-17T12:00",
-   "etaChangeCount": 1,
+   "etaChangeCount": 2,
    "polDepChangeCount": 1,
    "polDepActual": false,
    "tsArrActual": false,
@@ -26853,9 +26906,7 @@
    "etaActual": false,
    "podBerthingActual": false,
    "polDepActualDate": null,
-   "podBerthingAt": null,
-   "staleItem": false,
-   "scheduleError": null
+   "podBerthingAt": null
   },
   "schedule:KULM78736300": {
    "booking": "KULM78736300",
@@ -26877,16 +26928,16 @@
     "TRAPAC TERMINAL, LOS"
    ],
    "polDep": "2026-10-23T01:00",
-   "tsArr": "2026-10-23T18:00",
+   "tsArr": "2026-10-27T10:00",
    "tsDep": "2026-11-04T17:00",
-   "eta": "2026-12-02T07:00",
-   "destEta": "2026-12-03T12:02",
+   "eta": "2026-12-04T07:00",
+   "destEta": "2026-12-05T12:02",
    "status": "Export Empty Container Released",
    "statusLoc": "PORT KLANG,MALAYSIA",
-   "stamp": "2026-10-19T17:38",
-   "eventStamp": "2026-10-19T17:38",
+   "stamp": "2026-10-20T11:53",
+   "eventStamp": "2026-10-20T11:53",
    "lastEvent": "Export Empty Container Released @ PORT KLANG,MALAYSIA",
-   "last": "Export Empty Container Released @ PORT KLANG,MALAYSIA (2026-10-19 17:38)",
+   "last": "Export Empty Container Released @ PORT KLANG,MALAYSIA (2026-10-20 11:53)",
    "legsIncomplete": false,
    "legs": [
     {
@@ -26896,7 +26947,7 @@
      "pol": "PORT KLANG,MALAYSIA",
      "etd": "2026-10-23T01:00",
      "pod": "SINGAPORE",
-     "eta": "2026-10-23T18:00"
+     "eta": "2026-10-27T10:00"
     },
     {
      "vessel": "ONE HENRY HUDSON",
@@ -26905,18 +26956,21 @@
      "pol": "SINGAPORE",
      "etd": "2026-11-04T17:00",
      "pod": "LOS ANGELES, CA",
-     "eta": "2026-12-02T07:00"
+     "eta": "2026-12-04T07:00"
     }
    ],
    "events": [
     {
-     "at": "2026-10-19T17:38",
+     "at": "2026-10-20T11:53",
      "loc": "PORT KLANG,MALAYSIA",
      "status": "Export Empty Container Released",
      "mode": "Truck"
     }
    ],
    "containers": [
+    "HMMU6690449",
+    "HMMU4282324",
+    "HMMU4261980",
     "HMMU4864921",
     "KOCU4087324",
     "HMMU6739580",
@@ -26929,20 +26983,20 @@
     "KOCU4136769",
     "KOCU4867038"
    ],
-   "cntrQty": 11,
-   "container": "HMMU4864921",
-   "spDep": "2026-10-19T17:38",
-   "spArr": "2026-12-03T12:02",
+   "cntrQty": 14,
+   "container": "HMMU6690449",
+   "spDep": "2026-10-20T11:53",
+   "spArr": "2026-12-05T12:02",
    "successEdge": "ORD",
-   "checkedAt": "2026-10-19 15:03Z",
-   "scheduleCheckedAt": "2026-10-19 15:03Z",
+   "checkedAt": "2026-10-20 18:01Z",
+   "scheduleCheckedAt": "2026-10-20 18:01Z",
    "rollover": false,
    "planEta": "2026-11-22",
-   "delayDays": 10,
+   "delayDays": 12,
    "alert": "alert",
    "firstSeenEta": "2026-11-23T17:00",
    "firstSeenPolDep": "2026-10-24T12:00",
-   "etaChangeCount": 2,
+   "etaChangeCount": 3,
    "polDepChangeCount": 3,
    "polDepActual": false,
    "tsArrActual": false,
@@ -26950,9 +27004,7 @@
    "etaActual": false,
    "podBerthingActual": false,
    "polDepActualDate": null,
-   "podBerthingAt": null,
-   "staleItem": false,
-   "scheduleError": null
+   "podBerthingAt": null
   },
   "schedule:KULM85176300": {
    "booking": "KULM85176300",
@@ -28350,1304 +28402,12 @@
      113.94621249999997
     ],
     [
-     21.525194434204188,
-     114.02456392211911
+     21.53853375,
+     114.05935624999998
     ],
     [
-     21.64949330261257,
-     114.07874176635741
-    ],
-    [
-     21.717464105225144,
-     114.10874603271483
-    ],
-    [
-     21.729106842041915,
-     114.11457672119141
-    ],
-    [
-     21.74074957885868,
-     114.12040740966799
-    ],
-    [
-     21.75239231567544,
-     114.12623809814454
-    ],
-    [
-     21.764035052492204,
-     114.13206878662109
-    ],
-    [
-     21.775677789308975,
-     114.13789947509767
-    ],
-    [
-     21.78732052612574,
-     114.14373016357422
-    ],
-    [
-     21.7989632629425,
-     114.14956085205077
-    ],
-    [
-     21.810605999759268,
-     114.15539154052735
-    ],
-    [
-     21.822248736576032,
-     114.1612222290039
-    ],
-    [
-     21.833891473392796,
-     114.16705291748046
-    ],
-    [
-     21.845534210209564,
-     114.17288360595703
-    ],
-    [
-     21.85717694702633,
-     114.1787142944336
-    ],
-    [
-     21.868819683843093,
-     114.18454498291017
-    ],
-    [
-     21.88046242065986,
-     114.19037567138673
-    ],
-    [
-     21.892105157476625,
-     114.19620635986328
-    ],
-    [
-     21.90374789429339,
-     114.20203704833986
-    ],
-    [
-     21.915390631110157,
-     114.20786773681641
-    ],
-    [
-     21.925841609535404,
-     114.21486717224121
-    ],
-    [
-     21.935100829569134,
-     114.22303535461427
-    ],
-    [
-     21.94316829121135,
-     114.23237228393556
-    ],
-    [
-     21.950043994462046,
-     114.24287796020509
-    ],
-    [
-     21.956919697712742,
-     114.25338363647462
-    ],
-    [
-     21.963795400963445,
-     114.26388931274415
-    ],
-    [
-     21.97067110421414,
-     114.27439498901369
-    ],
-    [
-     21.97754680746484,
-     114.2849006652832
-    ],
-    [
-     21.98442251071554,
-     114.29540634155273
-    ],
-    [
-     21.99129821396624,
-     114.30591201782227
-    ],
-    [
-     21.998173917216935,
-     114.3164176940918
-    ],
-    [
-     22.005049620467627,
-     114.32692337036133
-    ],
-    [
-     22.011925323718323,
-     114.33742904663086
-    ],
-    [
-     22.018801026969022,
-     114.34793472290039
-    ],
-    [
-     22.025676730219722,
-     114.35844039916992
-    ],
-    [
-     22.03255243347042,
-     114.36894607543945
-    ],
-    [
-     22.039428136721117,
-     114.37945175170898
-    ],
-    [
-     22.04630383997182,
-     114.38995742797852
-    ],
-    [
-     22.053179543222516,
-     114.40046310424805
-    ],
-    [
-     22.060055246473212,
-     114.41096878051758
-    ],
-    [
-     22.067501324081555,
-     114.41877937316895
-    ],
-    [
-     22.075517776047544,
-     114.42389488220215
-    ],
-    [
-     22.084104602371177,
-     114.42631530761719
-    ],
-    [
-     22.093261803052446,
-     114.42604064941406
-    ],
-    [
-     22.102419003733722,
-     114.42576599121094
-    ],
-    [
-     22.111576204414995,
-     114.42549133300781
-    ],
-    [
-     22.12073340509627,
-     114.42521667480469
-    ],
-    [
-     22.129890605777547,
-     114.42494201660156
-    ],
-    [
-     22.13904780645882,
-     114.42466735839844
-    ],
-    [
-     22.148205007140092,
-     114.42439270019531
-    ],
-    [
-     22.157362207821365,
-     114.42411804199219
-    ],
-    [
-     22.166519408502644,
-     114.42384338378906
-    ],
-    [
-     22.17567660918392,
-     114.42356872558594
-    ],
-    [
-     22.18483380986519,
-     114.42329406738281
-    ],
-    [
-     22.193991010546466,
-     114.42301940917969
-    ],
-    [
-     22.20314821122774,
-     114.42274475097656
-    ],
-    [
-     22.212305411909014,
-     114.42247009277344
-    ],
-    [
-     22.22146261259029,
-     114.42219543457031
-    ],
-    [
-     22.230619813271566,
-     114.42192077636719
-    ],
-    [
-     22.23977701395284,
-     114.42164611816406
-    ],
-    [
-     22.247709056787997,
-     114.4215259552002
-    ],
-    [
-     22.254415941777047,
-     114.42156028747559
-    ],
-    [
-     22.259897668919987,
-     114.42174911499023
-    ],
-    [
-     22.264154238216808,
-     114.42209243774414
-    ],
-    [
-     22.268410807513632,
-     114.42243576049805
-    ],
-    [
-     22.272667376810453,
-     114.42277908325195
-    ],
-    [
-     22.276923946107274,
-     114.42312240600586
-    ],
-    [
-     22.281180515404095,
-     114.42346572875977
-    ],
-    [
-     22.285437084700916,
-     114.42380905151367
-    ],
-    [
-     22.28969365399774,
-     114.42415237426758
-    ],
-    [
-     22.293950223294562,
-     114.42449569702148
-    ],
-    [
-     22.298206792591383,
-     114.42483901977539
-    ],
-    [
-     22.302463361888204,
-     114.4251823425293
-    ],
-    [
-     22.30671993118503,
-     114.4255256652832
-    ],
-    [
-     22.31097650048185,
-     114.42586898803711
-    ],
-    [
-     22.315233069778667,
-     114.42621231079103
-    ],
-    [
-     22.31948963907549,
-     114.42655563354494
-    ],
-    [
-     22.323746208372313,
-     114.42689895629884
-    ],
-    [
-     22.328002777669134,
-     114.42724227905275
-    ],
-    [
-     22.33225934696596,
-     114.42758560180665
-    ],
-    [
-     22.33654700300476,
-     114.4281349182129
-    ],
-    [
-     22.340865745785536,
-     114.4288902282715
-    ],
-    [
-     22.345215575308288,
-     114.42985153198244
-    ],
-    [
-     22.349596491573024,
-     114.43101882934572
-    ],
-    [
-     22.353977407837757,
-     114.432186126709
-    ],
-    [
-     22.35835832410249,
-     114.43335342407228
-    ],
-    [
-     22.362739240367222,
-     114.43452072143556
-    ],
-    [
-     22.367120156631955,
-     114.43568801879883
-    ],
-    [
-     22.371501072896688,
-     114.43685531616211
-    ],
-    [
-     22.375881989161417,
-     114.43802261352539
-    ],
-    [
-     22.38026290542615,
-     114.43918991088867
-    ],
-    [
-     22.384643821690887,
-     114.44035720825195
-    ],
-    [
-     22.38902473795562,
-     114.44152450561523
-    ],
-    [
-     22.393405654220352,
-     114.44269180297852
-    ],
-    [
-     22.397786570485085,
-     114.4438591003418
-    ],
-    [
-     22.402167486749818,
-     114.44502639770509
-    ],
-    [
-     22.40654840301455,
-     114.44619369506837
-    ],
-    [
-     22.41092931927928,
-     114.44736099243165
-    ],
-    [
-     22.415310235544013,
-     114.44852828979494
-    ],
-    [
-     22.41969115180875,
-     114.44969558715822
-    ],
-    [
-     22.424118950203773,
-     114.45003890991212
-    ],
-    [
-     22.42859363072909,
-     114.44955825805665
-    ],
-    [
-     22.433115193384698,
-     114.44825363159181
-    ],
-    [
-     22.437683638170594,
-     114.44612503051759
-    ],
-    [
-     22.44225208295649,
-     114.44399642944337
-    ],
-    [
-     22.446820527742386,
-     114.44186782836915
-    ],
-    [
-     22.45138897252828,
-     114.43973922729494
-    ],
-    [
-     22.455957417314178,
-     114.4376106262207
-    ],
-    [
-     22.460525862100074,
-     114.43548202514648
-    ],
-    [
-     22.46509430688597,
-     114.43335342407227
-    ],
-    [
-     22.469662751671866,
-     114.43122482299805
-    ],
-    [
-     22.47423119645776,
-     114.42909622192383
-    ],
-    [
-     22.478799641243658,
-     114.42696762084961
-    ],
-    [
-     22.483368086029557,
-     114.42483901977539
-    ],
-    [
-     22.487936530815453,
-     114.42271041870117
-    ],
-    [
-     22.492504975601353,
-     114.42058181762697
-    ],
-    [
-     22.497073420387252,
-     114.41845321655275
-    ],
-    [
-     22.50164186517314,
-     114.41632461547853
-    ],
-    [
-     22.506210309959037,
-     114.41419601440431
-    ],
-    [
-     22.51077875474494,
-     114.41206741333009
-    ],
-    [
-     22.514712451245863,
-     114.40956115722658
-    ],
-    [
-     22.51801139946182,
-     114.40667724609376
-    ],
-    [
-     22.520675599392803,
-     114.40341567993165
-    ],
-    [
-     22.522705051038816,
-     114.39977645874025
-    ],
-    [
-     22.52473450268483,
-     114.39613723754884
-    ],
-    [
-     22.526763954330843,
-     114.39249801635744
-    ],
-    [
-     22.528793405976856,
-     114.38885879516603
-    ],
-    [
-     22.530822857622866,
-     114.38521957397461
-    ],
-    [
-     22.53285230926888,
-     114.3815803527832
-    ],
-    [
-     22.534881760914896,
-     114.3779411315918
-    ],
-    [
-     22.53691121256091,
-     114.37430191040039
-    ],
-    [
-     22.53894066420692,
-     114.37066268920898
-    ],
-    [
-     22.540970115852932,
-     114.36702346801758
-    ],
-    [
-     22.54299956749895,
-     114.36338424682617
-    ],
-    [
-     22.545029019144962,
-     114.35974502563477
-    ],
-    [
-     22.547058470790976,
-     114.35610580444337
-    ],
-    [
-     22.54908792243699,
-     114.35246658325197
-    ],
-    [
-     22.551117374083006,
-     114.34882736206056
-    ],
-    [
-     22.55314682572902,
-     114.34518814086915
-    ],
-    [
-     22.555176277375033,
-     114.34154891967775
-    ],
-    [
-     22.55685030167399,
-     114.33786387018557
-    ],
-    [
-     22.558168898625897,
-     114.3341329923926
-    ],
-    [
-     22.55913206823075,
-     114.33035628629885
-    ],
-    [
-     22.559739810488544,
-     114.32653375190432
-    ],
-    [
-     22.560347552746343,
-     114.32271121750978
-    ],
-    [
-     22.560955295004142,
-     114.31888868311525
-    ],
-    [
-     22.56156303726194,
-     114.31506614872072
-    ],
-    [
-     22.562170779519736,
-     114.31124361432617
-    ],
-    [
-     22.56277852177753,
-     114.30742107993164
-    ],
-    [
-     22.56338626403533,
-     114.30359854553713
-    ],
-    [
-     22.563994006293125,
-     114.2997760111426
-    ],
-    [
-     22.56460174855092,
-     114.29595347674805
-    ],
-    [
-     22.56520949080872,
-     114.29213094235352
-    ],
-    [
-     22.565817233066518,
-     114.28830840795901
-    ],
-    [
-     22.566424975324317,
-     114.28448587356448
-    ],
-    [
-     22.567032717582112,
-     114.28066333916992
-    ],
-    [
-     22.567640459839907,
-     114.27684080477539
-    ],
-    [
-     22.568248202097706,
-     114.27301827038087
-    ],
-    [
-     22.568855944355505,
-     114.26919573598633
-    ],
-    [
-     22.569463686613304,
-     114.26537320159181
-    ],
-    [
-     22.56991949330665,
-     114.2625063007959
-    ],
-    [
-     22.57022336443555,
-     114.26059503359863
-    ],
-    [
-     22.5703753,
-     114.2596394
-    ],
-    [
-     22.57022336443555,
-     114.26059503359863
-    ],
-    [
-     22.56991949330665,
-     114.2625063007959
-    ],
-    [
-     22.569463686613304,
-     114.26537320159181
-    ],
-    [
-     22.568855944355505,
-     114.26919573598633
-    ],
-    [
-     22.568248202097706,
-     114.27301827038087
-    ],
-    [
-     22.567640459839907,
-     114.27684080477539
-    ],
-    [
-     22.567032717582112,
-     114.28066333916992
-    ],
-    [
-     22.566424975324317,
-     114.28448587356448
-    ],
-    [
-     22.565817233066518,
-     114.28830840795901
-    ],
-    [
-     22.56520949080872,
-     114.29213094235352
-    ],
-    [
-     22.56460174855092,
-     114.29595347674805
-    ],
-    [
-     22.563994006293125,
-     114.2997760111426
-    ],
-    [
-     22.56338626403533,
-     114.30359854553713
-    ],
-    [
-     22.56277852177753,
-     114.30742107993164
-    ],
-    [
-     22.562170779519736,
-     114.31124361432617
-    ],
-    [
-     22.56156303726194,
-     114.31506614872072
-    ],
-    [
-     22.560955295004142,
-     114.31888868311525
-    ],
-    [
-     22.560347552746343,
-     114.32271121750976
-    ],
-    [
-     22.559739810488544,
-     114.3265337519043
-    ],
-    [
-     22.55913206823075,
-     114.33035628629885
-    ],
-    [
-     22.558168898625897,
-     114.3341329923926
-    ],
-    [
-     22.55685030167399,
-     114.33786387018557
-    ],
-    [
-     22.555176277375033,
-     114.34154891967775
-    ],
-    [
-     22.55314682572902,
-     114.34518814086915
-    ],
-    [
-     22.551117374083006,
-     114.34882736206056
-    ],
-    [
-     22.54908792243699,
-     114.35246658325197
-    ],
-    [
-     22.54705847079098,
-     114.35610580444337
-    ],
-    [
-     22.545029019144962,
-     114.35974502563477
-    ],
-    [
-     22.54299956749895,
-     114.36338424682617
-    ],
-    [
-     22.540970115852936,
-     114.36702346801758
-    ],
-    [
-     22.53894066420692,
-     114.37066268920898
-    ],
-    [
-     22.53691121256091,
-     114.37430191040039
-    ],
-    [
-     22.534881760914896,
-     114.3779411315918
-    ],
-    [
-     22.53285230926888,
-     114.3815803527832
-    ],
-    [
-     22.530822857622866,
-     114.38521957397461
-    ],
-    [
-     22.528793405976856,
-     114.38885879516603
-    ],
-    [
-     22.526763954330843,
-     114.39249801635744
-    ],
-    [
-     22.524734502684826,
-     114.39613723754884
-    ],
-    [
-     22.522705051038812,
-     114.39977645874025
-    ],
-    [
-     22.520675599392803,
-     114.40341567993165
-    ],
-    [
-     22.51801139946182,
-     114.40667724609376
-    ],
-    [
-     22.514712451245863,
-     114.40956115722658
-    ],
-    [
-     22.51077875474494,
-     114.41206741333009
-    ],
-    [
-     22.506210309959037,
-     114.41419601440431
-    ],
-    [
-     22.50164186517314,
-     114.41632461547853
-    ],
-    [
-     22.497073420387252,
-     114.41845321655275
-    ],
-    [
-     22.492504975601353,
-     114.42058181762697
-    ],
-    [
-     22.487936530815453,
-     114.42271041870117
-    ],
-    [
-     22.483368086029557,
-     114.42483901977539
-    ],
-    [
-     22.478799641243658,
-     114.42696762084961
-    ],
-    [
-     22.47423119645776,
-     114.42909622192383
-    ],
-    [
-     22.469662751671866,
-     114.43122482299805
-    ],
-    [
-     22.46509430688597,
-     114.43335342407227
-    ],
-    [
-     22.460525862100074,
-     114.43548202514648
-    ],
-    [
-     22.455957417314178,
-     114.4376106262207
-    ],
-    [
-     22.45138897252828,
-     114.43973922729494
-    ],
-    [
-     22.446820527742386,
-     114.44186782836915
-    ],
-    [
-     22.442252082956486,
-     114.44399642944337
-    ],
-    [
-     22.43768363817059,
-     114.44612503051759
-    ],
-    [
-     22.433115193384694,
-     114.44825363159181
-    ],
-    [
-     22.42859363072909,
-     114.44955825805665
-    ],
-    [
-     22.424118950203773,
-     114.45003890991212
-    ],
-    [
-     22.41969115180875,
-     114.44969558715822
-    ],
-    [
-     22.41531023554402,
-     114.44852828979494
-    ],
-    [
-     22.410929319279283,
-     114.44736099243165
-    ],
-    [
-     22.406548403014554,
-     114.44619369506837
-    ],
-    [
-     22.40216748674982,
-     114.44502639770509
-    ],
-    [
-     22.39778657048509,
-     114.4438591003418
-    ],
-    [
-     22.393405654220352,
-     114.44269180297852
-    ],
-    [
-     22.38902473795562,
-     114.44152450561523
-    ],
-    [
-     22.384643821690887,
-     114.44035720825195
-    ],
-    [
-     22.38026290542615,
-     114.43918991088867
-    ],
-    [
-     22.375881989161417,
-     114.43802261352539
-    ],
-    [
-     22.371501072896688,
-     114.43685531616211
-    ],
-    [
-     22.367120156631955,
-     114.43568801879883
-    ],
-    [
-     22.36273924036722,
-     114.43452072143556
-    ],
-    [
-     22.358358324102486,
-     114.43335342407228
-    ],
-    [
-     22.353977407837757,
-     114.432186126709
-    ],
-    [
-     22.349596491573024,
-     114.43101882934572
-    ],
-    [
-     22.345215575308288,
-     114.42985153198244
-    ],
-    [
-     22.340865745785536,
-     114.4288902282715
-    ],
-    [
-     22.33654700300476,
-     114.4281349182129
-    ],
-    [
-     22.332259346965962,
-     114.42758560180665
-    ],
-    [
-     22.328002777669134,
-     114.42724227905275
-    ],
-    [
-     22.323746208372313,
-     114.42689895629884
-    ],
-    [
-     22.3194896390755,
-     114.42655563354494
-    ],
-    [
-     22.315233069778674,
-     114.42621231079103
-    ],
-    [
-     22.31097650048185,
-     114.42586898803711
-    ],
-    [
-     22.30671993118503,
-     114.4255256652832
-    ],
-    [
-     22.302463361888204,
-     114.4251823425293
-    ],
-    [
-     22.298206792591383,
-     114.42483901977539
-    ],
-    [
-     22.293950223294562,
-     114.42449569702148
-    ],
-    [
-     22.28969365399774,
-     114.42415237426758
-    ],
-    [
-     22.285437084700916,
-     114.42380905151367
-    ],
-    [
-     22.281180515404095,
-     114.42346572875977
-    ],
-    [
-     22.276923946107274,
-     114.42312240600586
-    ],
-    [
-     22.272667376810453,
-     114.42277908325195
-    ],
-    [
-     22.268410807513625,
-     114.42243576049805
-    ],
-    [
-     22.264154238216804,
-     114.42209243774414
-    ],
-    [
-     22.259897668919983,
-     114.42174911499023
-    ],
-    [
-     22.254415941777047,
-     114.42156028747559
-    ],
-    [
-     22.247709056787997,
-     114.4215259552002
-    ],
-    [
-     22.23977701395284,
-     114.42164611816406
-    ],
-    [
-     22.230619813271566,
-     114.42192077636719
-    ],
-    [
-     22.22146261259029,
-     114.42219543457031
-    ],
-    [
-     22.212305411909014,
-     114.42247009277344
-    ],
-    [
-     22.20314821122774,
-     114.42274475097656
-    ],
-    [
-     22.19399101054647,
-     114.42301940917969
-    ],
-    [
-     22.184833809865196,
-     114.42329406738281
-    ],
-    [
-     22.17567660918392,
-     114.42356872558594
-    ],
-    [
-     22.166519408502644,
-     114.42384338378906
-    ],
-    [
-     22.157362207821365,
-     114.42411804199219
-    ],
-    [
-     22.148205007140092,
-     114.42439270019531
-    ],
-    [
-     22.13904780645882,
-     114.42466735839844
-    ],
-    [
-     22.129890605777547,
-     114.42494201660156
-    ],
-    [
-     22.120733405096267,
-     114.42521667480469
-    ],
-    [
-     22.11157620441499,
-     114.42549133300781
-    ],
-    [
-     22.102419003733722,
-     114.42576599121094
-    ],
-    [
-     22.093261803052446,
-     114.42604064941406
-    ],
-    [
-     22.08410460237117,
-     114.42631530761719
-    ],
-    [
-     22.07551777604754,
-     114.42389488220215
-    ],
-    [
-     22.067501324081555,
-     114.41877937316895
-    ],
-    [
-     22.060055246473212,
-     114.41096878051758
-    ],
-    [
-     22.053179543222516,
-     114.40046310424805
-    ],
-    [
-     22.04630383997182,
-     114.38995742797852
-    ],
-    [
-     22.039428136721117,
-     114.37945175170898
-    ],
-    [
-     22.03255243347042,
-     114.36894607543945
-    ],
-    [
-     22.025676730219722,
-     114.35844039916992
-    ],
-    [
-     22.018801026969022,
-     114.34793472290039
-    ],
-    [
-     22.011925323718323,
-     114.33742904663086
-    ],
-    [
-     22.005049620467627,
-     114.32692337036133
-    ],
-    [
-     21.998173917216935,
-     114.3164176940918
-    ],
-    [
-     21.99129821396624,
-     114.30591201782227
-    ],
-    [
-     21.98442251071554,
-     114.29540634155273
-    ],
-    [
-     21.97754680746484,
-     114.2849006652832
-    ],
-    [
-     21.97067110421414,
-     114.27439498901369
-    ],
-    [
-     21.963795400963445,
-     114.26388931274415
-    ],
-    [
-     21.956919697712742,
-     114.25338363647462
-    ],
-    [
-     21.950043994462046,
-     114.24287796020509
-    ],
-    [
-     21.94316829121135,
-     114.23237228393556
-    ],
-    [
-     21.935100829569134,
-     114.22303535461427
-    ],
-    [
-     21.925841609535404,
-     114.21486717224121
-    ],
-    [
-     21.915390631110157,
-     114.20786773681641
-    ],
-    [
-     21.90374789429339,
-     114.20203704833986
-    ],
-    [
-     21.892105157476625,
-     114.19620635986328
-    ],
-    [
-     21.88046242065986,
-     114.19037567138673
-    ],
-    [
-     21.868819683843093,
-     114.18454498291017
-    ],
-    [
-     21.85717694702633,
-     114.1787142944336
-    ],
-    [
-     21.845534210209564,
-     114.17288360595703
-    ],
-    [
-     21.833891473392796,
-     114.16705291748046
-    ],
-    [
-     21.822248736576032,
-     114.1612222290039
-    ],
-    [
-     21.810605999759268,
-     114.15539154052735
-    ],
-    [
-     21.7989632629425,
-     114.14956085205077
-    ],
-    [
-     21.78732052612574,
-     114.14373016357422
-    ],
-    [
-     21.775677789308975,
-     114.13789947509767
-    ],
-    [
-     21.764035052492204,
-     114.13206878662109
-    ],
-    [
-     21.75239231567544,
-     114.12623809814454
-    ],
-    [
-     21.74074957885868,
-     114.12040740966799
-    ],
-    [
-     21.729106842041915,
-     114.11457672119141
-    ],
-    [
-     21.717464105225144,
-     114.10874603271483
-    ],
-    [
-     21.72498205261257,
-     114.14062301635741
-    ],
-    [
-     21.75166068420419,
-     114.21020767211913
+     21.68951125,
+     114.18311874999998
     ],
     [
      21.7975,
@@ -34138,10 +32898,9 @@
     "PORT KLANG,MALAYSIA",
     "SINGAPORE",
     "BA RIA VUNG TAU, VIETNAM",
-    "YANTIAN, SHENZHEN, CHINA",
     "LOS ANGELES, CA"
    ],
-   "mapAt": "2026-10-19 18:17Z",
+   "mapAt": "2026-10-20 18:46Z",
    "idx": 1,
    "ratio": 0,
    "namedPorts": true,
@@ -34159,10 +32918,6 @@
      107.0315867
     ],
     [
-     22.5703753,
-     114.2596394
-    ],
-    [
      33.76478926,
      -118.2680205
     ]
@@ -34171,8 +32926,7 @@
     0,
     84,
     187,
-    430,
-    1712
+    1389
    ]
   },
   "map:KULM15263800": {
@@ -40318,7 +39072,7 @@
     "HAI PHONG, VIETNAM",
     "LOS ANGELES, CA"
    ],
-   "mapAt": "2026-10-19 18:46Z",
+   "mapAt": "2026-10-20 18:46Z",
    "idx": 1,
    "ratio": 0,
    "namedPorts": true,
@@ -47215,9 +45969,9 @@
     "YANTIAN, SHENZHEN, CHINA",
     "LOS ANGELES, CA"
    ],
-   "mapAt": "2026-10-19 17:17Z",
+   "mapAt": "2026-10-20 18:46Z",
    "idx": 3,
-   "ratio": 0.1521219207403833,
+   "ratio": 0.20886443215421352,
    "namedPorts": true,
    "rawRoute": [
     [
@@ -48321,1304 +47075,12 @@
      113.94621249999997
     ],
     [
-     21.525194434204188,
-     114.02456392211911
+     21.53853375,
+     114.05935624999998
     ],
     [
-     21.64949330261257,
-     114.07874176635741
-    ],
-    [
-     21.717464105225144,
-     114.10874603271483
-    ],
-    [
-     21.729106842041915,
-     114.11457672119141
-    ],
-    [
-     21.74074957885868,
-     114.12040740966799
-    ],
-    [
-     21.75239231567544,
-     114.12623809814454
-    ],
-    [
-     21.764035052492204,
-     114.13206878662109
-    ],
-    [
-     21.775677789308975,
-     114.13789947509767
-    ],
-    [
-     21.78732052612574,
-     114.14373016357422
-    ],
-    [
-     21.7989632629425,
-     114.14956085205077
-    ],
-    [
-     21.810605999759268,
-     114.15539154052735
-    ],
-    [
-     21.822248736576032,
-     114.1612222290039
-    ],
-    [
-     21.833891473392796,
-     114.16705291748046
-    ],
-    [
-     21.845534210209564,
-     114.17288360595703
-    ],
-    [
-     21.85717694702633,
-     114.1787142944336
-    ],
-    [
-     21.868819683843093,
-     114.18454498291017
-    ],
-    [
-     21.88046242065986,
-     114.19037567138673
-    ],
-    [
-     21.892105157476625,
-     114.19620635986328
-    ],
-    [
-     21.90374789429339,
-     114.20203704833986
-    ],
-    [
-     21.915390631110157,
-     114.20786773681641
-    ],
-    [
-     21.925841609535404,
-     114.21486717224121
-    ],
-    [
-     21.935100829569134,
-     114.22303535461427
-    ],
-    [
-     21.94316829121135,
-     114.23237228393556
-    ],
-    [
-     21.950043994462046,
-     114.24287796020509
-    ],
-    [
-     21.956919697712742,
-     114.25338363647462
-    ],
-    [
-     21.963795400963445,
-     114.26388931274415
-    ],
-    [
-     21.97067110421414,
-     114.27439498901369
-    ],
-    [
-     21.97754680746484,
-     114.2849006652832
-    ],
-    [
-     21.98442251071554,
-     114.29540634155273
-    ],
-    [
-     21.99129821396624,
-     114.30591201782227
-    ],
-    [
-     21.998173917216935,
-     114.3164176940918
-    ],
-    [
-     22.005049620467627,
-     114.32692337036133
-    ],
-    [
-     22.011925323718323,
-     114.33742904663086
-    ],
-    [
-     22.018801026969022,
-     114.34793472290039
-    ],
-    [
-     22.025676730219722,
-     114.35844039916992
-    ],
-    [
-     22.03255243347042,
-     114.36894607543945
-    ],
-    [
-     22.039428136721117,
-     114.37945175170898
-    ],
-    [
-     22.04630383997182,
-     114.38995742797852
-    ],
-    [
-     22.053179543222516,
-     114.40046310424805
-    ],
-    [
-     22.060055246473212,
-     114.41096878051758
-    ],
-    [
-     22.067501324081555,
-     114.41877937316895
-    ],
-    [
-     22.075517776047544,
-     114.42389488220215
-    ],
-    [
-     22.084104602371177,
-     114.42631530761719
-    ],
-    [
-     22.093261803052446,
-     114.42604064941406
-    ],
-    [
-     22.102419003733722,
-     114.42576599121094
-    ],
-    [
-     22.111576204414995,
-     114.42549133300781
-    ],
-    [
-     22.12073340509627,
-     114.42521667480469
-    ],
-    [
-     22.129890605777547,
-     114.42494201660156
-    ],
-    [
-     22.13904780645882,
-     114.42466735839844
-    ],
-    [
-     22.148205007140092,
-     114.42439270019531
-    ],
-    [
-     22.157362207821365,
-     114.42411804199219
-    ],
-    [
-     22.166519408502644,
-     114.42384338378906
-    ],
-    [
-     22.17567660918392,
-     114.42356872558594
-    ],
-    [
-     22.18483380986519,
-     114.42329406738281
-    ],
-    [
-     22.193991010546466,
-     114.42301940917969
-    ],
-    [
-     22.20314821122774,
-     114.42274475097656
-    ],
-    [
-     22.212305411909014,
-     114.42247009277344
-    ],
-    [
-     22.22146261259029,
-     114.42219543457031
-    ],
-    [
-     22.230619813271566,
-     114.42192077636719
-    ],
-    [
-     22.23977701395284,
-     114.42164611816406
-    ],
-    [
-     22.247709056787997,
-     114.4215259552002
-    ],
-    [
-     22.254415941777047,
-     114.42156028747559
-    ],
-    [
-     22.259897668919987,
-     114.42174911499023
-    ],
-    [
-     22.264154238216808,
-     114.42209243774414
-    ],
-    [
-     22.268410807513632,
-     114.42243576049805
-    ],
-    [
-     22.272667376810453,
-     114.42277908325195
-    ],
-    [
-     22.276923946107274,
-     114.42312240600586
-    ],
-    [
-     22.281180515404095,
-     114.42346572875977
-    ],
-    [
-     22.285437084700916,
-     114.42380905151367
-    ],
-    [
-     22.28969365399774,
-     114.42415237426758
-    ],
-    [
-     22.293950223294562,
-     114.42449569702148
-    ],
-    [
-     22.298206792591383,
-     114.42483901977539
-    ],
-    [
-     22.302463361888204,
-     114.4251823425293
-    ],
-    [
-     22.30671993118503,
-     114.4255256652832
-    ],
-    [
-     22.31097650048185,
-     114.42586898803711
-    ],
-    [
-     22.315233069778667,
-     114.42621231079103
-    ],
-    [
-     22.31948963907549,
-     114.42655563354494
-    ],
-    [
-     22.323746208372313,
-     114.42689895629884
-    ],
-    [
-     22.328002777669134,
-     114.42724227905275
-    ],
-    [
-     22.33225934696596,
-     114.42758560180665
-    ],
-    [
-     22.33654700300476,
-     114.4281349182129
-    ],
-    [
-     22.340865745785536,
-     114.4288902282715
-    ],
-    [
-     22.345215575308288,
-     114.42985153198244
-    ],
-    [
-     22.349596491573024,
-     114.43101882934572
-    ],
-    [
-     22.353977407837757,
-     114.432186126709
-    ],
-    [
-     22.35835832410249,
-     114.43335342407228
-    ],
-    [
-     22.362739240367222,
-     114.43452072143556
-    ],
-    [
-     22.367120156631955,
-     114.43568801879883
-    ],
-    [
-     22.371501072896688,
-     114.43685531616211
-    ],
-    [
-     22.375881989161417,
-     114.43802261352539
-    ],
-    [
-     22.38026290542615,
-     114.43918991088867
-    ],
-    [
-     22.384643821690887,
-     114.44035720825195
-    ],
-    [
-     22.38902473795562,
-     114.44152450561523
-    ],
-    [
-     22.393405654220352,
-     114.44269180297852
-    ],
-    [
-     22.397786570485085,
-     114.4438591003418
-    ],
-    [
-     22.402167486749818,
-     114.44502639770509
-    ],
-    [
-     22.40654840301455,
-     114.44619369506837
-    ],
-    [
-     22.41092931927928,
-     114.44736099243165
-    ],
-    [
-     22.415310235544013,
-     114.44852828979494
-    ],
-    [
-     22.41969115180875,
-     114.44969558715822
-    ],
-    [
-     22.424118950203773,
-     114.45003890991212
-    ],
-    [
-     22.42859363072909,
-     114.44955825805665
-    ],
-    [
-     22.433115193384698,
-     114.44825363159181
-    ],
-    [
-     22.437683638170594,
-     114.44612503051759
-    ],
-    [
-     22.44225208295649,
-     114.44399642944337
-    ],
-    [
-     22.446820527742386,
-     114.44186782836915
-    ],
-    [
-     22.45138897252828,
-     114.43973922729494
-    ],
-    [
-     22.455957417314178,
-     114.4376106262207
-    ],
-    [
-     22.460525862100074,
-     114.43548202514648
-    ],
-    [
-     22.46509430688597,
-     114.43335342407227
-    ],
-    [
-     22.469662751671866,
-     114.43122482299805
-    ],
-    [
-     22.47423119645776,
-     114.42909622192383
-    ],
-    [
-     22.478799641243658,
-     114.42696762084961
-    ],
-    [
-     22.483368086029557,
-     114.42483901977539
-    ],
-    [
-     22.487936530815453,
-     114.42271041870117
-    ],
-    [
-     22.492504975601353,
-     114.42058181762697
-    ],
-    [
-     22.497073420387252,
-     114.41845321655275
-    ],
-    [
-     22.50164186517314,
-     114.41632461547853
-    ],
-    [
-     22.506210309959037,
-     114.41419601440431
-    ],
-    [
-     22.51077875474494,
-     114.41206741333009
-    ],
-    [
-     22.514712451245863,
-     114.40956115722658
-    ],
-    [
-     22.51801139946182,
-     114.40667724609376
-    ],
-    [
-     22.520675599392803,
-     114.40341567993165
-    ],
-    [
-     22.522705051038816,
-     114.39977645874025
-    ],
-    [
-     22.52473450268483,
-     114.39613723754884
-    ],
-    [
-     22.526763954330843,
-     114.39249801635744
-    ],
-    [
-     22.528793405976856,
-     114.38885879516603
-    ],
-    [
-     22.530822857622866,
-     114.38521957397461
-    ],
-    [
-     22.53285230926888,
-     114.3815803527832
-    ],
-    [
-     22.534881760914896,
-     114.3779411315918
-    ],
-    [
-     22.53691121256091,
-     114.37430191040039
-    ],
-    [
-     22.53894066420692,
-     114.37066268920898
-    ],
-    [
-     22.540970115852932,
-     114.36702346801758
-    ],
-    [
-     22.54299956749895,
-     114.36338424682617
-    ],
-    [
-     22.545029019144962,
-     114.35974502563477
-    ],
-    [
-     22.547058470790976,
-     114.35610580444337
-    ],
-    [
-     22.54908792243699,
-     114.35246658325197
-    ],
-    [
-     22.551117374083006,
-     114.34882736206056
-    ],
-    [
-     22.55314682572902,
-     114.34518814086915
-    ],
-    [
-     22.555176277375033,
-     114.34154891967775
-    ],
-    [
-     22.55685030167399,
-     114.33786387018557
-    ],
-    [
-     22.558168898625897,
-     114.3341329923926
-    ],
-    [
-     22.55913206823075,
-     114.33035628629885
-    ],
-    [
-     22.559739810488544,
-     114.32653375190432
-    ],
-    [
-     22.560347552746343,
-     114.32271121750978
-    ],
-    [
-     22.560955295004142,
-     114.31888868311525
-    ],
-    [
-     22.56156303726194,
-     114.31506614872072
-    ],
-    [
-     22.562170779519736,
-     114.31124361432617
-    ],
-    [
-     22.56277852177753,
-     114.30742107993164
-    ],
-    [
-     22.56338626403533,
-     114.30359854553713
-    ],
-    [
-     22.563994006293125,
-     114.2997760111426
-    ],
-    [
-     22.56460174855092,
-     114.29595347674805
-    ],
-    [
-     22.56520949080872,
-     114.29213094235352
-    ],
-    [
-     22.565817233066518,
-     114.28830840795901
-    ],
-    [
-     22.566424975324317,
-     114.28448587356448
-    ],
-    [
-     22.567032717582112,
-     114.28066333916992
-    ],
-    [
-     22.567640459839907,
-     114.27684080477539
-    ],
-    [
-     22.568248202097706,
-     114.27301827038087
-    ],
-    [
-     22.568855944355505,
-     114.26919573598633
-    ],
-    [
-     22.569463686613304,
-     114.26537320159181
-    ],
-    [
-     22.56991949330665,
-     114.2625063007959
-    ],
-    [
-     22.57022336443555,
-     114.26059503359863
-    ],
-    [
-     22.5703753,
-     114.2596394
-    ],
-    [
-     22.57022336443555,
-     114.26059503359863
-    ],
-    [
-     22.56991949330665,
-     114.2625063007959
-    ],
-    [
-     22.569463686613304,
-     114.26537320159181
-    ],
-    [
-     22.568855944355505,
-     114.26919573598633
-    ],
-    [
-     22.568248202097706,
-     114.27301827038087
-    ],
-    [
-     22.567640459839907,
-     114.27684080477539
-    ],
-    [
-     22.567032717582112,
-     114.28066333916992
-    ],
-    [
-     22.566424975324317,
-     114.28448587356448
-    ],
-    [
-     22.565817233066518,
-     114.28830840795901
-    ],
-    [
-     22.56520949080872,
-     114.29213094235352
-    ],
-    [
-     22.56460174855092,
-     114.29595347674805
-    ],
-    [
-     22.563994006293125,
-     114.2997760111426
-    ],
-    [
-     22.56338626403533,
-     114.30359854553713
-    ],
-    [
-     22.56277852177753,
-     114.30742107993164
-    ],
-    [
-     22.562170779519736,
-     114.31124361432617
-    ],
-    [
-     22.56156303726194,
-     114.31506614872072
-    ],
-    [
-     22.560955295004142,
-     114.31888868311525
-    ],
-    [
-     22.560347552746343,
-     114.32271121750976
-    ],
-    [
-     22.559739810488544,
-     114.3265337519043
-    ],
-    [
-     22.55913206823075,
-     114.33035628629885
-    ],
-    [
-     22.558168898625897,
-     114.3341329923926
-    ],
-    [
-     22.55685030167399,
-     114.33786387018557
-    ],
-    [
-     22.555176277375033,
-     114.34154891967775
-    ],
-    [
-     22.55314682572902,
-     114.34518814086915
-    ],
-    [
-     22.551117374083006,
-     114.34882736206056
-    ],
-    [
-     22.54908792243699,
-     114.35246658325197
-    ],
-    [
-     22.54705847079098,
-     114.35610580444337
-    ],
-    [
-     22.545029019144962,
-     114.35974502563477
-    ],
-    [
-     22.54299956749895,
-     114.36338424682617
-    ],
-    [
-     22.540970115852936,
-     114.36702346801758
-    ],
-    [
-     22.53894066420692,
-     114.37066268920898
-    ],
-    [
-     22.53691121256091,
-     114.37430191040039
-    ],
-    [
-     22.534881760914896,
-     114.3779411315918
-    ],
-    [
-     22.53285230926888,
-     114.3815803527832
-    ],
-    [
-     22.530822857622866,
-     114.38521957397461
-    ],
-    [
-     22.528793405976856,
-     114.38885879516603
-    ],
-    [
-     22.526763954330843,
-     114.39249801635744
-    ],
-    [
-     22.524734502684826,
-     114.39613723754884
-    ],
-    [
-     22.522705051038812,
-     114.39977645874025
-    ],
-    [
-     22.520675599392803,
-     114.40341567993165
-    ],
-    [
-     22.51801139946182,
-     114.40667724609376
-    ],
-    [
-     22.514712451245863,
-     114.40956115722658
-    ],
-    [
-     22.51077875474494,
-     114.41206741333009
-    ],
-    [
-     22.506210309959037,
-     114.41419601440431
-    ],
-    [
-     22.50164186517314,
-     114.41632461547853
-    ],
-    [
-     22.497073420387252,
-     114.41845321655275
-    ],
-    [
-     22.492504975601353,
-     114.42058181762697
-    ],
-    [
-     22.487936530815453,
-     114.42271041870117
-    ],
-    [
-     22.483368086029557,
-     114.42483901977539
-    ],
-    [
-     22.478799641243658,
-     114.42696762084961
-    ],
-    [
-     22.47423119645776,
-     114.42909622192383
-    ],
-    [
-     22.469662751671866,
-     114.43122482299805
-    ],
-    [
-     22.46509430688597,
-     114.43335342407227
-    ],
-    [
-     22.460525862100074,
-     114.43548202514648
-    ],
-    [
-     22.455957417314178,
-     114.4376106262207
-    ],
-    [
-     22.45138897252828,
-     114.43973922729494
-    ],
-    [
-     22.446820527742386,
-     114.44186782836915
-    ],
-    [
-     22.442252082956486,
-     114.44399642944337
-    ],
-    [
-     22.43768363817059,
-     114.44612503051759
-    ],
-    [
-     22.433115193384694,
-     114.44825363159181
-    ],
-    [
-     22.42859363072909,
-     114.44955825805665
-    ],
-    [
-     22.424118950203773,
-     114.45003890991212
-    ],
-    [
-     22.41969115180875,
-     114.44969558715822
-    ],
-    [
-     22.41531023554402,
-     114.44852828979494
-    ],
-    [
-     22.410929319279283,
-     114.44736099243165
-    ],
-    [
-     22.406548403014554,
-     114.44619369506837
-    ],
-    [
-     22.40216748674982,
-     114.44502639770509
-    ],
-    [
-     22.39778657048509,
-     114.4438591003418
-    ],
-    [
-     22.393405654220352,
-     114.44269180297852
-    ],
-    [
-     22.38902473795562,
-     114.44152450561523
-    ],
-    [
-     22.384643821690887,
-     114.44035720825195
-    ],
-    [
-     22.38026290542615,
-     114.43918991088867
-    ],
-    [
-     22.375881989161417,
-     114.43802261352539
-    ],
-    [
-     22.371501072896688,
-     114.43685531616211
-    ],
-    [
-     22.367120156631955,
-     114.43568801879883
-    ],
-    [
-     22.36273924036722,
-     114.43452072143556
-    ],
-    [
-     22.358358324102486,
-     114.43335342407228
-    ],
-    [
-     22.353977407837757,
-     114.432186126709
-    ],
-    [
-     22.349596491573024,
-     114.43101882934572
-    ],
-    [
-     22.345215575308288,
-     114.42985153198244
-    ],
-    [
-     22.340865745785536,
-     114.4288902282715
-    ],
-    [
-     22.33654700300476,
-     114.4281349182129
-    ],
-    [
-     22.332259346965962,
-     114.42758560180665
-    ],
-    [
-     22.328002777669134,
-     114.42724227905275
-    ],
-    [
-     22.323746208372313,
-     114.42689895629884
-    ],
-    [
-     22.3194896390755,
-     114.42655563354494
-    ],
-    [
-     22.315233069778674,
-     114.42621231079103
-    ],
-    [
-     22.31097650048185,
-     114.42586898803711
-    ],
-    [
-     22.30671993118503,
-     114.4255256652832
-    ],
-    [
-     22.302463361888204,
-     114.4251823425293
-    ],
-    [
-     22.298206792591383,
-     114.42483901977539
-    ],
-    [
-     22.293950223294562,
-     114.42449569702148
-    ],
-    [
-     22.28969365399774,
-     114.42415237426758
-    ],
-    [
-     22.285437084700916,
-     114.42380905151367
-    ],
-    [
-     22.281180515404095,
-     114.42346572875977
-    ],
-    [
-     22.276923946107274,
-     114.42312240600586
-    ],
-    [
-     22.272667376810453,
-     114.42277908325195
-    ],
-    [
-     22.268410807513625,
-     114.42243576049805
-    ],
-    [
-     22.264154238216804,
-     114.42209243774414
-    ],
-    [
-     22.259897668919983,
-     114.42174911499023
-    ],
-    [
-     22.254415941777047,
-     114.42156028747559
-    ],
-    [
-     22.247709056787997,
-     114.4215259552002
-    ],
-    [
-     22.23977701395284,
-     114.42164611816406
-    ],
-    [
-     22.230619813271566,
-     114.42192077636719
-    ],
-    [
-     22.22146261259029,
-     114.42219543457031
-    ],
-    [
-     22.212305411909014,
-     114.42247009277344
-    ],
-    [
-     22.20314821122774,
-     114.42274475097656
-    ],
-    [
-     22.19399101054647,
-     114.42301940917969
-    ],
-    [
-     22.184833809865196,
-     114.42329406738281
-    ],
-    [
-     22.17567660918392,
-     114.42356872558594
-    ],
-    [
-     22.166519408502644,
-     114.42384338378906
-    ],
-    [
-     22.157362207821365,
-     114.42411804199219
-    ],
-    [
-     22.148205007140092,
-     114.42439270019531
-    ],
-    [
-     22.13904780645882,
-     114.42466735839844
-    ],
-    [
-     22.129890605777547,
-     114.42494201660156
-    ],
-    [
-     22.120733405096267,
-     114.42521667480469
-    ],
-    [
-     22.11157620441499,
-     114.42549133300781
-    ],
-    [
-     22.102419003733722,
-     114.42576599121094
-    ],
-    [
-     22.093261803052446,
-     114.42604064941406
-    ],
-    [
-     22.08410460237117,
-     114.42631530761719
-    ],
-    [
-     22.07551777604754,
-     114.42389488220215
-    ],
-    [
-     22.067501324081555,
-     114.41877937316895
-    ],
-    [
-     22.060055246473212,
-     114.41096878051758
-    ],
-    [
-     22.053179543222516,
-     114.40046310424805
-    ],
-    [
-     22.04630383997182,
-     114.38995742797852
-    ],
-    [
-     22.039428136721117,
-     114.37945175170898
-    ],
-    [
-     22.03255243347042,
-     114.36894607543945
-    ],
-    [
-     22.025676730219722,
-     114.35844039916992
-    ],
-    [
-     22.018801026969022,
-     114.34793472290039
-    ],
-    [
-     22.011925323718323,
-     114.33742904663086
-    ],
-    [
-     22.005049620467627,
-     114.32692337036133
-    ],
-    [
-     21.998173917216935,
-     114.3164176940918
-    ],
-    [
-     21.99129821396624,
-     114.30591201782227
-    ],
-    [
-     21.98442251071554,
-     114.29540634155273
-    ],
-    [
-     21.97754680746484,
-     114.2849006652832
-    ],
-    [
-     21.97067110421414,
-     114.27439498901369
-    ],
-    [
-     21.963795400963445,
-     114.26388931274415
-    ],
-    [
-     21.956919697712742,
-     114.25338363647462
-    ],
-    [
-     21.950043994462046,
-     114.24287796020509
-    ],
-    [
-     21.94316829121135,
-     114.23237228393556
-    ],
-    [
-     21.935100829569134,
-     114.22303535461427
-    ],
-    [
-     21.925841609535404,
-     114.21486717224121
-    ],
-    [
-     21.915390631110157,
-     114.20786773681641
-    ],
-    [
-     21.90374789429339,
-     114.20203704833986
-    ],
-    [
-     21.892105157476625,
-     114.19620635986328
-    ],
-    [
-     21.88046242065986,
-     114.19037567138673
-    ],
-    [
-     21.868819683843093,
-     114.18454498291017
-    ],
-    [
-     21.85717694702633,
-     114.1787142944336
-    ],
-    [
-     21.845534210209564,
-     114.17288360595703
-    ],
-    [
-     21.833891473392796,
-     114.16705291748046
-    ],
-    [
-     21.822248736576032,
-     114.1612222290039
-    ],
-    [
-     21.810605999759268,
-     114.15539154052735
-    ],
-    [
-     21.7989632629425,
-     114.14956085205077
-    ],
-    [
-     21.78732052612574,
-     114.14373016357422
-    ],
-    [
-     21.775677789308975,
-     114.13789947509767
-    ],
-    [
-     21.764035052492204,
-     114.13206878662109
-    ],
-    [
-     21.75239231567544,
-     114.12623809814454
-    ],
-    [
-     21.74074957885868,
-     114.12040740966799
-    ],
-    [
-     21.729106842041915,
-     114.11457672119141
-    ],
-    [
-     21.717464105225144,
-     114.10874603271483
-    ],
-    [
-     21.72498205261257,
-     114.14062301635741
-    ],
-    [
-     21.75166068420419,
-     114.21020767211913
+     21.68951125,
+     114.18311874999998
     ],
     [
      21.7975,
@@ -54109,10 +51571,9 @@
     "PORT KLANG,MALAYSIA",
     "SINGAPORE",
     "BA RIA VUNG TAU, VIETNAM",
-    "YANTIAN, SHENZHEN, CHINA",
     "LOS ANGELES, CA"
    ],
-   "mapAt": "2026-10-19 18:17Z",
+   "mapAt": "2026-10-20 18:46Z",
    "idx": 1,
    "ratio": 0,
    "namedPorts": true,
@@ -54130,10 +51591,6 @@
      107.0315867
     ],
     [
-     22.5703753,
-     114.2596394
-    ],
-    [
      33.76478926,
      -118.2680205
     ]
@@ -54142,8 +51599,7 @@
     0,
     84,
     187,
-    430,
-    1712
+    1389
    ]
   },
   "map:KULM40326600": {
@@ -61040,9 +58496,9 @@
     "YANTIAN, SHENZHEN, CHINA",
     "LOS ANGELES, CA"
    ],
-   "mapAt": "2026-10-19 19:47Z",
+   "mapAt": "2026-10-20 18:45Z",
    "idx": 3,
-   "ratio": 0.3933879681067597,
+   "ratio": 0.4566808992547021,
    "namedPorts": true,
    "rawRoute": [
     [
@@ -74837,7 +72293,7 @@
    "namedPorts": true,
    "idx": 4,
    "ratio": 0,
-   "mapAt": "2026-10-19 18:46Z",
+   "mapAt": "2026-10-20 18:45Z",
    "rawRoute": [
     [
      2.9372384,
@@ -94121,7 +91577,7 @@
     "HAI PHONG, VIETNAM",
     "LOS ANGELES, CA"
    ],
-   "mapAt": "2026-10-19 18:46Z",
+   "mapAt": "2026-10-20 18:46Z",
    "idx": 0,
    "ratio": 0,
    "namedPorts": true,
@@ -101018,7 +98474,7 @@
     "YANTIAN, SHENZHEN, CHINA",
     "LOS ANGELES, CA"
    ],
-   "mapAt": "2026-10-19 13:48Z",
+   "mapAt": "2026-10-20 18:46Z",
    "idx": -1,
    "ratio": 0,
    "namedPorts": true,
