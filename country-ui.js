@@ -763,7 +763,7 @@
 
   /* 호주 표 행 클릭 → 같은 순서(인덱스)의 auRows 행을 찾고,
      그 MBL 로 buildModels 모델을 매핑해 상세를 연다. */
-  function pickAuRow(idx) {
+  function pickAuRow(idx, tr) {
     var CG = getCountryGroups();
     var AL = getAisLayer();
     if (!ais || !CG || !AL) return;
@@ -776,14 +776,79 @@
       if (String(models[i].mbl) === String(row.mbl)) { model = models[i]; break; }
     }
     if (!model) return;
-    showAuDetail(model);
-    if (typeof setView === 'function') {
-      try { setView('map'); } catch (e) { /* 무시 */ }
+    showAuDetail(model);   /* 지도 옆 상세도 맞춰 두되, 화면은 지도로 옮기지 않는다(10-30 대장님) */
+    if (tr) toggleAuInline(tr, model);
+  }
+
+  /* 미국 PO 상세처럼 누른 행 바로 아래에 펼친다(같은 행을 다시 누르면 접음).
+     PO·컨테이너 칸 + 사진(부킹 폴더의 하위 폴더가 있는 칸만 누를 수 있음). */
+  function toggleAuInline(tr, m) {
+    var tbody = tr.parentNode;
+    var open = tbody.querySelector('tr.au-detail-row');
+    var same = open && open._forMbl === m.mbl && open.previousSibling === tr;
+    document.querySelectorAll('tr.au-detail-row').forEach(function (r) { r.parentNode.removeChild(r); });
+    document.querySelectorAll('tr.au-open').forEach(function (r) { r.classList.remove('au-open'); });
+    if (same) return;
+    var cols = tr.cells ? tr.cells.length : 4;
+    var drow = document.createElement('tr');
+    drow.className = 'au-detail-row';
+    drow._forMbl = m.mbl;
+    var pos = Array.isArray(m.po) ? m.po : (m.po ? String(m.po).split(',') : []);
+    pos = pos.map(function (p) { return String(p).trim(); }).filter(Boolean);
+    var conts = [];
+    String(m.container || '').split(',').forEach(function (c) { c = c.trim(); if (c && conts.indexOf(c) < 0) conts.push(c); });
+    var tq = m.traqo;
+    if (tq && tq.inherited !== true && Array.isArray(tq.containers)) {
+      tq.containers.forEach(function (c) { var x = c && c.number ? String(c.number).trim() : ''; if (x && conts.indexOf(x) < 0) conts.push(x); });
     }
-    if (isNum(model.lat) && isNum(model.lng) && mapCtl.map &&
-        typeof mapCtl.map.panTo === 'function') {
-      try { mapCtl.map.panTo([model.lat, model.lng]); } catch (e) { /* 무시 */ }
+    var n = Math.max(pos.length, conts.length, 1);
+    var cells = '';
+    for (var k = 0; k < n; k++) {
+      cells += '<div class="pocell" data-k="' + k + '"><span class="po">' + esc(pos[k] || pos[0] || '—') + '</span>'
+        + (conts[k] ? '<span class="cn">' + esc(conts[k]) + '</span>' : '') + '</div>';
     }
+    var title = esc(m.name || '') + (m.voyage ? ' ' + esc(m.voyage) : '');
+    drow.innerHTML = '<td colspan="' + cols + '"><div class="au-inline">'
+      + '<button class="close" type="button" title="Close">✕</button>'
+      + '<h3>' + title + '</h3><div class="sb">' + esc(m.booking || '—') + ' · ' + n + ' container(s)</div>'
+      + '<div class="pogrid">' + cells + '</div>'
+      + '<div class="polegend"><span><i style="background:#7FD8FF"></i>PO No.</span><span><i style="background:#F2C14E"></i>Container</span></div>'
+      + '<div class="au-gal"></div></div></td>';
+    tbody.insertBefore(drow, tr.nextSibling);
+    tr.classList.add('au-open');
+    var box = drow.querySelector('.au-inline'), gal = drow.querySelector('.au-gal');
+    box.querySelector('.close').addEventListener('click', function (ev) {
+      ev.stopPropagation(); drow.parentNode.removeChild(drow); tr.classList.remove('au-open');
+    });
+    var code = (typeof PHOTOS !== 'undefined' && m.booking) ? PHOTOS[m.booking] : null;
+    if (!code || typeof pcList !== 'function' || typeof renderGallery !== 'function') {
+      gal.innerHTML = '<div class="gal-title dim">No photo link registered for ' + esc(m.booking || '—') + '</div>';
+      return;
+    }
+    gal.innerHTML = '<div class="gal-title">Select a PO / container above to see its photos</div>';
+    var norm = function (x) { return String(x || '').toUpperCase().replace(/[^A-Z0-9]/g, ''); };
+    pcList(code).then(function (root) {
+      var folders = (root.folders || []).filter(function (f) { return !/^COA/i.test(f.name); });
+      var hit = 0;
+      box.querySelectorAll('.pocell').forEach(function (cell) {
+        var k = +cell.getAttribute('data-k');
+        var keys = [pos[k] || pos[0], conts[k]].map(norm).filter(Boolean);
+        var f = folders.filter(function (x) { return keys.some(function (q) { return norm(x.name).indexOf(q) >= 0; }); })[0]
+          || (folders.length === 1 && n === 1 ? folders[0] : null);
+        if (!f) return;
+        hit++;
+        cell.classList.add('has-photo');
+        cell.title = 'Click to view photos — ' + f.name;
+        cell.addEventListener('click', function (ev) {
+          ev.stopPropagation();
+          box.querySelectorAll('.pocell').forEach(function (c) { c.classList.remove('sel'); });
+          cell.classList.add('sel');
+          gal.innerHTML = '<div class="galbox"></div>';
+          renderGallery(gal.querySelector('.galbox'), (pos[k] || pos[0] || '') + (conts[k] ? ' (' + conts[k] + ')' : ''), code, f.name);
+        });
+      });
+      if (!hit) gal.innerHTML = '<div class="gal-title dim">No container photo folders for ' + esc(m.booking) + '</div>';
+    }).catch(function (e) { gal.innerHTML = '<div class="gal-title warn">photos unavailable — ' + esc(e.message || e) + '</div>'; });
   }
 
   /* 표 컨테이너에 클릭 위임 바인딩 (innerHTML 교체와 무관하게 1회만) */
@@ -795,15 +860,21 @@
       el.addEventListener('click', function (ev) {
         var target = ev.target || ev.srcElement;
         if (!target || typeof target.closest !== 'function') return;
+        if (target.closest('tr.au-detail-row') || target.closest('button, a, input, select')) return;
         var tr = target.closest('tr');
         if (!tr || !el.contains(tr)) return;
         var tbody = tr.parentNode;
         if (!tbody || (tbody.tagName || '').toUpperCase() !== 'TBODY') return;
         var trs = tbody.rows || tbody.getElementsByTagName('tr');
         var idx = -1;
-        for (var i = 0; i < trs.length; i++) { if (trs[i] === tr) { idx = i; break; } }
+        var seen = 0;   /* 펼친 상세 줄(au-detail-row)은 순서에서 뺀다 */
+        for (var i = 0; i < trs.length; i++) {
+          if (trs[i].classList.contains('au-detail-row')) continue;
+          if (trs[i] === tr) { idx = seen; break; }
+          seen++;
+        }
         if (idx < 0) return;
-        pickAuRow(idx);
+        pickAuRow(idx, tr);
       });
     });
   }
