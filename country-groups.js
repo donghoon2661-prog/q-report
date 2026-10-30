@@ -751,9 +751,82 @@
     return renderGroup('au', 0, card, '', 'cg-group-empty');
   }
 
+  /* [S5, 10-30] 폰 tracker 컨테이너별 실제 이벤트(plan.tracker[컨테이너])를 그 선적의 traqo 에 합친다.
+     Gate in·선적·출항은 그 컨테이너의 폰 실제값 → 없으면 그 선적 Traqo 실제값 → 계획값.
+     다른 선적에서 물려받은(inherited) 출항 실제값은 버리고, 계획 ETD·ETA 만 남긴다.
+     GET /ais 응답을 받자마자 한 번 부른다(응답 객체를 직접 고침). */
+  /* UTC ISO → 'YYYY-MM-DDTHH:MM' (그 항구 현지 시각). 시간대를 모르면 null */
+  function fmtIsoLocal(iso, locode) {
+    var t = Date.parse(iso), tz = TZ_BY_LOCODE[locode];
+    if (!isFinite(t) || !tz || typeof Intl === 'undefined') return null;
+    try {
+      var p = {};
+      new Intl.DateTimeFormat('en-CA', { timeZone: tz, year: 'numeric', month: '2-digit', day: '2-digit',
+        hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }).formatToParts(new Date(t))
+        .forEach(function (x) { p[x.type] = x.value; });
+      return p.year + '-' + p.month + '-' + p.day + 'T' + p.hour + ':' + p.minute;
+    } catch (e) { return null; }
+  }
+
+  var TRK_DESC = { GTOT: 'Gate out', GTIN: 'Gate in', LOAD: 'Loaded', DEPA: 'Departure', ARRI: 'Arrival',
+    DISC: 'Discharged', RTRN: 'Empty return' };
+
+  function applyTracker(aisJson) {
+    var plans = aisJson && aisJson.plans && typeof aisJson.plans === 'object' ? aisJson.plans : {};
+    Object.keys(plans).forEach(function (k) {
+      var plan = plans[k];
+      if (!plan || !plan.tracker || typeof plan.tracker !== 'object') return;
+      var cs = Object.keys(plan.tracker);
+      var evs = [];
+      cs.forEach(function (c) {
+        var r = plan.tracker[c];
+        (r && Array.isArray(r.events) ? r.events : []).forEach(function (e) {
+          if (!e || typeof e.date !== 'string' || !e.date) return;
+          var x = Object.assign({ container: c }, e);
+          /* 옛 폰 코드는 kind·description 을 안 보냈다 — 코드로 채운다(GATE_IN_RE 등이 description 을 봄) */
+          if (!x.kind) x.kind = /^(DEPA|ARRI)$/.test(x.code) ? 'transport' : 'equipment';
+          if (!x.description) x.description = TRK_DESC[x.code] || '';
+          evs.push(x);
+        });
+      });
+      if (!evs.length) return;
+      var old = plan.traqo && typeof plan.traqo === 'object' ? plan.traqo : {};
+      var own = old.inherited === true ? {} : old;
+      var t = Object.assign({}, own, { enabled: true, status: 'ok', inherited: false, tracker: true });
+      t.events = (Array.isArray(own.events) ? own.events : [])
+        .filter(function (e) { return !e || cs.indexOf(String(e.container || '').toUpperCase()) < 0; })
+        .concat(evs);
+      var pick = function (code, actual, latest) {
+        var best = null;
+        evs.forEach(function (e) {
+          if (e.code !== code || (actual && e.isActual !== true)) return;
+          var x = Date.parse(e.date);
+          if (isFinite(x) && (!best || (latest ? x > best.x : x < best.x))) best = { x: x, d: e.date };
+        });
+        return best ? best.d : null;
+      };
+      var dep = evs.filter(function (e) { return e.code === 'DEPA' && e.locode === PKG_LOCODE; });
+      var atd = dep.filter(function (e) { return e.isActual === true; }).map(function (e) { return e.date; }).sort()[0] || null;
+      t.atdUtc = atd || (own.atdUtc || null);
+      if (!t.atdUtc) t.etdUtc = (dep[0] && dep[0].date) || own.etdUtc || old.etdUtc || null;
+      t.ataUtc = pick('ARRI', true, true) || own.ataUtc || null;
+      var trkEta = pick('ARRI', false, true);
+      t.etaUtc = trkEta || own.etaUtc || old.etaUtc || null;
+      plan.traqo = t;
+      /* 표의 ETA 칸은 plan.eta(시드니 현지)를 쓰므로 폰 ETA 로 바꾼다. 일정이 자기 값이 되면 follows 표시는 뺀다. */
+      if (trkEta) {
+        var loc = fmtIsoLocal(trkEta, SYD_LOCODE);
+        if (loc) plan.eta = loc;
+      }
+      if (atd || trkEta) { plan.scheduleInherited = false; plan.scheduleFrom = null; plan.scheduleFromBooking = null; }
+    });
+    return aisJson;
+  }
+
   /* ───────────────────────── 공개 API ───────────────────────── */
 
   return {
+    applyTracker: applyTracker,
     COUNTRIES: COUNTRIES,
     visible: visible,
     renderBar: renderBar,
