@@ -397,13 +397,13 @@ function buildQuality(){
     const prevChart = Chart.getChart(document.getElementById('chart'));
     if(prevChart) prevChart.destroy();
     const barColor = worst.map(v=> v==null?qvar('line2','#2A3446'): isOff(curItem,v)?qvar('gA','#FF6D5E'): isNear(curItem,v)?qvar('gB','#F5B84F'):qvar('blue','#4DA3FF'));
-    const ds=[{type:'bar',label:'Lot 최악값',data:worst,backgroundColor:barColor,borderRadius:5,maxBarThickness:52},
-      {type:'line',label:'S1 한계',data:lots.map(()=>curItem.s1),borderColor:qvar('gA','#FF6D5E'),borderWidth:1.6,borderDash:[6,4],pointRadius:0}];
-    if(curItem.s2!=null) ds.push({type:'line',label:'S2 경계',data:lots.map(()=>curItem.s2),borderColor:qvar('gB','#F5B84F'),borderWidth:1.2,borderDash:[3,4],pointRadius:0});
+    const ds=[{type:'bar',label:t('worstByLot'),data:worst,backgroundColor:barColor,borderRadius:5,maxBarThickness:52},
+      {type:'line',label:t('off'),data:lots.map(()=>curItem.s1),borderColor:qvar('gA','#FF6D5E'),borderWidth:1.6,borderDash:[6,4],pointRadius:0}];
+    if(curItem.s2!=null) ds.push({type:'line',label:t('near'),data:lots.map(()=>curItem.s2),borderColor:qvar('gB','#F5B84F'),borderWidth:1.2,borderDash:[3,4],pointRadius:0});
     chart=new Chart(document.getElementById('chart'),{
       data:{labels:lots,datasets:ds},
       options:{responsive:true,maintainAspectRatio:false,
-        plugins:{legend:{display:false},tooltip:{backgroundColor:qvar('panel','#12161E'),borderColor:qvar('line2','#2A3446'),borderWidth:1,
+        plugins:{legend:{display:false},tooltip:{backgroundColor:qvar('panel','#12161E'),borderColor:qvar('line2','#2A3446'),borderWidth:1,titleColor:qvar('text','#E7ECF3'),bodyColor:qvar('text','#E7ECF3'),footerColor:qvar('muted','#7E8AA0'),
           callbacks:{title:c=>t('lot')+' '+lots[c[0].dataIndex]+' ('+lotMonth(lots[c[0].dataIndex])+(LANG==='en'?' mfg':' 제조')+')'}}},
         scales:{x:{grid:{color:qvar('line','#1A2130')}},
                 y:{grid:{color:qvar('line','#1A2130')},title:{display:true,text:itemName(curItem)+(curItem.unit?' ('+curItem.unit+')':'')+(LANG==='en'?' — Spec: ':' — 스펙: ')+itemSpecTxt(curItem),color:'#7E8AA0',font:{size:11}}}}
