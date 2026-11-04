@@ -304,7 +304,8 @@ function render() {
 
 async function load() {
   try {
-    const res = await fetch(API_ROOT + '/data');
+    // 2026-11-04: /data 는 로그인이 필요하다. 공개 달력은 달력 칸만 주는 /public/calendar 를 쓴다.
+    const res = await fetch(API_ROOT + '/public/calendar');
     if (!res.ok) throw new Error('HTTP ' + res.status);
     const data = await res.json();
     calItems = buildCalendarItems(data.shipments||[]);

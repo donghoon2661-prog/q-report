@@ -1,0 +1,8 @@
+# 2026-11-04: 데이터·내부 문서는 공개 저장소에 두지 않는다(Worker KV에서 로그인 후 내려줌).
+# 로컬 data/coa 는 동기화 도구의 작업 사본, backups/ 는 옛 백업 로컬 사본.
+data/
+backups/
+COA_*.json
+PROJECT_INSTRUCTIONS*.md
+.dev.vars
+.wrangler/

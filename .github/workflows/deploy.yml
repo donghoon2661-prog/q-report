@@ -43,7 +43,8 @@ jobs:
           bindings = d.get('result', {}).get('bindings', [])
           names = set(b.get('name') for b in bindings)
           print('설정 목록:', sorted(names))
-          required = ['OQC', 'ALERT_FROM', 'ALERT_TO', 'ALERT_TO_WEEKLY', 'RESEND_KEY', 'REFRESH_KEY']
+          required = ['OQC', 'ALERT_FROM', 'ALERT_TO', 'ALERT_TO_WEEKLY', 'RESEND_KEY', 'REFRESH_KEY',
+                      'SESSION_SECRET', 'PW_ADMIN', 'PW_KOSSAN', 'PW_ETA', 'PW_QC']
           optional = ['ALERT_CC_WEEKLY', 'ALERT_BCC_WEEKLY']
           failed = False
           for item in required:

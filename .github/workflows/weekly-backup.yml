@@ -1,72 +1,34 @@
 name: Daily KV Backup
+# 2026-11-04: 백업 파일을 공개 저장소에 커밋하지 않는다(누구나 받을 수 있었음).
+# Worker /backup?save=1 이 같은 내용을 KV "backup:<날짜>"(60일)에 남기고, 여기서는 Dropbox 에만 올린다.
 on:
   schedule:
     - cron: '0 15 * * *'
   workflow_dispatch: {}
 permissions:
-  contents: write
+  contents: read
 jobs:
   backup:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Fetch backup from Worker
+      - name: Save backup in Worker KV and fetch it
         env:
           REFRESH_KEY: ${{ secrets.REFRESH_KEY }}
         run: |
-          mkdir -p backups
-          DATE=$(date -u +'%Y-%m-%d')
           curl -sf -H "X-Refresh-Key: ${REFRESH_KEY}" \
-            "https://kossan-oqc.dhoqc.workers.dev/backup" \
-            -o "backups/backup-${DATE}.json"
-          cp "backups/backup-${DATE}.json" backups/backup-latest.json
-
-      - name: Commit backup
-        run: |
-          git config user.name "backup-bot"
-          git config user.email "backup-bot@users.noreply.github.com"
-          git add backups/
-          git diff --cached --quiet && echo "No changes" || \
-            git commit -m "chore: daily KV backup $(date -u +'%Y-%m-%d')"
-          git push
+            "https://kossan-oqc.dhoqc.workers.dev/backup?save=1" \
+            -o "$RUNNER_TEMP/backup.json"
+          python3 -c "import json,sys; d=json.load(open(sys.argv[1])); print('keys', len(d['kv']))" "$RUNNER_TEMP/backup.json"
 
       - name: Upload to Dropbox
         env:
           DROPBOX_TOKEN: ${{ secrets.DROPBOX_TOKEN }}
         run: |
           DATE=$(date -u +'%Y-%m-%d')
-          DROPBOX_BASE="/Github backup/Kossan OQC/${DATE}"
-
-          dbx_upload() {
-            local src="$1"
-            local dest="$2"
-            curl -sf -X POST "https://content.dropboxapi.com/2/files/upload" \
-              -H "Authorization: Bearer ${DROPBOX_TOKEN}" \
-              -H "Dropbox-API-Arg: {\"path\": \"${dest}\", \"mode\": \"overwrite\", \"autorename\": false}" \
-              -H "Content-Type: application/octet-stream" \
-              --data-binary "@${src}" \
-              -o /dev/null \
-              && echo "✓ ${dest}" \
-              || echo "✗ FAILED: ${dest}"
-          }
-
-          for f in app.js config.js history.js index.html map.js po.js quality.js style.css system.js trend.js worker.js devlog.js manifest.json; do
-            [ -f "$f" ] && dbx_upload "$f" "${DROPBOX_BASE}/${f}"
-          done
-
-          [ -f "PROJECT_INSTRUCTIONS_v4.md" ] && dbx_upload "PROJECT_INSTRUCTIONS_v4.md" "${DROPBOX_BASE}/PROJECT_INSTRUCTIONS_v4.md"
-          [ -f "COA_FNG-0310-06-16_to_07-11.json" ] && dbx_upload "COA_FNG-0310-06-16_to_07-11.json" "${DROPBOX_BASE}/COA_FNG-0310-06-16_to_07-11.json"
-          [ -f ".github/workflows/deploy.yml" ] && dbx_upload ".github/workflows/deploy.yml" "${DROPBOX_BASE}/.github/workflows/deploy.yml"
-          [ -f ".github/workflows/weekly-backup.yml" ] && dbx_upload ".github/workflows/weekly-backup.yml" "${DROPBOX_BASE}/.github/workflows/weekly-backup.yml"
-
-          for f in backups/*.json; do
-            [ -f "$f" ] && dbx_upload "$f" "${DROPBOX_BASE}/${f}"
-          done
-
-          for f in data/coa/*.json; do
-            [ -f "$f" ] && dbx_upload "$f" "${DROPBOX_BASE}/${f}"
-          done
-
-          echo "Dropbox upload complete: ${DROPBOX_BASE}"
+          curl -sf -X POST "https://content.dropboxapi.com/2/files/upload" \
+            -H "Authorization: Bearer ${DROPBOX_TOKEN}" \
+            -H "Dropbox-API-Arg: {\"path\": \"/Github backup/Kossan OQC/${DATE}/backup-${DATE}.json\", \"mode\": \"overwrite\", \"autorename\": false}" \
+            -H "Content-Type: application/octet-stream" \
+            --data-binary "@$RUNNER_TEMP/backup.json" -o /dev/null \
+            && echo "Dropbox upload OK" \
+            || echo "::warning::Dropbox upload failed (DROPBOX_TOKEN expired?) - KV copy is still saved"
