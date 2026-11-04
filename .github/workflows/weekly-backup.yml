@@ -21,14 +21,19 @@ jobs:
           python3 -c "import json,sys; d=json.load(open(sys.argv[1])); print('keys', len(d['kv']))" "$RUNNER_TEMP/backup.json"
 
       - name: Upload to Dropbox
+        # 2026-11-04: Dropbox는 4시간짜리 토큰만 주므로 refresh token 으로 매번 새 토큰을 받는다.
+        # 앱 "qreport_backup"(앱 폴더) → 대장님 Dropbox 의 앱/qreport_backup/<날짜>/ 에 쌓인다.
         env:
-          DROPBOX_TOKEN: ${{ secrets.DROPBOX_TOKEN }}
+          DBX_KEY: ${{ secrets.DROPBOX_APP_KEY }}
+          DBX_SECRET: ${{ secrets.DROPBOX_APP_SECRET }}
+          DBX_REFRESH: ${{ secrets.DROPBOX_REFRESH_TOKEN }}
         run: |
           DATE=$(date -u +'%Y-%m-%d')
-          curl -sf -X POST "https://content.dropboxapi.com/2/files/upload" \
-            -H "Authorization: Bearer ${DROPBOX_TOKEN}" \
-            -H "Dropbox-API-Arg: {\"path\": \"/Github backup/Kossan OQC/${DATE}/backup-${DATE}.json\", \"mode\": \"overwrite\", \"autorename\": false}" \
-            -H "Content-Type: application/octet-stream" \
-            --data-binary "@$RUNNER_TEMP/backup.json" -o /dev/null \
-            && echo "Dropbox upload OK" \
-            || echo "::warning::Dropbox upload failed (DROPBOX_TOKEN expired?) - KV copy is still saved"
+          RESP=$(curl -sf https://api.dropboxapi.com/oauth2/token -u "${DBX_KEY}:${DBX_SECRET}" -d grant_type=refresh_token -d refresh_token="${DBX_REFRESH}") || { echo "::warning::Dropbox token refresh failed - KV copy is still saved"; exit 0; }
+          TOKEN=$(printf '%s' "$RESP" | python3 -c "import json,sys; print(json.load(sys.stdin)['access_token'])")
+          ARG=$(printf '{"path": "/%s/backup-%s.json", "mode": "overwrite", "autorename": false}' "$DATE" "$DATE")
+          if curl -sf -X POST https://content.dropboxapi.com/2/files/upload -H "Authorization: Bearer ${TOKEN}" -H "Dropbox-API-Arg: ${ARG}" -H "Content-Type: application/octet-stream" --data-binary "@$RUNNER_TEMP/backup.json" -o /dev/null; then
+            echo "Dropbox upload OK: /${DATE}/backup-${DATE}.json"
+          else
+            echo "::warning::Dropbox upload failed - KV copy is still saved"
+          fi
