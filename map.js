@@ -322,7 +322,21 @@ function initMap(data){
 
   const portSeen = {};
   const routeDrawn = {};   /* 같은 항로선을 선적마다 겹쳐 그리면 점선이 실선처럼 보인다 — 항로당 한 번만 */
+  /* 미국 항로선은 하나만 그린다(11-09 대장님): 바다 위에서 배가 가장 많이 모인 지점의 항로 */
+  const routeKey = s => s.route.length + '|' + s.route[0] + '|' + s.route[s.route.length - 1];
+  const seaCount = {};
+  let keepRoute = null, keepN = 0;
   data.shipments.forEach(s=>{
+    if (!Array.isArray(s.route) || s.route.length <= 10) return;
+    const here = locate(s);
+    if (!here || here.atPort) return;
+    const at = here.pos[0].toFixed(1) + ',' + here.pos[1].toFixed(1);
+    seaCount[at] = (seaCount[at] || 0) + 1;
+    if (seaCount[at] > keepN) { keepN = seaCount[at]; keepRoute = routeKey(s); }
+  });
+
+  data.shipments.forEach(s=>{
+    if (!Array.isArray(s.route) || s.route.length <= 10 || routeKey(s) !== keepRoute) return;
     const det = detectService(s);
     /* dense route: marnet routing 완료 상태 (route 좌표가 기항지보다 훨씬 많음) */
     const hasDense = Array.isArray(s.route) && s.route.length > 10;
@@ -350,14 +364,7 @@ function initMap(data){
           .bindTooltip(s.names[k] || ("P"+(k+1)),{className:'vsl-tip',direction:'top'}).addTo(usaGroup);
       });
     } else if (svcRoute) {
-      /* PS3/PS5 수동 항로 (dense route 미도입 fallback) */
-      const lineColor = det.inferred ? '#B8860B' : cssVar('--buoy', '#FF6B35');
-      const sk = 'svc|' + (det.svc || '') + '|' + (det.inferred ? 1 : 0);
-      if (!routeDrawn[sk]) L.polyline(svcRoute, {
-        color: lineColor, weight: 1.5,
-        dashArray: '4,4', opacity: 0.9
-      }).addTo(usaGroup);
-      routeDrawn[sk] = 1;
+      /* HMM 실제 항로가 아직 없는 선적: 수동 대체 항로는 그리지 않고 기항지만 찍는다(11-09 대장님) */
       const r = portRoute.map(wrap);
       r.forEach((p,k)=>{
         const key = p[0].toFixed(2)+","+p[1].toFixed(2);
